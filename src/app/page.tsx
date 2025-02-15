@@ -1,11 +1,5 @@
-"use client";
-
-import { ThemeSwitcher } from "@/components/ui/theme-switcher";
+'use client';
 
 export default function Home() {
-  return (
-    <div className="bg-background min-h-screen p-8 font-[family-name:var(--font-geist-sans)]">
-      <ThemeSwitcher />
-    </div>
-  );
+  return <div className=" min-h-screen p-2 font-[family-name:var(--font-geist-sans)]">nice</div>;
 }
