@@ -15,7 +15,7 @@ import {
   SidebarMenuSubItem,
   SidebarRail,
 } from '@/components/ui/sidebar';
-import { ChevronRight, GalleryVerticalEnd, Plus, SquareTerminal } from 'lucide-react';
+import { ChevronRight, GalleryVerticalEnd, Link, SquareTerminal } from 'lucide-react';
 import * as React from 'react';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '../ui/collapsible';
 
@@ -46,8 +46,8 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         <SidebarMenu>
           <SidebarMenuItem>
             <SidebarMenuButton>
-              <Plus />
-              <span>New Calendar</span>
+              <Link />
+              <span>BlankRiser</span>
             </SidebarMenuButton>
           </SidebarMenuItem>
         </SidebarMenu>
@@ -66,7 +66,7 @@ const navItems = [
     items: [
       {
         title: 'Tic Tac Toe',
-        url: '#',
+        url: '/games/tic-tac-toe',
       },
     ],
   },
