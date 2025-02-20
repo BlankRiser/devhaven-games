@@ -2,6 +2,7 @@ import { GlobalProvider } from '@/providers/global-provider';
 import type { Metadata } from 'next';
 import { Geist, Geist_Mono } from 'next/font/google';
 import './globals.css';
+import { siteMetadata } from '@/config/site-metadata';
 
 const geistSans = Geist({
   variable: '--font-geist-sans',
@@ -14,8 +15,24 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: 'DevHaven Games',
-  description: 'DevHaven Games | Learning to build games with React',
+  title: siteMetadata.title,
+  description: siteMetadata.description,
+  openGraph: {
+    siteName: siteMetadata.title,
+    type: 'website',
+    locale: 'en_US',
+    url: siteMetadata.url,
+    title: siteMetadata.title,
+    description: siteMetadata.description,
+    images: [
+      {
+        url: siteMetadata.url + '/og?title=Games',
+        width: 1600,
+        height: 900,
+        alt: 'ram.codes',
+      },
+    ],
+  },
 };
 
 export default function RootLayout({
