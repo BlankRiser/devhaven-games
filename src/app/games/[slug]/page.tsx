@@ -15,7 +15,7 @@ export default function GameSlugPage() {
   );
 }
 
-export const GamesList = [
+const GamesList = [
   {
     slug: 'tic-tac-toe',
     component: TicTacToe,
