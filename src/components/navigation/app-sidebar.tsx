@@ -15,7 +15,8 @@ import {
   SidebarMenuSubItem,
   SidebarRail,
 } from '@/components/ui/sidebar';
-import { ChevronRight, GalleryVerticalEnd, Link, SquareTerminal } from 'lucide-react';
+import { ChevronRight, GalleryVerticalEnd, Link as LinkIcon, SquareTerminal } from 'lucide-react';
+import Link from 'next/link';
 import * as React from 'react';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '../ui/collapsible';
 
@@ -26,7 +27,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         <SidebarMenu>
           <SidebarMenuItem>
             <SidebarMenuButton size="lg" asChild>
-              <a href="#">
+              <Link href="/">
                 <div className="flex aspect-square size-8 items-center justify-center rounded-lg bg-sidebar-primary text-sidebar-primary-foreground">
                   <GalleryVerticalEnd className="size-4" />
                 </div>
@@ -34,7 +35,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                   <span className="font-semibold">DevHaven</span>
                   <span className="">Games</span>
                 </div>
-              </a>
+              </Link>
             </SidebarMenuButton>
           </SidebarMenuItem>
         </SidebarMenu>
@@ -45,10 +46,19 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
       <SidebarFooter>
         <SidebarMenu>
           <SidebarMenuItem>
-            <SidebarMenuButton>
-              <Link />
-              <span>BlankRiser</span>
-            </SidebarMenuButton>
+            <a href="http://github.com/BlankRiser" target="_blank" rel="noreferrer">
+              <SidebarMenuButton>
+                <LinkIcon />
+                <span>BlankRiser</span>
+              </SidebarMenuButton>
+            </a>
+          </SidebarMenuItem>
+          <SidebarMenuItem>
+            <a href="https://github.com/BlankRiser/devhaven-games" target="_blank" rel="noreferrer">
+              <SidebarMenuButton>
+                <span>Star on Github</span>
+              </SidebarMenuButton>
+            </a>
           </SidebarMenuItem>
         </SidebarMenu>
       </SidebarFooter>
