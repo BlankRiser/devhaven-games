@@ -27,11 +27,17 @@ export const metadata: Metadata = {
     images: [
       {
         url: siteMetadata.url + '/og?title=Games',
-        width: 1600,
-        height: 900,
-        alt: 'ram.codes',
+        width: 1200,
+        height: 630,
+        alt: 'games.ram.codes',
       },
     ],
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: siteMetadata.title,
+    description: siteMetadata.description,
+    images: [siteMetadata.url + '/og?title=Games'],
   },
 };
 
