@@ -5,13 +5,13 @@ export async function generateMetadata({
   params,
 }: {
   params: {
-    slug: string[];
+    slug: string;
   };
 }): Promise<Metadata> {
-  const ogTitle = params.slug[0];
-  const ogSlug = params.slug[0];
+  const ogTitle = params.slug;
+  const ogSlug = params.slug;
   const ogDescription = siteMetadata.description;
-  const ogImage = siteMetadata.url + `/og/?title=${params.slug[0]}`;
+  const ogImage = siteMetadata.url + `/og/?title=${params.slug}`;
 
   return {
     title: ogTitle,

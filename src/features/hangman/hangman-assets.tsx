@@ -114,12 +114,11 @@ export const HangmanInput = () => {
                   stats.hasWon && 'bg-emerald-200 dark:bg-emerald-900 border-b-emerald-700 dark:border-b-emerald-600',
                 ])}
               >
-                {stats.correctLetters.includes(letter) ? letter : null}
+                {stats.correctLetters.includes(letter) || stats.hasWon || stats.maxAttemptsReached ? letter : null}
               </motion.div>
             );
           })}
         </motion.div>
-        {word}
       </div>
     </React.Suspense>
   );
