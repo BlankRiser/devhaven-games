@@ -1,13 +1,7 @@
 import { siteMetadata } from '@/config/site-metadata';
 import type { Metadata } from 'next';
 
-export async function generateMetadata({
-  params,
-}: {
-  params: {
-    slug: string[];
-  };
-}): Promise<Metadata> {
+export async function generateMetadata({ params }: { params: any }): Promise<Metadata> {
   const ogTitle = params.slug.join('');
   const ogSlug = params.slug;
   const ogDescription = siteMetadata.description;
