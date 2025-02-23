@@ -1,6 +1,7 @@
 import { siteMetadata } from '@/config/site-metadata';
 import type { Metadata } from 'next';
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export async function generateMetadata({ params }: { params: any }): Promise<Metadata> {
   const ogTitle = params.slug.join('');
   const ogSlug = params.slug;
