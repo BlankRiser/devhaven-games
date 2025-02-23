@@ -1,6 +1,7 @@
 'use client';
-import React from 'react';
-import { AnimatedCircle, AnimatedCross, Cell } from './boards-assets';
+
+import * as React from 'react';
+import { AnimatedCircle, AnimatedCross, Cell } from './board-assets';
 import { Button } from '@/components/ui/button';
 import { AnimatePresence } from 'motion/react';
 import { motion } from 'motion/react';
@@ -51,68 +52,71 @@ export const TicTacToe = () => {
     return null;
   };
 
+  const handleCellClick = (idx: number, jdx: number) => {
+    // If a player has already selected a cell, do nothing
+    if (board[idx][jdx] !== null || winner !== null) {
+      return;
+    }
+
+    const updatedBoard = [...board];
+
+    if (turn === 'x') {
+      updatedBoard[idx][jdx] = 'x';
+      setTurn('o');
+    } else {
+      updatedBoard[idx][jdx] = 'o';
+      setTurn('x');
+    }
+
+    setBoard(updatedBoard);
+
+    const isWinner = checkForWinner(updatedBoard);
+    if (isWinner !== null) {
+      setWinner(isWinner);
+      return;
+    }
+  };
+
   return (
-    <section className="border rounded-md border-zinc-200 dark:border-zinc-800 w-full h-full grid place-items-center">
-      <div className="flex flex-col gap-3">
-        <div className="relative border overflow-hidden border-zinc-200 dark:border-zinc-800 p-1 rounded-md flex flex-col gap-1 bg-zinc-100 dark:bg-zinc-900">
-          {board.map((columns, idx) => {
-            return (
-              <div key={idx} className="flex flex-row gap-1">
-                {columns.map((value, jdx) => {
-                  return (
-                    <Cell
-                      key={idx + jdx}
-                      isSelected={value !== null}
-                      onClick={() => {
-                        // If a player has already selected a cell, do nothing
-                        if (board[idx][jdx] !== null || winner !== null) {
-                          return;
-                        }
-
-                        const updatedBoard = [...board];
-
-                        if (turn === 'x') {
-                          updatedBoard[idx][jdx] = 'x';
-                          setTurn('o');
-                        } else {
-                          updatedBoard[idx][jdx] = 'o';
-                          setTurn('x');
-                        }
-
-                        setBoard(updatedBoard);
-
-                        const isWinner = checkForWinner(updatedBoard);
-                        if (isWinner !== null) {
-                          setWinner(isWinner);
-                          return;
-                        }
-                      }}
-                    >
-                      <AnimatePresence>
-                        {value === 'x' && <AnimatedCross className="text-indigo-400" />}
-                        {value === 'o' && <AnimatedCircle className="text-teal-400" />}
-                      </AnimatePresence>
-                    </Cell>
-                  );
-                })}
-              </div>
-            );
-          })}
-          <AnimatePresence>
-            {winner !== null && (
-              <motion.div
-                initial={{ opacity: 0, scale: 0 }}
-                animate={{ opacity: 1, scale: 1 }}
-                exit={{ opacity: 0, scale: 0 }}
-                className="absolute inset-0 w-full h-full grid place-items-center bg-zinc-100 dark:bg-zinc-900"
-              >
-                {winner === 'x' && <AnimatedCross className="size-40 text-indigo-400" />}
-                {winner === 'o' && <AnimatedCircle className="size-40 text-teal-400" />}
-              </motion.div>
-            )}
-          </AnimatePresence>
+    <section className="border rounded-md border-zinc-200 dark:border-zinc-800 w-full h-full overflow-hidden">
+      <div className="p-6 border-b border-b-neutral-200 dark:border-b-neutral-800">
+        <h2 className="text-3xl font-semibold tracking-tight text-zinc-950 dark:text-zinc-50">Tic Tac Toe</h2>
+      </div>
+      <div className="grid place-items-center h-full w-full">
+        <div className="flex flex-col gap-3">
+          <div className="relative border overflow-hidden border-zinc-200 dark:border-zinc-800 p-1 rounded-md flex flex-col gap-1 bg-zinc-100 dark:bg-zinc-900">
+            {board.map((columns, idx) => {
+              return (
+                <div key={idx} className="flex flex-row gap-1">
+                  {columns.map((value, jdx) => {
+                    return (
+                      <Cell key={idx + jdx} isSelected={value !== null} onClick={() => handleCellClick(idx, jdx)}>
+                        <AnimatePresence>
+                          {value === 'x' && <AnimatedCross className="text-indigo-400 size-6 md:size-12" />}
+                          {value === 'o' && <AnimatedCircle className="text-teal-400 size-6 md:size-12" />}
+                        </AnimatePresence>
+                      </Cell>
+                    );
+                  })}
+                </div>
+              );
+            })}
+            <AnimatePresence>
+              {winner !== null && (
+                <motion.div
+                  initial={{ opacity: 0, scale: 0 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  exit={{ opacity: 0, scale: 0 }}
+                  className="absolute inset-0 w-full h-full grid place-items-center bg-zinc-100 dark:bg-zinc-900"
+                >
+                  {winner === 'x' && <AnimatedCross className="size-40 md:size-56 text-indigo-400" />}
+                  {winner === 'o' && <AnimatedCircle className="size-40 md:size-56 text-teal-400" />}
+                </motion.div>
+              )}
+            </AnimatePresence>
+          </div>
+          <Button onClick={resetBoard}>{winner !== null ? 'Restart' : 'Reset'}</Button>
         </div>
-        <Button onClick={resetBoard}>{winner !== null ? 'Restart' : 'Reset'}</Button>
       </div>
     </section>
   );

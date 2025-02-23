@@ -12,6 +12,7 @@ Building games for fun. Learning new technologies.
 ### TODO
 
 - [x] Tic Tac Toe
+- [ ] Hangman (WIP)
 - [ ] Minesweeper
 - [ ] Snake
 - [ ] Tetris

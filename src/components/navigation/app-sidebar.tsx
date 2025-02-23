@@ -19,6 +19,7 @@ import { ChevronRight, GalleryVerticalEnd, Link as LinkIcon, SquareTerminal } fr
 import Link from 'next/link';
 import * as React from 'react';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '../ui/collapsible';
+import { GAMES_LIST } from '@/features/games-list';
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   return (
@@ -73,12 +74,7 @@ const navItems = [
     url: '#',
     icon: SquareTerminal,
     isActive: true,
-    items: [
-      {
-        title: 'Tic Tac Toe',
-        url: '/games/tic-tac-toe',
-      },
-    ],
+    items: GAMES_LIST,
   },
 ];
 
@@ -100,10 +96,10 @@ const NavMain = () => {
               <CollapsibleContent>
                 <SidebarMenuSub>
                   {item.items?.map((subItem) => (
-                    <SidebarMenuSubItem key={subItem.title}>
+                    <SidebarMenuSubItem key={subItem.slug}>
                       <SidebarMenuSubButton asChild>
                         <a href={subItem.url}>
-                          <span>{subItem.title}</span>
+                          <span>{subItem.label}</span>
                         </a>
                       </SidebarMenuSubButton>
                     </SidebarMenuSubItem>
