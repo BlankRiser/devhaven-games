@@ -5,11 +5,6 @@ import { atomWithQuery } from 'jotai-tanstack-query';
 import { atomWithRefresh, atomWithReset } from 'jotai/utils';
 
 export const wordsAtom = atomWithQuery(() => hangmanWordQueryFactory());
-// export const uniqueWordAtom = atomWithDefault<string>((get) => {
-//   const words = get(wordsAtom).data ?? [];
-//   return getUniqueRandomWord(words) ?? '';
-// });
-// Resettable uniqueWordAtom
 export const uniqueWordAtom = atomWithRefresh<string>((get) => {
   const words = get(wordsAtom).data ?? [];
   return getUniqueRandomWord(words) ?? '';

@@ -17,3 +17,7 @@ Building games for fun. Learning new technologies.
 - [ ] Snake
 - [ ] Tetris
 - [ ] Block breaker using balls
+- [ ] Flappy bird
+- [ ] Pong
+- [ ] Space Invaders
+- [ ] Pacman
