@@ -83,6 +83,7 @@ export const HangmanInput = () => {
   return (
     <React.Suspense>
       <div className="grid place-items-center p-2">
+        <input autoFocus className="hidden" aria-hidden="true" />
         <motion.div
           className="flex gap-2 flex-wrap justify-center md:flex-nowrap"
           // shake when failedattempts increases

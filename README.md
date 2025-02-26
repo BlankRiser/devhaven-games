@@ -1,6 +1,6 @@
 # DevHaven Games
 
-Building games for fun. Learning new technologies. 
+Building games for fun. Learning new technologies.
 
 ### Tech Stack
 
@@ -12,8 +12,8 @@ Building games for fun. Learning new technologies.
 ### TODO
 
 - [x] Tic Tac Toe
-- [ ] Hangman (WIP)
-- [ ] Minesweeper
+- [x] Hangman
+- [ ] Minesweeper (WIP)
 - [ ] Snake
 - [ ] Tetris
 - [ ] Block breaker using balls
