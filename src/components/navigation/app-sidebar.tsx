@@ -74,7 +74,7 @@ const navItems = [
     url: '#',
     icon: SquareTerminal,
     isActive: true,
-    items: GAMES_LIST,
+    items: GAMES_LIST.filter((game) => game.status === "completed"),
   },
 ];
 

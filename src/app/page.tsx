@@ -9,7 +9,9 @@ export default function Home() {
     <div className=" min-h-screen p-2 font-[family-name:var(--font-geist-sans)]">
       <section className="flex flex-col gap-2">
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-3">
-          {GAMES_LIST.map((game) => {
+          {GAMES_LIST
+          .filter((game) => game.status === "completed")
+          .map((game) => {
             return (
               <Link href={game.url} key={game.slug}>
                 <Card className="h-full">

@@ -5,6 +5,7 @@ import { AnimatedCircle, AnimatedCross, Cell } from './board-assets';
 import { Button } from '@/components/ui/button';
 import { AnimatePresence } from 'motion/react';
 import { motion } from 'motion/react';
+import { GameHeader } from '../common/game-header';
 
 type Players = 'x' | 'o';
 type PlayerStates = Players | null;
@@ -79,9 +80,7 @@ export const TicTacToe = () => {
 
   return (
     <section className="border rounded-md border-zinc-200 dark:border-zinc-800 w-full h-full overflow-hidden">
-      <div className="p-6 border-b border-b-neutral-200 dark:border-b-neutral-800">
-        <h2 className="text-3xl font-semibold tracking-tight text-zinc-950 dark:text-zinc-50">Tic Tac Toe</h2>
-      </div>
+      <GameHeader title="Tic Tac Toe" />
       <div className="grid place-items-center h-full w-full">
         <div className="flex flex-col gap-3">
           <div className="relative border overflow-hidden border-zinc-200 dark:border-zinc-800 p-1 rounded-md flex flex-col gap-1 bg-zinc-100 dark:bg-zinc-900">
