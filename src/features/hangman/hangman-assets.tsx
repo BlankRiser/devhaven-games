@@ -83,7 +83,6 @@ export const HangmanInput = () => {
   return (
     <React.Suspense>
       <div className="grid place-items-center p-2">
-        <input autoFocus className="invisible" aria-hidden="true" />
         <motion.div
           className="flex gap-2 flex-wrap justify-center md:flex-nowrap"
           variants={shakeContainer}
@@ -91,7 +90,7 @@ export const HangmanInput = () => {
         >
           {word.split('').map((letter, index) => {
             return (
-              <motion.div
+              <motion.input
                 initial={{
                   x: index * 25,
                 }}
@@ -113,9 +112,13 @@ export const HangmanInput = () => {
                   stats.maxAttemptsReached && 'bg-rose-100 dark:bg-rose-950 border-b-rose-700 dark:border-b-rose-600',
                   stats.hasWon && 'bg-emerald-200 dark:bg-emerald-900 border-b-emerald-700 dark:border-b-emerald-600',
                 ])}
-              >
-                {stats.correctLetters.includes(letter) || stats.hasWon || stats.maxAttemptsReached ? letter : null}
-              </motion.div>
+                type="text"
+                maxLength={1}
+                readOnly
+                value={
+                  stats.correctLetters.includes(letter) || stats.hasWon || stats.maxAttemptsReached ? letter : undefined
+                }
+              ></motion.input>
             );
           })}
         </motion.div>

@@ -3,7 +3,6 @@
 import { Moon, Sun } from 'lucide-react';
 import { useTheme } from 'next-themes';
 import { Button } from './button';
-import { cn } from '@/lib/utils';
 
 export const ThemeSwitcher = () => {
   const { theme, setTheme } = useTheme();
@@ -13,8 +12,7 @@ export const ThemeSwitcher = () => {
 
   return (
     <Button size="icon" variant="outline" onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}>
-      <Sun className={cn([isDark ? 'hidden' : 'block'])} />
-      <Moon className={cn([!isDark ? 'hidden' : 'block'])} />
+      {isDark ? <Moon /> : <Sun />}
     </Button>
   );
 };

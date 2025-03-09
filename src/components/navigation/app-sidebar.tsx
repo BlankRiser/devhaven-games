@@ -74,7 +74,12 @@ const navItems = [
     url: '#',
     icon: SquareTerminal,
     isActive: true,
-    items: GAMES_LIST.filter((game) => game.status === "completed"),
+    items: GAMES_LIST.filter((game) => {
+      if (process.env.NODE_ENV === 'development') {
+        return true;
+      }
+      return game.status === 'completed';
+    }),
   },
 ];
 

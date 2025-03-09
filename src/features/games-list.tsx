@@ -6,6 +6,16 @@ import { TicTacToe } from './tic-tac-toe/tic-tac-toe';
 
 export const GAMES_LIST = [
   {
+    slug: 'tic-tac-toe',
+    status: 'completed',
+    label: 'Tic Tac Toe',
+    description: 'Take turns marking X and O on a 3x3 grid to win.',
+    icon: 'gamepad',
+    color: 'green',
+    url: '/games/tic-tac-toe',
+    component: TicTacToe,
+  },
+  {
     slug: 'hangman',
     status: 'completed',
     label: 'Hangman',
@@ -17,22 +27,12 @@ export const GAMES_LIST = [
   },
   {
     slug: 'minesweeper',
-    status: 'completed',
+    status: 'wip',
     label: 'Minesweeper',
     description: 'Clear the minefield without detonating any mines.',
     icon: 'gamepad',
     color: 'green',
     url: '/games/minesweeper',
     component: Minesweeper,
-  },
-  {
-    slug: 'tic-tac-toe',
-    status: process.env.NODE_ENV === 'development' ? 'completed' : 'wip',
-    label: 'Tic Tac Toe',
-    description: 'Take turns marking X and O on a 3x3 grid to win.',
-    icon: 'gamepad',
-    color: 'green',
-    url: '/games/tic-tac-toe',
-    component: TicTacToe,
   },
 ];
