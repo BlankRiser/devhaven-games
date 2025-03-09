@@ -118,7 +118,9 @@ export const HangmanInput = () => {
                 value={
                   stats.correctLetters.includes(letter) || stats.hasWon || stats.maxAttemptsReached ? letter : undefined
                 }
-              ></motion.input>
+                autoFocus={index === 0}
+                onFocus={(e) => e.target.select()}
+              />
             );
           })}
         </motion.div>
