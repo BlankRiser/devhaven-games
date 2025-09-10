@@ -34,7 +34,7 @@ function TooltipContent({ className, sideOffset = 4, children, ...props }: React
         {...props}
       >
         {children}
-        <TooltipPrimitive.Arrow className="bg-zinc-900 fill-primary z-50 size-2.5 translate-y-[calc(-50%_-_2px)] rotate-45 rounded-[2px] dark:bg-zinc-50" />
+        <TooltipPrimitive.Arrow className="bg-zinc-900 fill-primary z-50 size-2.5 translate-y-[calc(-50%-2px)] rotate-45 rounded-[2px] dark:bg-zinc-50" />
       </TooltipPrimitive.Content>
     </TooltipPrimitive.Portal>
   );

@@ -2,9 +2,9 @@
 
 import { Button } from '@/components/ui/button';
 import { useAtom } from 'jotai';
+import { motion } from 'motion/react';
 import { GameHeader } from '../common/game-header';
 import { boardAtom } from './minesweeper-utils';
-import { motion } from 'motion/react';
 
 const icons = {
   grid: 6, // 6x6 grid
@@ -33,11 +33,11 @@ export const Minesweeper = () => {
       <div className="grid place-items-center h-full w-full">
         <div className="flex flex-col gap-1">
           {board.map((row, rowIndex) => (
-            <div key={rowIndex} className="flex gap-1">
+            <div key={row.toString()} className="flex gap-1">
               {row.map((cell, colIndex) => (
                 <motion.button
                   onClick={() => handleCellClick(rowIndex, colIndex)}
-                  key={colIndex}
+                  key={`${row.toString()}-${cell.toString()}`}
                   className="border rounded-md border-zinc-200 dark:border-zinc-800 size-15 md:size-10 grid place-items-center"
                 >
                   {cell === 'mine' ? icons.mine : cell}
@@ -46,7 +46,13 @@ export const Minesweeper = () => {
             </div>
           ))}
         </div>
-        <Button onClick={resetBoard}>Reset</Button>
+        <Button
+          onClick={() => {
+            resetBoard();
+          }}
+        >
+          Reset
+        </Button>
       </div>
     </section>
   );
