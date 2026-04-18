@@ -3,27 +3,30 @@
 import { Moon, Sun } from 'lucide-react';
 import { useTheme } from 'next-themes';
 import { Button } from './button';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
 
-const THEME_COOKIE_NAME = 'sidebar_state';
-const THEME_COOKIE_MAX_AGE = 60 * 60 * 24 * 7;
-
-export const ThemeSwitcher = () => {
-  const { theme, setTheme } = useTheme();
-
-  // using local storage to get the theme due to the fact that next-themes does not support server side rendering
-  const isDark = theme === 'dark';
+export function ThemeSwitcher() {
+  const { setTheme } = useTheme();
 
   return (
-    <Button
-      size="icon"
-      variant="outline"
-      onClick={() => {
-        const updatedTheme = theme === 'dark' ? 'open' : 'closed';
-        setTheme(updatedTheme);
-        document.cookie = `${THEME_COOKIE_NAME}=${updatedTheme}; path=/; max-age=${THEME_COOKIE_MAX_AGE}`;
-      }}
-    >
-      {isDark ? <Moon /> : <Sun />}
-    </Button>
+    <DropdownMenu>
+      <DropdownMenuTrigger asChild>
+        <Button variant="outline" size="icon">
+          <Sun className="h-[1.2rem] w-[1.2rem] scale-100 rotate-0 transition-all dark:scale-0 dark:-rotate-90" />
+          <Moon className="absolute h-[1.2rem] w-[1.2rem] scale-0 rotate-90 transition-all dark:scale-100 dark:rotate-0" />
+          <span className="sr-only">Toggle theme</span>
+        </Button>
+      </DropdownMenuTrigger>
+      <DropdownMenuContent align="end">
+        <DropdownMenuItem onClick={() => setTheme('light')}>Light</DropdownMenuItem>
+        <DropdownMenuItem onClick={() => setTheme('dark')}>Dark</DropdownMenuItem>
+        <DropdownMenuItem onClick={() => setTheme('system')}>System</DropdownMenuItem>
+      </DropdownMenuContent>
+    </DropdownMenu>
   );
-};
+}

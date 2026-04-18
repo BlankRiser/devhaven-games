@@ -5,10 +5,20 @@ import { atomWithQuery } from 'jotai-tanstack-query';
 import { atomWithRefresh, atomWithReset } from 'jotai/utils';
 
 export const wordsAtom = atomWithQuery(() => hangmanWordQueryFactory());
-export const uniqueWordAtom = atomWithRefresh<string>((get) => {
-  const words = get(wordsAtom).data ?? [];
-  return getUniqueRandomWord(words) ?? '';
-});
+const currentWordInternalAtom = atom('');
+const refreshCounterAtom = atom(0);
+export const uniqueWordAtom = atom(
+  (get) => {
+    get(refreshCounterAtom);
+    const words = get(wordsAtom).data ?? [];
+    const prevWord = get(currentWordInternalAtom);
+    return getUniqueRandomWord(words.filter(Boolean), prevWord) || '';
+  },
+  (get, set) => {
+    set(currentWordInternalAtom, get(uniqueWordAtom));
+    set(refreshCounterAtom, (c) => c + 1);
+  },
+);
 
 export const lettersAtom = atomWithReset<Array<string>>([]);
 export const failedAttemptsAtom = atomWithReset(0);
@@ -17,6 +27,14 @@ export const hangmanStatsAtom = atom((get) => {
   const word = get(uniqueWordAtom);
   const letters = get(lettersAtom);
   const failedAttempts = get(failedAttemptsAtom);
+
+  if (!word) {
+    return {
+      correctLetters: [],
+      maxAttemptsReached: false,
+      hasWon: false,
+    };
+  }
 
   return {
     correctLetters: letters.filter((letter) => word.includes(letter)),

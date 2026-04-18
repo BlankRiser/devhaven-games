@@ -15,11 +15,10 @@ import {
   SidebarMenuSubItem,
   SidebarRail,
 } from '@/components/ui/sidebar';
+import { GAMES_LIST } from '@/features/games-list';
 import { ChevronRight, GalleryVerticalEnd, Link as LinkIcon, SquareTerminal } from 'lucide-react';
 import Link from 'next/link';
-import * as React from 'react';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '../ui/collapsible';
-import { GAMES_LIST } from '@/features/games-list';
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   return (

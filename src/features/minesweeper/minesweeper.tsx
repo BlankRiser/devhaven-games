@@ -3,7 +3,6 @@
 import { Button } from '@/components/ui/button';
 import { useAtom } from 'jotai';
 import { motion } from 'motion/react';
-import { GameHeader } from '../common/game-header';
 import { boardAtom } from './minesweeper-utils';
 
 const icons = {
@@ -29,7 +28,6 @@ export const Minesweeper = () => {
 
   return (
     <section className="border rounded-md border-zinc-200 dark:border-zinc-800 w-full h-full overflow-hidden">
-      <GameHeader title="Minesweeper" />
       <div className="grid place-items-center h-full w-full">
         <div className="flex flex-col gap-1">
           {board.map((row, rowIndex) => (

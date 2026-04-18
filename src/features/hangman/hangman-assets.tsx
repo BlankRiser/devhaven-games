@@ -1,11 +1,13 @@
 'use client';
 
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import NumberFlow from '@number-flow/react';
 import { useAtom, useSetAtom } from 'jotai';
 import { useResetAtom } from 'jotai/utils';
-import { motion, useAnimation } from 'motion/react';
+import { AlertCircle } from 'lucide-react';
+import { AnimatePresence, motion, useAnimation } from 'motion/react';
 import * as React from 'react';
 import { failedAttemptsAtom, hangmanStatsAtom, lettersAtom, uniqueWordAtom } from './hangman-utils';
 
@@ -29,6 +31,8 @@ export const HangmanInput = () => {
   const setLetters = useSetAtom(lettersAtom);
   const setFailedAttempts = useSetAtom(failedAttemptsAtom);
 
+  const [errorMessage, setErrorMessage] = React.useState<string | null>(null);
+
   const controls = useAnimation();
 
   const checkLetterInWord = React.useCallback(
@@ -50,18 +54,26 @@ export const HangmanInput = () => {
       controls.stop();
       controls.set('reset');
 
-      if (/^[a-zA-Z]$/.test(keyInput) && stats.maxAttemptsReached === false) {
-        if (
-          checkLetterInWord({
-            letter: keyInput,
-            word: word!,
-          })
-        ) {
-          setLetters((values) => [...values, keyInput]);
-        } else {
-          controls.start('start');
-          setFailedAttempts((failedAttempts) => failedAttempts + 1);
+      if (stats.maxAttemptsReached) return;
+
+      if (!/^[a-zA-Z]$/.test(keyInput)) {
+        // Only alert for single characters that aren't letters (avoid alerting for Shift, Alt, etc.)
+        if (keyInput.length === 1) {
+          setErrorMessage('Please enter a valid letter (A-Z).');
         }
+        return;
+      }
+
+      if (
+        checkLetterInWord({
+          letter: keyInput,
+          word: word!,
+        })
+      ) {
+        setLetters((values) => [...values, keyInput]);
+      } else {
+        controls.start('start');
+        setFailedAttempts((failedAttempts) => failedAttempts + 1);
       }
     },
     [stats.maxAttemptsReached, checkLetterInWord, word, setLetters, controls, setFailedAttempts],
@@ -80,9 +92,35 @@ export const HangmanInput = () => {
     };
   }, [handleKeyPress, setLetters, word]);
 
+  React.useEffect(() => {
+    if (errorMessage) {
+      const timer = setTimeout(() => {
+        setErrorMessage(null);
+      }, 3000);
+      return () => clearTimeout(timer);
+    }
+  }, [errorMessage]);
+
   return (
     <React.Suspense>
-      <div className="grid place-items-center p-2">
+      <div className="grid place-items-center p-2 gap-4">
+        <AnimatePresence>
+          {errorMessage && (
+            <motion.div
+              initial={{ opacity: 0, y: -20, scale: 0.95 }}
+              animate={{ opacity: 1, y: 0, scale: 1 }}
+              exit={{ opacity: 0, y: -20, scale: 0.95 }}
+              className="w-full max-w-xs"
+            >
+              <Alert variant="destructive" className="shadow-lg border-rose-200 dark:border-rose-900">
+                <AlertCircle className="h-4 w-4" />
+                <AlertTitle>Invalid Input</AlertTitle>
+                <AlertDescription>{errorMessage}</AlertDescription>
+              </Alert>
+            </motion.div>
+          )}
+        </AnimatePresence>
+
         <motion.div
           className="flex gap-2 flex-wrap justify-center md:flex-nowrap"
           variants={shakeContainer}
@@ -105,7 +143,7 @@ export const HangmanInput = () => {
                   delay: index * 0.05,
                   duration: 0.5,
                 }}
-                key={index}
+                key={`${word}-${index}`}
                 className={cn([
                   'w-8 aspect-square border-b capitalize grid place-items-center',
                   'bg-zinc-100 dark:bg-zinc-900 border-b-zinc-700 dark:border-b-zinc-600',
@@ -116,7 +154,7 @@ export const HangmanInput = () => {
                 maxLength={1}
                 readOnly
                 value={
-                  stats.correctLetters.includes(letter) || stats.hasWon || stats.maxAttemptsReached ? letter : undefined
+                  stats.correctLetters.includes(letter) || stats.hasWon || stats.maxAttemptsReached ? letter : ''
                 }
                 autoFocus={index === 0}
                 onFocus={(e) => e.target.select()}

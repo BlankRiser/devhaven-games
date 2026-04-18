@@ -17,7 +17,7 @@ export default function Home() {
           }).map((game) => {
             return (
               <Link href={game.url} key={game.slug}>
-                <Card className="h-full">
+                <Card className="h-full hover:bg-zinc-50 dark:hover:bg-zinc-900">
                   <CardHeader>
                     <CardTitle>{game.label}</CardTitle>
                     <CardDescription>{game.description}</CardDescription>

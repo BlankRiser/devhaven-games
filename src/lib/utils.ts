@@ -5,24 +5,22 @@ export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
 }
 
-export function getUniqueRandomWord(words: string[]): string {
-  const remainingWords = words.slice(); // Make a copy of the original array
-  let unselectedCount = remainingWords.length;
-
-  // Generate the random index, select the word and swap
-  const randomIndex = Math.floor(Math.random() * unselectedCount);
-  const selectedWord = remainingWords[randomIndex];
-
-  // Swap the selected word with the last unselected word in the array
-  [remainingWords[randomIndex], remainingWords[unselectedCount - 1]] = [remainingWords[unselectedCount - 1], remainingWords[randomIndex]];
-
-  // Decrease unselectedCount
-  unselectedCount--;
-
-  // If all words have been selected, throw an error
-  if (unselectedCount === 0) {
-    throw new Error('All words have been selected!');
+export function getUniqueRandomWord(words: string[], currentWord?: string): string {
+  // Filter out the current word if provided, but only if there are other words available
+  let availableWords = words;
+  if (currentWord && words.length > 1) {
+    availableWords = words.filter((word) => word !== currentWord);
   }
 
-  return selectedWord;
+  if (availableWords.length === 0) {
+    if (words.length > 0) {
+      // Fallback to picking any word if filtering left us with nothing (e.g. only one word exists)
+      return words[Math.floor(Math.random() * words.length)];
+    }
+    return ''; // Return empty string instead of throwing
+  }
+
+  // Pick a random word from the available list
+  const randomIndex = Math.floor(Math.random() * availableWords.length);
+  return availableWords[randomIndex];
 }

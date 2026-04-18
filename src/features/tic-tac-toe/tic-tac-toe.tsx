@@ -1,23 +1,22 @@
 'use client';
 
+import { Button } from '@/components/ui/button';
+import { AnimatePresence, motion } from 'motion/react';
 import * as React from 'react';
 import { AnimatedCircle, AnimatedCross, Cell } from './board-assets';
-import { Button } from '@/components/ui/button';
-import { AnimatePresence } from 'motion/react';
-import { motion } from 'motion/react';
-import { GameHeader } from '../common/game-header';
 
 type Players = 'x' | 'o';
-type PlayerStates = Players | null;
+type CellState = Players | null;
+type GameOutcome = Players | 'draw' | null;
 
-const defaultBoardState: PlayerStates[][] = Array(3)
+const defaultBoardState: CellState[][] = Array(3)
   .fill(null)
   .map(() => Array(3).fill(null));
 
 export const TicTacToe = () => {
-  const [board, setBoard] = React.useState<PlayerStates[][]>(defaultBoardState);
+  const [board, setBoard] = React.useState<CellState[][]>(defaultBoardState);
   const [turn, setTurn] = React.useState<Players>('x');
-  const [winner, setWinner] = React.useState<PlayerStates>(null);
+  const [winner, setWinner] = React.useState<GameOutcome>(null);
 
   const resetBoard = () => {
     setWinner(null);
@@ -29,7 +28,7 @@ export const TicTacToe = () => {
     );
   };
 
-  const checkForWinner = (board: (null | string)[][]): PlayerStates => {
+  const checkForWinner = (board: CellState[][]): GameOutcome => {
     // Check rows
     for (let i = 0; i < 3; i++) {
       if (board[i][0] !== null && board[i][0] === board[i][1] && board[i][0] === board[i][2]) {
@@ -49,6 +48,10 @@ export const TicTacToe = () => {
     if (board[0][2] !== null && board[0][2] === board[1][1] && board[0][2] === board[2][0]) {
       return board[0][2] as Players;
     }
+    // Check for draw
+    const isDraw = board.every((row) => row.every((cell) => cell !== null));
+    if (isDraw) return 'draw';
+
     // No winner
     return null;
   };
@@ -80,7 +83,6 @@ export const TicTacToe = () => {
 
   return (
     <section className="border rounded-md border-zinc-200 dark:border-zinc-800 w-full h-full overflow-hidden">
-      <GameHeader title="Tic Tac Toe" />
       <div className="grid place-items-center h-full w-full">
         <div className="flex flex-col gap-3">
           <div className="relative border overflow-hidden border-zinc-200 dark:border-zinc-800 p-1 rounded-md flex flex-col gap-1 bg-zinc-100 dark:bg-zinc-900">
@@ -110,6 +112,16 @@ export const TicTacToe = () => {
                 >
                   {winner === 'x' && <AnimatedCross className="size-40 md:size-56 text-indigo-400" />}
                   {winner === 'o' && <AnimatedCircle className="size-40 md:size-56 text-teal-400" />}
+                  {winner === 'draw' && (
+                    <motion.span
+                      initial={{ scale: 0.5, opacity: 0 }}
+                      animate={{ scale: 1, opacity: 1 }}
+                      transition={{ type: 'spring', bounce: 0.5 }}
+                      className="text-5xl border-zinc-200 dark:border-zinc-800 md:text-7xl font-bold text-zinc-700 dark:text-zinc-300"
+                    >
+                      Draw!
+                    </motion.span>
+                  )}
                 </motion.div>
               )}
             </AnimatePresence>
