@@ -1,8 +1,8 @@
 'use client';
 
+import Link from 'next/link';
 import { Card, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { GAMES_LIST } from '@/features/games-list';
-import Link from 'next/link';
 
 export default function Home() {
   return (

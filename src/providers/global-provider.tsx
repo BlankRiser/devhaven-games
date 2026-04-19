@@ -1,14 +1,14 @@
 'use client';
 
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { useParams } from 'next/navigation';
+import { ThemeProvider } from 'next-themes';
 import { AppSidebar } from '@/components/navigation/app-sidebar';
 import { Separator } from '@/components/ui/separator';
 import { SidebarInset, SidebarProvider, SidebarTrigger } from '@/components/ui/sidebar';
 import { ThemeSwitcher } from '@/components/ui/theme-switcher';
 import { MobileBanner } from '@/features/common/mobile-banner';
 import { GAMES_LIST } from '@/features/games-list';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { ThemeProvider } from 'next-themes';
-import { useParams } from 'next/navigation';
 
 const queryClient = new QueryClient({
   defaultOptions: {

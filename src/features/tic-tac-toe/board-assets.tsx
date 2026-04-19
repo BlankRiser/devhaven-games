@@ -1,7 +1,7 @@
 'use client';
 
-import { cn } from '@/lib/utils';
 import { motion, SVGMotionProps } from 'motion/react';
+import { cn } from '@/lib/utils';
 
 export const Cell = ({ children, isSelected = false, ...rest }: React.ComponentProps<'button'> & { isSelected: boolean }) => {
   return (

@@ -1,14 +1,14 @@
 'use client';
 
-import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
-import { Button } from '@/components/ui/button';
-import { cn } from '@/lib/utils';
 import NumberFlow from '@number-flow/react';
 import { useAtom, useSetAtom } from 'jotai';
 import { useResetAtom } from 'jotai/utils';
 import { AlertCircle } from 'lucide-react';
 import { AnimatePresence, motion, useAnimation } from 'motion/react';
 import * as React from 'react';
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
+import { Button } from '@/components/ui/button';
+import { cn } from '@/lib/utils';
 import { failedAttemptsAtom, hangmanStatsAtom, lettersAtom, uniqueWordAtom } from './hangman-utils';
 
 const shakeContainer = {

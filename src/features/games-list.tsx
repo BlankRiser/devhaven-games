@@ -1,8 +1,10 @@
 'use client';
+import dynamic from 'next/dynamic';
 
-import { Hangman } from './hangman/hangman';
-import { Minesweeper } from './minesweeper/minesweeper';
-import { TicTacToe } from './tic-tac-toe/tic-tac-toe';
+const Hangman = dynamic(() => import('./hangman/hangman'), { ssr: false })
+const Minesweeper = dynamic(() => import('./minesweeper/minesweeper'), { ssr: false })
+const TicTacToe = dynamic(() => import('./tic-tac-toe/tic-tac-toe'), { ssr: false })
+
 
 export const GAMES_LIST = [
   {

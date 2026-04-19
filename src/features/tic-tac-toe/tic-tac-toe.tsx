@@ -1,8 +1,8 @@
 'use client';
 
-import { Button } from '@/components/ui/button';
 import { AnimatePresence, motion } from 'motion/react';
 import * as React from 'react';
+import { Button } from '@/components/ui/button';
 import { AnimatedCircle, AnimatedCross, Cell } from './board-assets';
 
 type Players = 'x' | 'o';
@@ -13,7 +13,7 @@ const defaultBoardState: CellState[][] = Array(3)
   .fill(null)
   .map(() => Array(3).fill(null));
 
-export const TicTacToe = () => {
+export default function TicTacToe(){
   const [ board, setBoard ] = React.useState<CellState[][]>(defaultBoardState);
   const [ turn, setTurn ] = React.useState<Players>('x');
   const [ winner, setWinner ] = React.useState<GameOutcome>(null);

@@ -1,8 +1,8 @@
 'use client';
 
-import { Button } from '@/components/ui/button';
 import { useAtom } from 'jotai';
 import { motion } from 'motion/react';
+import { Button } from '@/components/ui/button';
 import { boardAtom } from './minesweeper-utils';
 
 const icons = {
@@ -11,7 +11,7 @@ const icons = {
   mine: '💣',
 };
 
-export const Minesweeper = () => {
+export default function Minesweeper(){
   const [ board, resetBoard ] = useAtom(boardAtom);
 
   return (

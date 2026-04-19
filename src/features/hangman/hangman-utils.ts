@@ -1,8 +1,8 @@
-import { getUniqueRandomWord } from '@/lib/utils';
 import { queryOptions } from '@tanstack/react-query';
 import { atom } from 'jotai';
-import { atomWithQuery } from 'jotai-tanstack-query';
 import { atomWithReset } from 'jotai/utils';
+import { atomWithQuery } from 'jotai-tanstack-query';
+import { getUniqueRandomWord } from '@/lib/utils';
 
 export const wordsAtom = atomWithQuery(() => hangmanWordQueryFactory());
 const currentWordInternalAtom = atom('');

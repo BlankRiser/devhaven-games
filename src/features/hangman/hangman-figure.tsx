@@ -3,8 +3,8 @@
 import { useAtom } from 'jotai';
 import { AnimatePresence, motion, SVGMotionProps } from 'motion/react';
 import * as React from 'react';
-import { figuresVisibleAtom, hangmanStatsAtom } from './hangman-utils';
 import { cn } from '@/lib/utils';
+import { figuresVisibleAtom, hangmanStatsAtom } from './hangman-utils';
 
 const draw = {
   hidden: { pathLength: 0, opacity: 0 },

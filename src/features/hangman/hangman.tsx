@@ -3,7 +3,7 @@
 import { FailedAttemptsCounter, HangmanInput, ResetHangman } from './hangman-assets';
 import { HangmanFigure } from './hangman-figure';
 
-export const Hangman = () => {
+export default function Hangman(){
   return (
     <section className="border rounded-md border-zinc-200 dark:border-zinc-800 w-full h-full overflow-hidden">
       <div className="flex flex-col items-center gap-6 py-4">

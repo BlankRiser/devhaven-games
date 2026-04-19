@@ -1,5 +1,7 @@
 'use client';
 
+import { ChevronRight, GalleryVerticalEnd, GithubIcon, Link as LinkIcon, SquareTerminal } from 'lucide-react';
+import Link from 'next/link';
 import {
   Sidebar,
   SidebarContent,
@@ -16,8 +18,6 @@ import {
   SidebarRail,
 } from '@/components/ui/sidebar';
 import { GAMES_LIST } from '@/features/games-list';
-import { ChevronRight, GalleryVerticalEnd, Link as LinkIcon, SquareTerminal } from 'lucide-react';
-import Link from 'next/link';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '../ui/collapsible';
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
@@ -56,6 +56,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
           <SidebarMenuItem>
             <a href="https://github.com/BlankRiser/devhaven-games" target="_blank" rel="noreferrer">
               <SidebarMenuButton>
+                <GithubIcon />
                 <span>Star on Github</span>
               </SidebarMenuButton>
             </a>
@@ -102,9 +103,9 @@ const NavMain = () => {
                   {item.items?.map((subItem) => (
                     <SidebarMenuSubItem key={subItem.slug}>
                       <SidebarMenuSubButton asChild>
-                        <a href={subItem.url}>
+                        <Link href={subItem.url}>
                           <span>{subItem.label}</span>
-                        </a>
+                        </Link>
                       </SidebarMenuSubButton>
                     </SidebarMenuSubItem>
                   ))}
