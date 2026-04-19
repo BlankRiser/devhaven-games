@@ -7,8 +7,14 @@ export async function GET(req: NextRequest) {
   const { searchParams } = req.nextUrl;
   const postTitle = searchParams.get('title');
 
-  const geistSansFont = fetch(new URL('https://cdn.jsdelivr.net/fontsource/fonts/geist-sans@latest/latin-500-normal.ttf', import.meta.url)).then((res) => res.arrayBuffer());
-  const geistMonoFont = fetch(new URL('https://cdn.jsdelivr.net/fontsource/fonts/geist-mono@latest/latin-400-normal.ttf', import.meta.url)).then((res) => res.arrayBuffer());
+  const geistSansFont = fetch(
+    new URL('https://cdn.jsdelivr.net/fontsource/fonts/geist-sans@latest/latin-500-normal.ttf', import.meta.url),
+  ).then((res) => res.arrayBuffer());
+
+  const geistMonoFont = fetch(
+    new URL('https://cdn.jsdelivr.net/fontsource/fonts/geist-mono@latest/latin-400-normal.ttf', import.meta.url),
+  ).then((res) => res.arrayBuffer());
+
   const geistSansFontData = await geistSansFont;
   const geistMonoFontData = await geistMonoFont;
 
@@ -24,16 +30,14 @@ export async function GET(req: NextRequest) {
           justifyContent: 'flex-start',
           backgroundColor: 'black',
           padding: '48px',
-        }}
-      >
+        }}>
         <div
           style={{
             display: 'flex',
             flexDirection: 'column',
             justifyContent: 'space-between',
             gap: 20,
-          }}
-        >
+          }}>
           <div
             style={{
               display: 'flex',
@@ -45,8 +49,7 @@ export async function GET(req: NextRequest) {
               fontFamily: 'Geist Sans',
               color: 'white',
               textTransform: 'capitalize',
-            }}
-          >
+            }}>
             {postTitle ?? 'Games'}
           </div>
         </div>
@@ -57,8 +60,7 @@ export async function GET(req: NextRequest) {
             marginTop: 'auto',
             width: '100%',
             gap: 24,
-          }}
-        >
+          }}>
           <div
             style={{
               display: 'flex',
@@ -66,8 +68,7 @@ export async function GET(req: NextRequest) {
               margin: '0px auto',
               border: '4px solid #171717',
               borderRadius: '4px',
-            }}
-          ></div>
+            }}></div>
 
           <div
             style={{
@@ -76,16 +77,14 @@ export async function GET(req: NextRequest) {
               alignItems: 'center',
               width: '100%',
               padding: '0px 8px',
-            }}
-          >
+            }}>
             <div
               style={{
                 display: 'flex',
                 fontFamily: 'Geist Sans',
                 color: 'white',
                 fontSize: 40,
-              }}
-            >
+              }}>
               Ram Shankar Choudhary
             </div>
             <div
@@ -94,8 +93,7 @@ export async function GET(req: NextRequest) {
                 fontFamily: 'Geist Sans',
                 color: 'white',
                 fontSize: 40,
-              }}
-            >
+              }}>
               ram.codes
             </div>
           </div>

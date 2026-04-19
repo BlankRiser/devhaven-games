@@ -2,7 +2,7 @@ import { getUniqueRandomWord } from '@/lib/utils';
 import { queryOptions } from '@tanstack/react-query';
 import { atom } from 'jotai';
 import { atomWithQuery } from 'jotai-tanstack-query';
-import { atomWithRefresh, atomWithReset } from 'jotai/utils';
+import { atomWithReset } from 'jotai/utils';
 
 export const wordsAtom = atomWithQuery(() => hangmanWordQueryFactory());
 const currentWordInternalAtom = atom('');
@@ -57,7 +57,7 @@ export const figuresVisibleAtom = atom<Record<string, boolean>>((get) => {
 
 export const hangmanWordQueryFactory = () => {
   return queryOptions({
-    queryKey: ['wordBank'],
+    queryKey: [ 'wordBank' ],
     queryFn: async ({ signal }) => {
       const res = await fetch('/games/hangman-word-bank.txt', {
         signal,

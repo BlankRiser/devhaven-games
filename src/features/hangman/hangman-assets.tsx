@@ -13,7 +13,7 @@ import { failedAttemptsAtom, hangmanStatsAtom, lettersAtom, uniqueWordAtom } fro
 
 const shakeContainer = {
   start: () => ({
-    rotate: [0, 2, -2, 2, 0],
+    rotate: [ 0, 2, -2, 2, 0 ],
     transition: {
       repeat: 1,
       duration: 0.25,
@@ -25,13 +25,13 @@ const shakeContainer = {
 };
 
 export const HangmanInput = () => {
-  const [word] = useAtom(uniqueWordAtom);
-  const [stats] = useAtom(hangmanStatsAtom);
+  const [ word ] = useAtom(uniqueWordAtom);
+  const [ stats ] = useAtom(hangmanStatsAtom);
 
   const setLetters = useSetAtom(lettersAtom);
   const setFailedAttempts = useSetAtom(failedAttemptsAtom);
 
-  const [errorMessage, setErrorMessage] = React.useState<string | null>(null);
+  const [ errorMessage, setErrorMessage ] = React.useState<string | null>(null);
 
   const controls = useAnimation();
 
@@ -43,7 +43,7 @@ export const HangmanInput = () => {
 
       return false;
     },
-    [stats.correctLetters],
+    [ stats.correctLetters ],
   );
 
   const handleKeyPress = React.useCallback(
@@ -70,13 +70,13 @@ export const HangmanInput = () => {
           word: word!,
         })
       ) {
-        setLetters((values) => [...values, keyInput]);
+        setLetters((values) => [ ...values, keyInput ]);
       } else {
         controls.start('start');
         setFailedAttempts((failedAttempts) => failedAttempts + 1);
       }
     },
-    [stats.maxAttemptsReached, checkLetterInWord, word, setLetters, controls, setFailedAttempts],
+    [ stats.maxAttemptsReached, checkLetterInWord, word, setLetters, controls, setFailedAttempts ],
   );
 
   React.useEffect(() => {
@@ -90,7 +90,7 @@ export const HangmanInput = () => {
     return () => {
       abortController.abort();
     };
-  }, [handleKeyPress, setLetters, word]);
+  }, [ handleKeyPress, setLetters, word ]);
 
   React.useEffect(() => {
     if (errorMessage) {
@@ -99,7 +99,7 @@ export const HangmanInput = () => {
       }, 3000);
       return () => clearTimeout(timer);
     }
-  }, [errorMessage]);
+  }, [ errorMessage ]);
 
   return (
     <React.Suspense>
@@ -110,8 +110,7 @@ export const HangmanInput = () => {
               initial={{ opacity: 0, y: -20, scale: 0.95 }}
               animate={{ opacity: 1, y: 0, scale: 1 }}
               exit={{ opacity: 0, y: -20, scale: 0.95 }}
-              className="w-full max-w-xs"
-            >
+              className="w-full max-w-xs">
               <Alert variant="destructive" className="shadow-lg border-rose-200 dark:border-rose-900">
                 <AlertCircle className="h-4 w-4" />
                 <AlertTitle>Invalid Input</AlertTitle>
@@ -124,8 +123,7 @@ export const HangmanInput = () => {
         <motion.div
           className="flex gap-2 flex-wrap justify-center md:flex-nowrap"
           variants={shakeContainer}
-          animate={controls}
-        >
+          animate={controls}>
           {word.split('').map((letter, index) => {
             return (
               <motion.input
@@ -168,8 +166,8 @@ export const HangmanInput = () => {
 };
 
 export const FailedAttemptsCounter = () => {
-  const [failedAttempts] = useAtom(failedAttemptsAtom);
-  const [stats] = useAtom(hangmanStatsAtom);
+  const [ failedAttempts ] = useAtom(failedAttemptsAtom);
+  const [ stats ] = useAtom(hangmanStatsAtom);
 
   const maxAttempts = 6;
 
@@ -179,8 +177,7 @@ export const FailedAttemptsCounter = () => {
         'text-xl text-zinc-600 dark:text-zinc-400',
         stats.maxAttemptsReached && 'text-rose-400 dark:text-rose-900',
         stats.hasWon && 'text-emerald-600 dark:text-emerald-400',
-      ])}
-    >
+      ])}>
       <span>Attempts Left: </span>
       <NumberFlow value={maxAttempts - failedAttempts} />
     </div>
@@ -188,10 +185,10 @@ export const FailedAttemptsCounter = () => {
 };
 
 export const ResetHangman = () => {
-  const [stats] = useAtom(hangmanStatsAtom);
+  const [ stats ] = useAtom(hangmanStatsAtom);
   const resetHistory = useResetAtom(lettersAtom);
   const resetFailedAttempts = useResetAtom(failedAttemptsAtom);
-  const [, resetWord] = useAtom(uniqueWordAtom);
+  const [ , resetWord ] = useAtom(uniqueWordAtom);
 
   const reset = () => {
     resetHistory();

@@ -53,8 +53,7 @@ function SheetContent({
           side === 'bottom' && 'data-[state=closed]:slide-out-to-bottom data-[state=open]:slide-in-from-bottom inset-x-0 bottom-0 h-auto border-t',
           className,
         )}
-        {...props}
-      >
+        {...props}>
         {children}
         <SheetPrimitive.Close className="ring-offset-white focus:ring-zinc-950 data-[state=open]:bg-zinc-100 absolute top-4 right-4 rounded-xs opacity-70 transition-opacity hover:opacity-100 focus:ring-2 focus:ring-offset-2 focus:outline-hidden disabled:pointer-events-none dark:ring-offset-zinc-950 dark:focus:ring-zinc-300 dark:data-[state=open]:bg-zinc-800">
           <XIcon className="size-4" />

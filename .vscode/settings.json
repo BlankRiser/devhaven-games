@@ -1,7 +1,53 @@
 {
-  "editor.formatOnSave": true,
+  // Disable the prettier formatter, use eslint instead
+  "prettier.enable": false,
+  "prettier.requireConfig": true,
+
+  // Enable eslint for formatting
+  "eslint.format.enable": true,
+  // Silent the stylistic rules in your IDE, but still auto fix them
+  "eslint.rules.customizations": [
+    { "rule": "style/*", "severity": "info", "fixable": true },
+    { "rule": "format/*", "severity": "info", "fixable": true },
+    { "rule": "*-indent", "severity": "info", "fixable": true },
+    { "rule": "*-spacing", "severity": "info", "fixable": true },
+    { "rule": "*-spaces", "severity": "info", "fixable": true },
+    { "rule": "*-order", "severity": "info", "fixable": true },
+    { "rule": "*-dangle", "severity": "info", "fixable": true },
+    { "rule": "*-newline", "severity": "info", "fixable": true },
+    { "rule": "*quotes", "severity": "info", "fixable": true },
+    { "rule": "*semi", "severity": "info", "fixable": true }
+  ],
+  "eslint.validate": [
+    "javascript",
+    "javascriptreact",
+    "typescript",
+    "typescriptreact",
+    "html",
+    "markdown",
+    "json",
+    "jsonc",
+    "yaml",
+    "toml",
+    "xml",
+    "css",
+    "scss",
+    "postcss"
+  ],
+
+  // Tailwind CSS
   "tailwindCSS.experimental.classRegex": [
     ["cva\\(((?:[^()]|\\([^()]*\\))*)\\)", "[\"'`]([^\"'`]*).*?[\"'`]"],
     ["cx\\(((?:[^()]|\\([^()]*\\))*)\\)", "(?:'|\"|`)([^']*)(?:'|\"|`)"]
-  ]
+  ],
+
+  // Editor settings
+  "editor.codeActionsOnSave": {
+    "source.fixAll.eslint": "explicit",
+    "source.organizeImports": "never"
+  },
+  "editor.defaultFormatter": "dbaeumer.vscode-eslint",
+  "[typescriptreact]": {
+    "editor.defaultFormatter": "dbaeumer.vscode-eslint"
+  }
 }

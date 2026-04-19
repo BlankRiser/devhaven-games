@@ -50,11 +50,11 @@ const SidebarProvider = React.forwardRef<
   }
 >(({ defaultOpen = true, open: openProp, onOpenChange: setOpenProp, className, style, children, ...props }, ref) => {
   const isMobile = useIsMobile();
-  const [openMobile, setOpenMobile] = React.useState(false);
+  const [ openMobile, setOpenMobile ] = React.useState(false);
 
   // This is the internal state of the sidebar.
   // We use openProp and setOpenProp for control from outside the component.
-  const [_open, _setOpen] = React.useState(defaultOpen);
+  const [ _open, _setOpen ] = React.useState(defaultOpen);
   const open = openProp ?? _open;
   const setOpen = React.useCallback(
     (value: boolean | ((value: boolean) => boolean)) => {
@@ -68,13 +68,13 @@ const SidebarProvider = React.forwardRef<
       // This sets the cookie to keep the sidebar state.
       document.cookie = `${SIDEBAR_COOKIE_NAME}=${openState}; path=/; max-age=${SIDEBAR_COOKIE_MAX_AGE}`;
     },
-    [setOpenProp, open],
+    [ setOpenProp, open ],
   );
 
   // Helper to toggle the sidebar.
   const toggleSidebar = React.useCallback(() => {
     return isMobile ? setOpenMobile((open) => !open) : setOpen((open) => !open);
-  }, [isMobile, setOpen, setOpenMobile]);
+  }, [ isMobile, setOpen, setOpenMobile ]);
 
   // Adds a keyboard shortcut to toggle the sidebar.
   React.useEffect(() => {
@@ -87,7 +87,7 @@ const SidebarProvider = React.forwardRef<
 
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [toggleSidebar]);
+  }, [ toggleSidebar ]);
 
   // We add a state so that we can do data-state="expanded" or "collapsed".
   // This makes it easier to style the sidebar with Tailwind classes.
@@ -103,7 +103,7 @@ const SidebarProvider = React.forwardRef<
       setOpenMobile,
       toggleSidebar,
     }),
-    [state, open, setOpen, isMobile, openMobile, setOpenMobile, toggleSidebar],
+    [ state, open, setOpen, isMobile, openMobile, setOpenMobile, toggleSidebar ],
   );
 
   return (
@@ -120,8 +120,7 @@ const SidebarProvider = React.forwardRef<
           }
           className={cn('group/sidebar-wrapper has-data-[variant=inset]:bg-sidebar flex min-h-svh w-full', className)}
           ref={ref}
-          {...props}
-        >
+          {...props}>
           {children}
         </div>
       </TooltipProvider>
@@ -169,8 +168,7 @@ function Sidebar({
               '--sidebar-width': SIDEBAR_WIDTH_MOBILE,
             } as React.CSSProperties
           }
-          side={side}
-        >
+          side={side}>
           <div className="flex h-full w-full flex-col">{children}</div>
         </SheetContent>
       </Sheet>
@@ -184,8 +182,7 @@ function Sidebar({
       data-collapsible={state === 'collapsed' ? collapsible : ''}
       data-variant={variant}
       data-side={side}
-      data-slot="sidebar"
-    >
+      data-slot="sidebar">
       {/* This is what handles the sidebar gap on desktop */}
       <div
         className={cn(
@@ -205,12 +202,10 @@ function Sidebar({
             : 'group-data-[collapsible=icon]:w-(--sidebar-width-icon) group-data-[side=left]:border-r group-data-[side=right]:border-l',
           className,
         )}
-        {...props}
-      >
+        {...props}>
         <div
           data-sidebar="sidebar"
-          className="bg-sidebar group-data-[variant=floating]:border-sidebar-border flex h-full w-full flex-col group-data-[variant=floating]:rounded-lg group-data-[variant=floating]:border group-data-[variant=floating]:shadow-sm"
-        >
+          className="bg-sidebar group-data-[variant=floating]:border-sidebar-border flex h-full w-full flex-col group-data-[variant=floating]:rounded-lg group-data-[variant=floating]:border group-data-[variant=floating]:shadow-sm">
           {children}
         </div>
       </div>
@@ -232,8 +227,7 @@ function SidebarTrigger({ className, onClick, ...props }: React.ComponentProps<t
         onClick?.(event);
         toggleSidebar();
       }}
-      {...props}
-    >
+      {...props}>
       <PanelLeftIcon />
       <span className="sr-only">Toggle Sidebar</span>
     </Button>

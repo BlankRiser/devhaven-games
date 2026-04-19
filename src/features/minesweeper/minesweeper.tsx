@@ -12,7 +12,38 @@ const icons = {
 };
 
 export const Minesweeper = () => {
-  const [board, resetBoard] = useAtom(boardAtom);
+  const [ board, resetBoard ] = useAtom(boardAtom);
+
+  return (
+    <section className="border rounded-md border-zinc-200 dark:border-zinc-800 w-full h-full overflow-hidden">
+      <div className="grid place-items-center h-full w-full">
+        <div className="flex flex-col gap-1">
+          {board.map((row, rowIndex) => (
+            <div key={row.toString()} className="flex gap-1">
+              {row.map((cell, colIndex) => (
+                <MinesweeperCell
+                  row={rowIndex}
+                  col={colIndex}
+                  key={`${rowIndex.toString()}-${colIndex.toString()}`}
+                  cell={cell} 
+                />
+              ))}
+            </div>
+          ))}
+        </div>
+        <Button
+          onClick={() => {
+            resetBoard();
+          }}>
+          Reset
+        </Button>
+      </div>
+    </section>
+  );
+};
+
+const MinesweeperCell = ({ row, col, cell }: { row: number; col: number; cell: number | 'mine' | 'flag' }) => {
+  const [ board ] = useAtom(boardAtom);
 
   const handleCellClick = (row: number, col: number) => {
     console.log('cell clicked', row, col, board[row][col]);
@@ -27,31 +58,10 @@ export const Minesweeper = () => {
   };
 
   return (
-    <section className="border rounded-md border-zinc-200 dark:border-zinc-800 w-full h-full overflow-hidden">
-      <div className="grid place-items-center h-full w-full">
-        <div className="flex flex-col gap-1">
-          {board.map((row, rowIndex) => (
-            <div key={row.toString()} className="flex gap-1">
-              {row.map((cell, colIndex) => (
-                <motion.button
-                  onClick={() => handleCellClick(rowIndex, colIndex)}
-                  key={`${row.toString()}-${cell.toString()}`}
-                  className="border rounded-md border-zinc-200 dark:border-zinc-800 size-15 md:size-10 grid place-items-center"
-                >
-                  {cell === 'mine' ? icons.mine : cell}
-                </motion.button>
-              ))}
-            </div>
-          ))}
-        </div>
-        <Button
-          onClick={() => {
-            resetBoard();
-          }}
-        >
-          Reset
-        </Button>
-      </div>
-    </section>
+    <motion.button
+      onClick={() => handleCellClick(row, col)}
+      className="border rounded-md border-zinc-200 dark:border-zinc-800 size-15 md:size-10 grid place-items-center">
+      {cell === 'mine' ? icons.mine : cell}
+    </motion.button>
   );
 };
