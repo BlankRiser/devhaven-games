@@ -2,7 +2,7 @@ import stylistic from '@stylistic/eslint-plugin';
 import nextCoreWebVitals from 'eslint-config-next/core-web-vitals';
 import nextTypescript from 'eslint-config-next/typescript';
 
-const eslintConfig =  [
+const eslintConfig = [
   ...nextCoreWebVitals,
   ...nextTypescript,
 
@@ -34,15 +34,18 @@ const eslintConfig =  [
           },
         },
       ],
-      '@stylistic/max-len': [ 'warn', {
-        code: 150,
-        tabWidth: 2,
-        ignoreUrls: true,
-        ignoreStrings: true,
-        ignoreRegExpLiterals: true,
-        ignoreComments: true,
-        ignoreTrailingComments: true,
-      } ],
+      '@stylistic/max-len': [
+        'warn',
+        {
+          code: 150,
+          tabWidth: 2,
+          ignoreUrls: true,
+          ignoreStrings: true,
+          ignoreRegExpLiterals: true,
+          ignoreComments: true,
+          ignoreTrailingComments: true,
+        },
+      ],
       '@stylistic/indent': [ 'warn', 2 ],
       '@stylistic/quotes': [ 'warn', 'single' ],
       '@stylistic/comma-dangle': [ 'warn', 'always-multiline' ],
@@ -66,4 +69,4 @@ const eslintConfig =  [
   },
 ];
 
-export default eslintConfig
+export default eslintConfig;
