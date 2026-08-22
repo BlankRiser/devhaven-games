@@ -35,7 +35,7 @@ export const GlobalProvider = ({ children }: { children: React.ReactNode }) => {
               </div>
             </header>
             <MobileBanner />
-            <div className="bg-zinc-50 dark:bg-zinc-950 min-h-[calc(100dvh-var(--spacing)*16)]">{children}</div>
+            <div className="bg-zinc-50 dark:bg-zinc-950 flex-1 min-h-0">{children}</div>
           </SidebarInset>
         </SidebarProvider>
       </QueryClientProvider>
