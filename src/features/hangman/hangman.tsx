@@ -1,6 +1,6 @@
 'use client';
 
-import { FailedAttemptsCounter, HangmanInput, ResetHangman } from './hangman-assets';
+import { FailedAttemptsCounter, HangmanErrorAlert, HangmanInput, ResetHangman } from './hangman-assets';
 import { HangmanFigure } from './hangman-figure';
 
 export default function Hangman(){
@@ -11,6 +11,7 @@ export default function Hangman(){
         <HangmanFigure />
         <HangmanInput />
         <ResetHangman />
+        <HangmanErrorAlert />
       </div>
     </section>
   );

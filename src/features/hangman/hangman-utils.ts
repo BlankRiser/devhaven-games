@@ -22,6 +22,19 @@ export const uniqueWordAtom = atom(
 
 export const lettersAtom = atomWithReset<Array<string>>([]);
 export const failedAttemptsAtom = atomWithReset(0);
+export const hangmanErrorAtom = atomWithReset<{ title: string; message: string } | null>(null);
+
+export const getRandomUnrevealedLetter = (word: string, revealedLetters: Array<string>): string | null => {
+  const uniqueUnrevealed = [ ...new Set(word.split('')) ].filter(
+    (letter) => !revealedLetters.includes(letter),
+  );
+
+  if (uniqueUnrevealed.length === 0) {
+    return null;
+  }
+
+  return uniqueUnrevealed[Math.floor(Math.random() * uniqueUnrevealed.length)] ?? null;
+};
 
 export const hangmanStatsAtom = atom((get) => {
   const word = get(uniqueWordAtom);

@@ -9,7 +9,14 @@ import * as React from 'react';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
-import { failedAttemptsAtom, hangmanStatsAtom, lettersAtom, uniqueWordAtom } from './hangman-utils';
+import {
+  failedAttemptsAtom,
+  getRandomUnrevealedLetter,
+  hangmanErrorAtom,
+  hangmanStatsAtom,
+  lettersAtom,
+  uniqueWordAtom,
+} from './hangman-utils';
 
 const shakeContainer = {
   start: () => ({
@@ -30,53 +37,55 @@ export const HangmanInput = () => {
 
   const setLetters = useSetAtom(lettersAtom);
   const setFailedAttempts = useSetAtom(failedAttemptsAtom);
-
-  const [ errorMessage, setErrorMessage ] = React.useState<string | null>(null);
+  const setError = useSetAtom(hangmanErrorAtom);
 
   const controls = useAnimation();
 
-  const checkLetterInWord = React.useCallback(
-    ({ letter, word }: { letter: string; word: string }) => {
-      if (word.includes(letter) && stats.correctLetters.includes(letter) === false) {
-        return true;
-      }
-
-      return false;
-    },
-    [ stats.correctLetters ],
-  );
-
   const handleKeyPress = React.useCallback(
     (e: KeyboardEvent) => {
-      const keyInput = e.key;
+      const keyInput = e.key.toLowerCase();
 
       // Reset animation as soon as user types
       controls.stop();
       controls.set('reset');
 
-      if (stats.maxAttemptsReached) return;
+      if (stats.maxAttemptsReached || stats.hasWon) return;
 
-      if (!/^[a-zA-Z]$/.test(keyInput)) {
+      if (!/^[a-z]$/.test(keyInput)) {
         // Only alert for single characters that aren't letters (avoid alerting for Shift, Alt, etc.)
-        if (keyInput.length === 1) {
-          setErrorMessage('Please enter a valid letter (A-Z).');
+        if (e.key.length === 1) {
+          setError({
+            title: 'Invalid Input',
+            message: 'Please enter a valid letter (A-Z).',
+          });
         }
         return;
       }
 
-      if (
-        checkLetterInWord({
-          letter: keyInput,
-          word: word!,
-        })
-      ) {
+      if (!word) return;
+
+      if (stats.correctLetters.includes(keyInput)) {
+        return;
+      }
+
+      if (word.includes(keyInput)) {
         setLetters((values) => [ ...values, keyInput ]);
-      } else {
-        controls.start('start');
-        setFailedAttempts((failedAttempts) => failedAttempts + 1);
+        return;
+      }
+
+      controls.start('start');
+      setFailedAttempts((failedAttempts) => failedAttempts + 1);
+      setError({
+        title: 'Wrong Guess',
+        message: `"${keyInput.toUpperCase()}" is not in the word`,
+      });
+
+      const revealedLetter = getRandomUnrevealedLetter(word, stats.correctLetters);
+      if (revealedLetter) {
+        setLetters((values) => [ ...values, revealedLetter ]);
       }
     },
-    [ stats.maxAttemptsReached, checkLetterInWord, word, setLetters, controls, setFailedAttempts ],
+    [ stats.maxAttemptsReached, stats.hasWon, stats.correctLetters, word, setLetters, controls, setFailedAttempts, setError ],
   );
 
   React.useEffect(() => {
@@ -92,34 +101,9 @@ export const HangmanInput = () => {
     };
   }, [ handleKeyPress, setLetters, word ]);
 
-  React.useEffect(() => {
-    if (errorMessage) {
-      const timer = setTimeout(() => {
-        setErrorMessage(null);
-      }, 3000);
-      return () => clearTimeout(timer);
-    }
-  }, [ errorMessage ]);
-
   return (
     <React.Suspense>
-      <div className="grid place-items-center p-2 gap-4">
-        <AnimatePresence>
-          {errorMessage && (
-            <motion.div
-              initial={{ opacity: 0, y: -20, scale: 0.95 }}
-              animate={{ opacity: 1, y: 0, scale: 1 }}
-              exit={{ opacity: 0, y: -20, scale: 0.95 }}
-              className="w-full max-w-xs">
-              <Alert variant="destructive" className="shadow-lg border-rose-200 dark:border-rose-900">
-                <AlertCircle className="h-4 w-4" />
-                <AlertTitle>Invalid Input</AlertTitle>
-                <AlertDescription>{errorMessage}</AlertDescription>
-              </Alert>
-            </motion.div>
-          )}
-        </AnimatePresence>
-
+      <div className="grid place-items-center p-2">
         <motion.div
           className="flex gap-2 flex-wrap justify-center md:flex-nowrap"
           variants={shakeContainer}
@@ -184,15 +168,49 @@ export const FailedAttemptsCounter = () => {
   );
 };
 
+export const HangmanErrorAlert = () => {
+  const [ error, setError ] = useAtom(hangmanErrorAtom);
+
+  React.useEffect(() => {
+    if (error) {
+      const timer = setTimeout(() => {
+        setError(null);
+      }, 3000);
+      return () => clearTimeout(timer);
+    }
+  }, [ error, setError ]);
+
+  return (
+    <div className="min-h-16 w-full max-w-xs px-2">
+      <AnimatePresence>
+        {error && (
+          <motion.div
+            initial={{ opacity: 0, y: -8, scale: 0.95 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, y: -8, scale: 0.95 }}>
+            <Alert variant="destructive" className="shadow-lg border-rose-200 dark:border-rose-900">
+              <AlertCircle className="h-4 w-4" />
+              <AlertTitle>{error.title}</AlertTitle>
+              <AlertDescription>{error.message}</AlertDescription>
+            </Alert>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </div>
+  );
+};
+
 export const ResetHangman = () => {
   const [ stats ] = useAtom(hangmanStatsAtom);
   const resetHistory = useResetAtom(lettersAtom);
   const resetFailedAttempts = useResetAtom(failedAttemptsAtom);
+  const resetError = useResetAtom(hangmanErrorAtom);
   const [ , resetWord ] = useAtom(uniqueWordAtom);
 
   const reset = () => {
     resetHistory();
     resetFailedAttempts();
+    resetError();
     resetWord();
   };
 
