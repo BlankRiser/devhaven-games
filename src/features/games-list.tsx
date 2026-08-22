@@ -1,6 +1,7 @@
 'use client';
 import dynamic from 'next/dynamic';
 
+const FlappyBird = dynamic(() => import('./flappy-bird/flappy-bird'), { ssr: false })
 const Hangman = dynamic(() => import('./hangman/hangman'), { ssr: false })
 const Minesweeper = dynamic(() => import('./minesweeper/minesweeper'), { ssr: false })
 const TicTacToe = dynamic(() => import('./tic-tac-toe/tic-tac-toe'), { ssr: false })
@@ -36,5 +37,15 @@ export const GAMES_LIST = [
     color: 'green',
     url: '/games/minesweeper',
     component: Minesweeper,
+  },
+  {
+    slug: 'flappy-bird',
+    status: 'wip',
+    label: 'Flappy Bird',
+    description: 'Tap or press space to flap through the pipes.',
+    icon: 'gamepad',
+    color: 'green',
+    url: '/games/flappy-bird',
+    component: FlappyBird,
   },
 ];
