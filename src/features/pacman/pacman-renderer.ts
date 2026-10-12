@@ -18,23 +18,35 @@ import {
 export const drawStaticMaze = (g: Graphics): void => {
   g.clear();
 
-  // Subtle background grid
+  let hasWalls = false;
   for (let r = 0; r < MAZE_ROWS; r++) {
     for (let c = 0; c < MAZE_COLS; c++) {
-      const tile = PACMAN_MAZE_TEMPLATE[r]?.[c];
-      const x = c * TILE_SIZE;
-      const y = r * TILE_SIZE;
-
-      if (tile === 1) {
+      if (PACMAN_MAZE_TEMPLATE[r]?.[c] === 1) {
+        const x = c * TILE_SIZE;
+        const y = r * TILE_SIZE;
         g.roundRect(x + 2, y + 2, TILE_SIZE - 4, TILE_SIZE - 4, 4);
-        g.fill({ color: 0x1a_24_36 });
-        g.stroke({ color: 0x3b_82_f6, width: 1.5, alpha: 0.85 });
-      } else if (tile === 5) {
-        // Ghost House Door
-        g.rect(x + 1, y + TILE_SIZE / 2 - 2, TILE_SIZE - 2, 4);
-        g.fill({ color: 0xff_b4_d6 });
+        hasWalls = true;
       }
     }
+  }
+  if (hasWalls) {
+    g.fill({ color: 0x1a_24_36 });
+    g.stroke({ color: 0x3b_82_f6, width: 1.5, alpha: 0.85 });
+  }
+
+  let hasDoors = false;
+  for (let r = 0; r < MAZE_ROWS; r++) {
+    for (let c = 0; c < MAZE_COLS; c++) {
+      if (PACMAN_MAZE_TEMPLATE[r]?.[c] === 5) {
+        const x = c * TILE_SIZE;
+        const y = r * TILE_SIZE;
+        g.rect(x + 1, y + TILE_SIZE / 2 - 2, TILE_SIZE - 2, 4);
+        hasDoors = true;
+      }
+    }
+  }
+  if (hasDoors) {
+    g.fill({ color: 0xff_b4_d6 });
   }
 };
 
@@ -128,23 +140,36 @@ export const drawDynamicScene = (g: Graphics, world: PacmanWorldState): void => 
 
   const powerRadius = 4.6 + Math.sin(world.pulseClock * 8) * 1.2;
 
-  // 1. Draw remaining pellets and pulsing power pellets
+  // 1. Draw remaining regular pellets in a single batched path
+  let hasRegularPellets = false;
   for (let r = 0; r < MAZE_ROWS; r++) {
     for (let c = 0; c < MAZE_COLS; c++) {
-      const tile = world.maze[r]?.[c];
-      if (tile !== 2 && tile !== 3) continue;
-
-      const cx = (c + 0.5) * TILE_SIZE;
-      const cy = (r + 0.5) * TILE_SIZE;
-
-      if (tile === 2) {
+      if (world.maze[r]?.[c] === 2) {
+        const cx = (c + 0.5) * TILE_SIZE;
+        const cy = (r + 0.5) * TILE_SIZE;
         g.circle(cx, cy, 2.4);
-        g.fill({ color: 0xfd_e6_8a });
-      } else {
-        g.circle(cx, cy, powerRadius);
-        g.fill({ color: 0xfb_bf_24 });
+        hasRegularPellets = true;
       }
     }
+  }
+  if (hasRegularPellets) {
+    g.fill({ color: 0xfd_e6_8a });
+  }
+
+  // 1b. Draw pulsing power pellets in a single batched path
+  let hasPowerPellets = false;
+  for (let r = 0; r < MAZE_ROWS; r++) {
+    for (let c = 0; c < MAZE_COLS; c++) {
+      if (world.maze[r]?.[c] === 3) {
+        const cx = (c + 0.5) * TILE_SIZE;
+        const cy = (r + 0.5) * TILE_SIZE;
+        g.circle(cx, cy, powerRadius);
+        hasPowerPellets = true;
+      }
+    }
+  }
+  if (hasPowerPellets) {
+    g.fill({ color: 0xfb_bf_24 });
   }
 
   // 2. Draw bonus fruit if active
