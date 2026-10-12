@@ -1,15 +1,23 @@
 'use client';
 
-import { motion, SVGMotionProps } from 'motion/react';
+import { motion, type SVGMotionProps } from 'motion/react';
+import type * as React from 'react';
 import { cn } from '@/lib/utils';
 
-export const Cell = ({ children, isSelected = false, ...rest }: React.ComponentProps<'button'> & { isSelected: boolean }) => {
+export const Cell = ({
+  children,
+  isSelected = false,
+  className,
+  ...rest
+}: React.ComponentProps<'button'> & { isSelected: boolean }) => {
   return (
     <button
-      className={cn([
+      type="button"
+      className={cn(
         isSelected ? 'bg-secondary' : 'bg-card hover:bg-secondary/60',
-        'grid size-20 place-items-center border border-border transition-colors md:size-36',
-      ])}
+        'grid h-full w-full place-items-center border border-border transition-colors focus-visible:z-10 focus-visible:ring-1 focus-visible:ring-ring focus-visible:outline-none',
+        className,
+      )}
       {...rest}>
       {children}
     </button>
@@ -24,7 +32,7 @@ const draw = {
       pathLength: 1,
       opacity: 1,
       transition: {
-        pathLength: { delay, type: 'spring', duration: 0.5, bounce: 0 },
+        pathLength: { delay, type: 'spring' as const, duration: 0.5, bounce: 0 },
         opacity: { delay, duration: 0.01 },
       },
     };
@@ -33,7 +41,7 @@ const draw = {
     pathLength: 0,
     opacity: 0,
     transition: {
-      pathLength: { type: 'spring', duration: 0.5, bounce: 0 },
+      pathLength: { type: 'spring' as const, duration: 0.5, bounce: 0 },
       opacity: { duration: 0.01 },
     },
   },
@@ -60,8 +68,9 @@ export const AnimatedCircle = (props: SVGMotionProps<SVGSVGElement>) => {
 };
 
 export const AnimatedCross = (props: SVGMotionProps<SVGSVGElement>) => (
-  <motion.svg 
-    width="24" height="24"
+  <motion.svg
+    width="24"
+    height="24"
     viewBox="0 0 24 24"
     fill="none"
     stroke="currentColor"

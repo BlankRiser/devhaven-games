@@ -7,7 +7,7 @@ import {
   SpadeIcon,
   StackIcon,
 } from '@phosphor-icons/react';
-import * as React from 'react';
+import type * as React from 'react';
 import { cn } from '@/lib/utils';
 import {
   RANK_LABELS,
@@ -56,7 +56,7 @@ export const SpiderPlayingCardView = ({
     return (
       <div
         className={cn(
-          'relative h-20 w-full select-none border border-border bg-secondary/90 shadow-xs sm:h-24',
+          'relative h-22 w-full select-none border border-border bg-secondary/90 shadow-xs sm:h-28 lg:h-32',
           'bg-[radial-gradient(circle_at_center,_var(--color-border)_1px,_transparent_1px)] bg-[size:6px_6px]',
           className,
         )}>
@@ -71,7 +71,7 @@ export const SpiderPlayingCardView = ({
   return (
     <div
       className={cn(
-        'relative flex h-20 w-full select-none flex-col justify-between border p-1.5 transition-colors sm:h-24 sm:p-2',
+        'relative flex h-22 w-full select-none flex-col justify-between border p-1.5 transition-colors sm:h-28 sm:p-2 lg:h-32 lg:p-2.5',
         isSelected
           ? 'border-2 border-foreground bg-accent text-accent-foreground shadow-md'
           : isHintSource
@@ -86,34 +86,28 @@ export const SpiderPlayingCardView = ({
       <div
         className={cn(
           'flex items-center justify-between leading-none',
-          red
-            ? 'text-red-600 dark:text-red-400'
-            : 'text-foreground',
+          red ? 'text-red-600 dark:text-red-400' : 'text-foreground',
         )}>
-        <span className="font-heading text-sm leading-none font-bold tracking-tight sm:text-base">
+        <span className="font-heading text-sm leading-none font-bold tracking-tight sm:text-base lg:text-lg">
           {rankLabel}
         </span>
-        <SuitGlyph suit={card.suit} className="size-3 sm:size-3.5" />
+        <SuitGlyph suit={card.suit} className="size-3.5 sm:size-4" />
       </div>
 
       {/* Center large watermark suit */}
       <div
         className={cn(
           'pointer-events-none grid place-items-center opacity-20 sm:opacity-25',
-          red
-            ? 'text-red-600 dark:text-red-400'
-            : 'text-foreground',
+          red ? 'text-red-600 dark:text-red-400' : 'text-foreground',
         )}>
-        <SuitGlyph suit={card.suit} className="size-6 sm:size-8" />
+        <SuitGlyph suit={card.suit} className="size-6 sm:size-9 lg:size-10" />
       </div>
 
       {/* Bottom corner rank + suit */}
       <div
         className={cn(
           'hidden items-center justify-between leading-none sm:flex',
-          red
-            ? 'text-red-600 dark:text-red-400'
-            : 'text-foreground',
+          red ? 'text-red-600 dark:text-red-400' : 'text-foreground',
         )}>
         <SuitGlyph suit={card.suit} className="size-3 opacity-75" />
         <span className="font-heading text-xs leading-none font-bold">
@@ -130,7 +124,9 @@ export const CompletedFoundationsBar = ({
   completedSuits: Suit[];
 }) => {
   return (
-    <div className="flex items-center gap-1" aria-label="Completed suit foundations">
+    <div
+      className="hidden items-center gap-1 lg:flex"
+      aria-label="Completed suit foundations">
       {Array.from({ length: 8 }).map((_, idx) => {
         const suit = completedSuits[idx];
         const red = suit ? isRedSuit(suit) : false;
@@ -144,20 +140,19 @@ export const CompletedFoundationsBar = ({
                 : `Empty Foundation Slot ${idx + 1}`
             }
             className={cn(
-              'grid h-10 w-7 place-items-center border text-xs transition-colors sm:h-11 sm:w-8',
+              'grid h-7 w-6 place-items-center border text-xs transition-colors',
               suit
                 ? 'border-foreground bg-accent text-accent-foreground shadow-xs'
                 : 'border-dashed border-border bg-secondary/30 text-muted-foreground/35',
             )}>
             {suit ? (
-              <div
+              <SuitGlyph
+                suit={suit}
                 className={cn(
-                  'flex flex-col items-center leading-none',
+                  'size-3.5',
                   red ? 'text-red-600 dark:text-red-400' : 'text-foreground',
-                )}>
-                <span className="font-heading text-[10px] font-bold">K</span>
-                <SuitGlyph suit={suit} className="size-3.5" />
-              </div>
+                )}
+              />
             ) : (
               <span className="font-mono text-[9px]">{idx + 1}</span>
             )}
@@ -192,22 +187,17 @@ export const StockPileButton = ({
             : 'Fill all empty columns before dealing from stock'
       }
       className={cn(
-        'group relative flex h-10 items-center gap-2 border px-2.5 text-left text-xs transition-colors sm:h-11 sm:px-3',
+        'group relative flex h-7 items-center gap-1.5 border px-2.5 text-[11px] font-medium tracking-wider uppercase transition-colors',
         dealsRemaining === 0
           ? 'cursor-not-allowed border-dashed border-border bg-secondary/20 text-muted-foreground/40'
           : isHintTarget
             ? 'border-2 border-chart-3 bg-accent text-accent-foreground'
             : 'border-border bg-card text-foreground hover:border-foreground hover:bg-secondary/60',
       )}>
-      <StackIcon className="size-4 shrink-0 text-chart-3" weight="duotone" />
-      <div className="flex flex-col leading-tight">
-        <span className="text-[9px] tracking-wider text-muted-foreground uppercase">
-          Stock Pile
-        </span>
-        <span className="font-mono text-xs font-bold">
-          {dealsRemaining} {dealsRemaining === 1 ? 'Deal' : 'Deals'}
-        </span>
-      </div>
+      <StackIcon className="size-3.5 shrink-0 text-chart-3" weight="duotone" />
+      <span className="font-mono font-bold">
+        Deal ({dealsRemaining})
+      </span>
     </button>
   );
 };

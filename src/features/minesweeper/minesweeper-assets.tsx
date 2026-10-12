@@ -1,4 +1,4 @@
-import * as React from 'react';
+import type * as React from 'react';
 import { cn } from '@/lib/utils';
 import type { DifficultyId } from './minesweeper-utils';
 
@@ -9,6 +9,7 @@ type CellProps = React.ComponentProps<'button'> & {
   isWrongFlag?: boolean;
   isChordable?: boolean;
   difficulty?: DifficultyId;
+  cellSize?: number;
 };
 
 const DIFFICULTY_CELL_SIZE: Record<DifficultyId, string> = {
@@ -25,15 +26,27 @@ export const Cell = ({
   isWrongFlag = false,
   isChordable = false,
   difficulty = 'beginner',
+  cellSize,
+  style,
   className,
   ...rest
 }: CellProps) => {
+  const dynamicStyle: React.CSSProperties | undefined = cellSize
+    ? {
+        width: cellSize,
+        height: cellSize,
+        fontSize: Math.max(11, Math.floor(cellSize * 0.42)),
+        ...style,
+      }
+    : style;
+
   return (
     <button
       type="button"
+      style={dynamicStyle}
       className={cn(
         'relative grid shrink-0 select-none place-items-center border border-border font-mono font-bold transition-colors focus-visible:z-10 focus-visible:ring-1 focus-visible:ring-ring focus-visible:outline-none',
-        DIFFICULTY_CELL_SIZE[difficulty],
+        !cellSize && DIFFICULTY_CELL_SIZE[difficulty],
         isExploded
           ? 'bg-destructive text-destructive-foreground'
           : isWrongFlag

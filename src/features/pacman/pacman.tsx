@@ -7,8 +7,6 @@ import {
   ArrowLeftIcon,
   ArrowRightIcon,
   ArrowUpIcon,
-  CornersInIcon,
-  CornersOutIcon,
   GhostIcon,
   HeartIcon,
   LightningIcon,
@@ -31,6 +29,10 @@ import {
   usePixiTick,
 } from '@/features/common/pixi/pixi-stage';
 import { useArcadeDirection } from '@/features/common/pixi/use-keyboard-direction';
+import {
+  FullscreenToggleButton,
+  useGameFullscreen,
+} from '@/features/common/use-game-fullscreen';
 import { cn } from '@/lib/utils';
 import { drawDynamicScene, drawStaticMaze } from './pacman-renderer';
 import {
@@ -260,19 +262,10 @@ const PacmanTopHud = ({
             <span>Reset</span>
           </Button>
 
-          <Button
-            variant="outline"
-            size="icon-sm"
-            onClick={onToggleFullscreen}
-            title={isFullscreen ? 'Exit Fullscreen' : 'Enter Fullscreen'}
-            aria-label={isFullscreen ? 'Exit Fullscreen' : 'Enter Fullscreen'}
-            className="size-7">
-            {isFullscreen ? (
-              <CornersInIcon className="size-3.5" />
-            ) : (
-              <CornersOutIcon className="size-3.5" />
-            )}
-          </Button>
+          <FullscreenToggleButton
+            isFullscreen={isFullscreen}
+            onToggle={onToggleFullscreen}
+          />
         </div>
       </div>
     </div>
@@ -333,8 +326,8 @@ const PacmanStatusOverlay = ({
 export default function Pacman() {
   const setHud = useSetAtom(pacmanHudAtom);
   const worldRef = React.useRef<PacmanWorldState>(createInitialWorld(0, 1));
-  const sectionRef = React.useRef<HTMLElement | null>(null);
-  const [ isFullscreen, setIsFullscreen ] = React.useState(false);
+  const { containerRef, isFullscreen, toggleFullscreen } =
+    useGameFullscreen<HTMLElement>();
 
   const syncHudFromWorld = React.useCallback(() => {
     const w = worldRef.current;
@@ -385,30 +378,6 @@ export default function Pacman() {
     syncHudFromWorld();
   }, [ syncHudFromWorld ]);
 
-  const toggleFullscreen = React.useCallback(async () => {
-    const element = sectionRef.current;
-    if (!element) return;
-
-    try {
-      if (!document.fullscreenElement) {
-        await element.requestFullscreen();
-      } else {
-        await document.exitFullscreen();
-      }
-    } catch {
-      // Ignore fullscreen permission errors
-    }
-  }, []);
-
-  React.useEffect(() => {
-    const handleFullscreenChange = () => {
-      setIsFullscreen(Boolean(document.fullscreenElement));
-    };
-
-    document.addEventListener('fullscreenchange', handleFullscreenChange);
-    return () => document.removeEventListener('fullscreenchange', handleFullscreenChange);
-  }, []);
-
   const { inputRef, queueDirection, resetDirections, touchHandlers } =
     useArcadeDirection({
       onDirectionInput: () => {
@@ -438,7 +407,7 @@ export default function Pacman() {
 
   return (
     <section
-      ref={sectionRef}
+      ref={containerRef}
       className="relative flex h-full w-full flex-1 flex-col overflow-hidden bg-[#0d111a]"
       {...touchHandlers}>
       <PacmanTopHud

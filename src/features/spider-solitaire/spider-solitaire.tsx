@@ -17,7 +17,6 @@ import {
   ArrowUUpLeftIcon,
   CheckCircleIcon,
   LightbulbIcon,
-  SparkleIcon,
   TimerIcon,
   WarningCircleIcon,
 } from '@phosphor-icons/react';
@@ -26,6 +25,10 @@ import { AnimatePresence, motion } from 'motion/react';
 import * as React from 'react';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
+import {
+  FullscreenToggleButton,
+  useGameFullscreen,
+} from '@/features/common/use-game-fullscreen';
 import { cn } from '@/lib/utils';
 import {
   CompletedFoundationsBar,
@@ -57,6 +60,9 @@ interface ActiveSelection {
 }
 
 export default function SpiderSolitaire() {
+  const { containerRef, isFullscreen, toggleFullscreen } =
+    useGameFullscreen<HTMLElement>();
+
   const game = useAtomValue(spiderGameAtom);
   const stats = useAtomValue(spiderStatsAtom);
   const [ notice, setNotice ] = useAtom(spiderNoticeAtom);
@@ -70,7 +76,8 @@ export default function SpiderSolitaire() {
 
   const currentMoveStamp = `${game.suitMode}-${game.moves}`;
   const [ activeDrag, setActiveDrag ] = React.useState<ActiveSelection | null>(null);
-  const [ rawSelectedRun, setSelectedRun ] = React.useState<ActiveSelection | null>(null);
+  const [ rawSelectedRun, setSelectedRun ] =
+    React.useState<ActiveSelection | null>(null);
   const selectedRun =
     rawSelectedRun?.moveStamp === currentMoveStamp ? rawSelectedRun : null;
 
@@ -104,7 +111,7 @@ export default function SpiderSolitaire() {
     return () => window.clearInterval(interval);
   }, [ stats.moves, stats.hasWon, setElapsedSeconds ]);
 
-  // Keyboard shortcuts: Z to undo, H for hint, D to deal stock, N for new game
+  // Keyboard shortcuts: Z to undo, H for hint, D to deal stock
   React.useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
       if (
@@ -186,7 +193,6 @@ export default function SpiderSolitaire() {
     const col = game.columns[colIndex];
     if (!col) return;
 
-    // If a run is currently selected and the user clicks a different column, try moving there
     if (selectedRun && selectedRun.fromCol !== colIndex) {
       const moved = moveCards({
         fromCol: selectedRun.fromCol,
@@ -199,7 +205,6 @@ export default function SpiderSolitaire() {
       }
     }
 
-    // If clicking the exact same selected card again, auto-move to the best valid destination
     if (
       selectedRun &&
       selectedRun.fromCol === colIndex &&
@@ -245,10 +250,57 @@ export default function SpiderSolitaire() {
   const seconds = elapsedSeconds % 60;
 
   return (
-    <section className="flex h-full w-full flex-col overflow-auto border border-border bg-card/40">
-      <div className="mx-auto flex w-full max-w-7xl flex-1 flex-col gap-3 p-2.5 sm:p-5">
-        {/* Top Control Bar: Suit Difficulty + Actions */}
-        <div className="flex flex-wrap items-center justify-between gap-2 border border-border bg-card p-2">
+    <section
+      ref={containerRef}
+      className="relative flex h-full w-full flex-1 flex-col overflow-hidden bg-background">
+      {/* Unified Top Control & Telemetry HUD Bar */}
+      <div className="z-10 flex shrink-0 flex-wrap items-center justify-between gap-3 border-b border-border bg-card px-4 py-2 text-xs uppercase">
+        {/* Left: Score, Moves, Runs, Time, Completed Foundations */}
+        <div className="flex flex-wrap items-center gap-4 sm:gap-5">
+          <div className="flex flex-col">
+            <span className="text-[10px] leading-none text-muted-foreground">
+              Score
+            </span>
+            <span className="font-mono text-sm font-bold text-foreground">
+              <NumberFlow value={stats.score} />
+            </span>
+          </div>
+
+          <div className="flex flex-col">
+            <span className="text-[10px] leading-none text-muted-foreground">
+              Moves
+            </span>
+            <span className="font-mono text-sm font-bold text-foreground">
+              <NumberFlow value={stats.moves} />
+            </span>
+          </div>
+
+          <div className="flex flex-col">
+            <span className="text-[10px] leading-none text-muted-foreground">
+              Runs
+            </span>
+            <span className="font-mono text-sm font-bold text-foreground">
+              <NumberFlow value={stats.completedCount} /> / 8
+            </span>
+          </div>
+
+          <div className="flex items-center gap-1.5">
+            <TimerIcon className="size-4 text-muted-foreground" />
+            <div className="flex flex-col">
+              <span className="text-[10px] leading-none text-muted-foreground">
+                Time
+              </span>
+              <span className="font-mono text-sm font-bold text-foreground">
+                {String(minutes).padStart(2, '0')}:{String(seconds).padStart(2, '0')}
+              </span>
+            </div>
+          </div>
+
+          <CompletedFoundationsBar completedSuits={stats.completedSuits} />
+        </div>
+
+        {/* Right: Suit Difficulty + Stock Deal + Undo/Hint/New Deal + Fullscreen */}
+        <div className="flex flex-wrap items-center gap-2">
           <div className="flex flex-wrap items-center gap-1">
             {SUIT_MODES.map((preset) => {
               const isActive = stats.suitMode === preset.mode;
@@ -259,19 +311,26 @@ export default function SpiderSolitaire() {
                   onClick={() => startNewGame(preset.mode)}
                   title={preset.description}
                   className={cn(
-                    'border px-2.5 py-1 text-[11px] font-medium tracking-wider uppercase transition-colors',
+                    'h-7 border px-2.5 text-[11px] font-medium tracking-wider uppercase transition-colors',
                     isActive
                       ? 'border-foreground bg-foreground text-background'
                       : 'border-border bg-secondary/40 text-muted-foreground hover:bg-secondary hover:text-foreground',
                   )}>
-                  <span className="hidden sm:inline">{preset.label}</span>
-                  <span className="sm:hidden">{preset.shortLabel}</span>
+                  <span className="hidden md:inline">{preset.label}</span>
+                  <span className="md:hidden">{preset.shortLabel}</span>
                 </button>
               );
             })}
           </div>
 
           <div className="flex flex-wrap items-center gap-1.5">
+            <StockPileButton
+              dealsRemaining={stats.dealsRemaining}
+              canDeal={stats.canDealStock}
+              isHintTarget={game.hint?.toCol === 'stock'}
+              onDeal={() => dealStock()}
+            />
+
             <Button
               variant="outline"
               size="sm"
@@ -303,160 +362,116 @@ export default function SpiderSolitaire() {
               <ArrowCounterClockwiseIcon className="size-3.5" />
               <span>New Deal</span>
             </Button>
-          </div>
-        </div>
 
-        {/* Telemetry & Foundations Bar */}
-        <div className="flex flex-wrap items-center justify-between gap-3 border border-border bg-secondary/50 px-3 py-2">
-          <div className="flex flex-wrap items-center gap-4 text-xs tracking-wider uppercase sm:gap-6">
-            <div className="flex flex-col">
-              <span className="text-[10px] leading-none text-muted-foreground">Score</span>
-              <span className="font-mono text-sm font-bold text-foreground">
-                <NumberFlow value={stats.score} />
-              </span>
-            </div>
-
-            <div className="flex flex-col">
-              <span className="text-[10px] leading-none text-muted-foreground">Moves</span>
-              <span className="font-mono text-sm font-bold text-foreground">
-                <NumberFlow value={stats.moves} />
-              </span>
-            </div>
-
-            <div className="flex flex-col">
-              <span className="text-[10px] leading-none text-muted-foreground">Runs</span>
-              <span className="font-mono text-sm font-bold text-foreground">
-                <NumberFlow value={stats.completedCount} /> / 8
-              </span>
-            </div>
-
-            <div className="flex items-center gap-1.5">
-              <TimerIcon className="size-4 text-muted-foreground" />
-              <div className="flex flex-col">
-                <span className="text-[10px] leading-none text-muted-foreground">Time</span>
-                <span className="font-mono text-sm font-bold text-foreground">
-                  {String(minutes).padStart(2, '0')}:{String(seconds).padStart(2, '0')}
-                </span>
-              </div>
-            </div>
-          </div>
-
-          <div className="flex flex-wrap items-center gap-2">
-            <CompletedFoundationsBar completedSuits={stats.completedSuits} />
-            <StockPileButton
-              dealsRemaining={stats.dealsRemaining}
-              canDeal={stats.canDealStock}
-              isHintTarget={game.hint?.toCol === 'stock'}
-              onDeal={() => dealStock()}
+            <FullscreenToggleButton
+              isFullscreen={isFullscreen}
+              onToggle={toggleFullscreen}
             />
           </div>
         </div>
-
-        {/* Notice / Hint Alert */}
-        <AnimatePresence>
-          {notice && (
-            <motion.div
-              initial={{ opacity: 0, y: -6 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -6 }}
-              transition={{ duration: 0.16 }}>
-              <Alert className="py-2">
-                <WarningCircleIcon className="size-4 text-chart-3" />
-                <AlertTitle className="text-xs font-bold uppercase">{notice.title}</AlertTitle>
-                <AlertDescription className="text-xs">{notice.message}</AlertDescription>
-              </Alert>
-            </motion.div>
-          )}
-        </AnimatePresence>
-
-        {/* Victory Banner */}
-        <AnimatePresence>
-          {stats.hasWon && (
-            <motion.div
-              initial={{ opacity: 0, y: -8 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -8 }}
-              className="flex flex-wrap items-center justify-between gap-3 border border-foreground bg-accent px-4 py-3 text-accent-foreground">
-              <div className="flex items-center gap-3">
-                <CheckCircleIcon className="size-6 shrink-0" weight="fill" />
-                <div className="flex flex-col">
-                  <span className="font-heading text-lg leading-none font-bold uppercase">
-                    All 8 Suit Runs Completed!
-                  </span>
-                  <span className="mt-1 text-xs opacity-85">
-                    Final Score: {stats.score} · Completed in {stats.moves} moves ({minutes}m {seconds}s).
-                  </span>
-                </div>
-              </div>
-              <Button size="sm" onClick={() => startNewGame()}>
-                Play Again
-              </Button>
-            </motion.div>
-          )}
-        </AnimatePresence>
-
-        {/* 10-Column Spider Tableau with @dnd-kit Drag and Drop */}
-        <DndContext
-          sensors={sensors}
-          onDragStart={handleDragStart}
-          onDragEnd={handleDragEnd}
-          onDragCancel={() => setActiveDrag(null)}>
-          <div className="flex-1 overflow-x-auto border border-border bg-secondary/25 p-2 sm:p-3">
-            <div className="grid min-w-[680px] grid-cols-10 gap-1.5 sm:gap-2.5">
-              {game.columns.map((column, colIndex) => {
-                const isValidTarget =
-                  activeSource !== null &&
-                  activeSource.fromCol !== colIndex &&
-                  canDropRunOnColumn(activeMovingCards, column);
-
-                return (
-                  <TableauColumn
-                    key={colIndex}
-                    colIndex={colIndex}
-                    cards={column}
-                    activeDrag={activeDrag}
-                    selectedRun={selectedRun}
-                    hint={game.hint}
-                    isValidTarget={isValidTarget}
-                    onCardClick={handleCardClick}
-                    onCardDoubleClick={handleCardDoubleClick}
-                    onEmptyColumnClick={handleEmptyColumnClick}
-                  />
-                );
-              })}
-            </div>
-          </div>
-
-          <DragOverlay dropAnimation={null}>
-            {activeDrag && activeMovingCards.length > 0 ? (
-              <div className="relative w-16 sm:w-22">
-                {activeMovingCards.map((card, idx) => (
-                  <div
-                    key={card.id}
-                    style={{
-                      position: idx === 0 ? 'relative' : 'absolute',
-                      top: idx === 0 ? 0 : idx * 24,
-                      left: 0,
-                      right: 0,
-                      zIndex: idx + 1,
-                    }}>
-                    <SpiderPlayingCardView card={card} isMovable isOverlay />
-                  </div>
-                ))}
-              </div>
-            ) : null}
-          </DragOverlay>
-        </DndContext>
-
-        {/* Footer Controls Legend */}
-        <div className="flex flex-wrap items-center justify-between gap-2 text-[11px] tracking-wider text-muted-foreground uppercase">
-          <span className="flex items-center gap-1.5">
-            <SparkleIcon className="size-3.5 text-chart-3" weight="fill" />
-            Drag same-suit runs or click/double-click a card to move
-          </span>
-          <span>Shortcuts: [Z] Undo · [H] Hint · [D] Deal Stock</span>
-        </div>
       </div>
+
+      {/* Notice / Hint Alert */}
+      <AnimatePresence>
+        {notice && (
+          <motion.div
+            initial={{ opacity: 0, y: -6 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -6 }}
+            transition={{ duration: 0.16 }}
+            className="z-10 shrink-0 border-b border-border">
+            <Alert className="rounded-none border-0 py-2">
+              <WarningCircleIcon className="size-4 text-chart-3" />
+              <AlertTitle className="text-xs font-bold uppercase">
+                {notice.title}
+              </AlertTitle>
+              <AlertDescription className="text-xs">
+                {notice.message}
+              </AlertDescription>
+            </Alert>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* Victory Banner */}
+      <AnimatePresence>
+        {stats.hasWon && (
+          <motion.div
+            initial={{ opacity: 0, y: -8 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -8 }}
+            className="z-10 flex shrink-0 flex-wrap items-center justify-between gap-3 border-b border-foreground bg-accent px-4 py-2.5 text-accent-foreground">
+            <div className="flex items-center gap-3">
+              <CheckCircleIcon className="size-5 shrink-0" weight="fill" />
+              <div className="flex flex-wrap items-baseline gap-2">
+                <span className="font-heading text-base leading-none font-bold uppercase">
+                  All 8 Suit Runs Completed!
+                </span>
+                <span className="text-xs opacity-85">
+                  Final Score: {stats.score} · Completed in {stats.moves} moves (
+                  {minutes}m {seconds}s).
+                </span>
+              </div>
+            </div>
+            <Button size="sm" onClick={() => startNewGame()} className="h-7 text-xs">
+              Play Again
+            </Button>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* Full-Width 10-Column Spider Tableau */}
+      <DndContext
+        sensors={sensors}
+        onDragStart={handleDragStart}
+        onDragEnd={handleDragEnd}
+        onDragCancel={() => setActiveDrag(null)}>
+        <div className="min-h-0 w-full flex-1 overflow-auto bg-card/30 p-2 sm:p-4">
+          <div className="grid h-full min-w-[720px] grid-cols-10 gap-1.5 sm:gap-2.5 lg:gap-3">
+            {game.columns.map((column, colIndex) => {
+              const isValidTarget =
+                activeSource !== null &&
+                activeSource.fromCol !== colIndex &&
+                canDropRunOnColumn(activeMovingCards, column);
+
+              return (
+                <TableauColumn
+                  key={colIndex}
+                  colIndex={colIndex}
+                  cards={column}
+                  activeDrag={activeDrag}
+                  selectedRun={selectedRun}
+                  hint={game.hint}
+                  isValidTarget={isValidTarget}
+                  onCardClick={handleCardClick}
+                  onCardDoubleClick={handleCardDoubleClick}
+                  onEmptyColumnClick={handleEmptyColumnClick}
+                />
+              );
+            })}
+          </div>
+        </div>
+
+        <DragOverlay dropAnimation={null}>
+          {activeDrag && activeMovingCards.length > 0 ? (
+            <div className="relative w-20 sm:w-28 lg:w-32">
+              {activeMovingCards.map((card, idx) => (
+                <div
+                  key={card.id}
+                  style={{
+                    position: idx === 0 ? 'relative' : 'absolute',
+                    top: idx === 0 ? 0 : idx * 26,
+                    left: 0,
+                    right: 0,
+                    zIndex: idx + 1,
+                  }}>
+                  <SpiderPlayingCardView card={card} isMovable isOverlay />
+                </div>
+              ))}
+            </div>
+          ) : null}
+        </DragOverlay>
+      </DndContext>
     </section>
   );
 }
@@ -489,9 +504,8 @@ const TableauColumn = ({
 
   const isHintTarget = hint?.toCol === colIndex;
 
-  // Compute cumulative top offsets so face-down cards stay compact and face-up cards show their headers
-  const faceUpStep = cards.length > 13 ? 20 : 25;
-  const faceDownStep = 10;
+  const faceUpStep = cards.length > 13 ? 22 : 28;
+  const faceDownStep = 12;
 
   const cardTopOffsets: number[] = [];
   let currentTop = 0;
@@ -501,7 +515,7 @@ const TableauColumn = ({
   }
 
   const columnHeight =
-    cards.length === 0 ? 110 : cardTopOffsets[cards.length - 1] + 96;
+    cards.length === 0 ? 128 : cardTopOffsets[cards.length - 1] + 132;
 
   return (
     <div
@@ -511,18 +525,20 @@ const TableauColumn = ({
           onEmptyColumnClick(colIndex);
         }
       }}
-      style={{ minHeight: Math.max(360, columnHeight + 16) }}
+      style={{ minHeight: Math.max(420, columnHeight + 16) }}
       className={cn(
-        'relative flex flex-col border border-transparent p-0.5 transition-colors',
+        'relative flex h-full flex-col border border-transparent p-0.5 transition-colors',
         isOver && isValidTarget && 'border-foreground bg-accent/35',
-        !isOver && isValidTarget && 'border-dashed border-foreground/40 bg-accent/15',
+        !isOver &&
+          isValidTarget &&
+          'border-dashed border-foreground/40 bg-accent/15',
         isHintTarget && 'border-2 border-chart-3 bg-accent/25',
       )}>
       {/* Empty Column Slot */}
       {cards.length === 0 && (
         <div
           className={cn(
-            'grid h-20 w-full place-items-center border border-dashed text-[10px] font-mono tracking-widest uppercase transition-colors sm:h-24',
+            'grid h-22 w-full place-items-center border border-dashed font-mono text-[10px] tracking-widest uppercase transition-colors sm:h-28 lg:h-32',
             isValidTarget || isHintTarget
               ? 'cursor-pointer border-foreground bg-accent/30 text-foreground'
               : 'border-border bg-secondary/20 text-muted-foreground/40',

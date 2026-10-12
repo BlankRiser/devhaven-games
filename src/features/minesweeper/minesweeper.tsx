@@ -15,6 +15,10 @@ import { useAtom, useAtomValue, useSetAtom } from 'jotai';
 import { AnimatePresence, motion } from 'motion/react';
 import * as React from 'react';
 import { Button } from '@/components/ui/button';
+import {
+  FullscreenToggleButton,
+  useGameFullscreen,
+} from '@/features/common/use-game-fullscreen';
 import { cn } from '@/lib/utils';
 import { Cell } from './minesweeper-assets';
 import {
@@ -55,6 +59,11 @@ const NUMBER_COLORS: Record<number, string> = {
 const DIFFICULTY_LIST = Object.values(DIFFICULTY_CONFIGS);
 
 export default function Minesweeper() {
+  const { containerRef, isFullscreen, toggleFullscreen } =
+    useGameFullscreen<HTMLElement>();
+  const arenaRef = React.useRef<HTMLDivElement | null>(null);
+  const [ cellSize, setCellSize ] = React.useState<number>(36);
+
   const board = useAtomValue(boardAtom);
   const difficulty = useAtomValue(difficultyAtom);
   const config = useAtomValue(configAtom);
@@ -63,6 +72,40 @@ export default function Minesweeper() {
   const [ elapsedSeconds, setElapsedSeconds ] = useAtom(elapsedSecondsAtom);
   const setDifficulty = useSetAtom(setDifficultyAtom);
   const resetBoard = useSetAtom(resetBoardAtom);
+
+  // Compute optimal cell size so the board fills the available arena height & width
+  React.useEffect(() => {
+    const element = arenaRef.current;
+    if (!element) return;
+
+    let rafId = 0;
+    const updateCellSize = () => {
+      window.cancelAnimationFrame(rafId);
+      rafId = window.requestAnimationFrame(() => {
+        const rect = element.getBoundingClientRect();
+        const gapTotalW = (config.cols - 1) * 2 + 36;
+        const gapTotalH = (config.rows - 1) * 2 + 36;
+        const maxW = Math.floor((rect.width - gapTotalW) / config.cols);
+        const maxH = Math.floor((rect.height - gapTotalH) / config.rows);
+        const nextCellSize = Math.max(24, Math.min(72, Math.min(maxW, maxH)));
+        setCellSize(nextCellSize);
+      });
+    };
+
+    updateCellSize();
+
+    const observer = new ResizeObserver(updateCellSize);
+    observer.observe(element);
+    window.addEventListener('resize', updateCellSize);
+    document.addEventListener('fullscreenchange', updateCellSize);
+
+    return () => {
+      window.cancelAnimationFrame(rafId);
+      observer.disconnect();
+      window.removeEventListener('resize', updateCellSize);
+      document.removeEventListener('fullscreenchange', updateCellSize);
+    };
+  }, [ config.cols, config.rows ]);
 
   // Live timer while playing
   React.useEffect(() => {
@@ -106,10 +149,67 @@ export default function Minesweeper() {
   const isGameOver = stats.status === 'won' || stats.status === 'lost';
 
   return (
-    <section className="flex h-full w-full flex-col overflow-auto border border-border bg-card/40">
-      <div className="m-auto flex max-w-full flex-col gap-3 p-3 sm:p-6">
-        {/* Top bar: Difficulty presets + Input mode toggle */}
-        <div className="flex flex-wrap items-center justify-between gap-2 border border-border bg-card p-2">
+    <section
+      ref={containerRef}
+      className="relative flex h-full w-full flex-1 flex-col overflow-hidden bg-background">
+      {/* Unified Top Control & Telemetry HUD Bar */}
+      <div className="z-10 flex shrink-0 flex-wrap items-center justify-between gap-3 border-b border-border bg-card px-4 py-2 text-xs uppercase">
+        {/* Left: Flags Left, Time, Status & Safe Cells */}
+        <div className="flex flex-wrap items-center gap-4 sm:gap-6">
+          <div className="flex items-center gap-2">
+            <FlagBannerIcon
+              className="size-4 shrink-0 text-chart-3"
+              weight="fill"
+            />
+            <div className="flex flex-col">
+              <span className="text-[10px] leading-none text-muted-foreground">
+                Flags Left
+              </span>
+              <span className="font-mono text-sm font-bold text-foreground">
+                <NumberFlow
+                  value={stats.flagsRemaining}
+                  format={{ minimumIntegerDigits: 2 }}
+                />
+              </span>
+            </div>
+          </div>
+
+          <div className="flex items-center gap-2">
+            <TimerIcon className="size-4 shrink-0 text-muted-foreground" />
+            <div className="flex flex-col">
+              <span className="text-[10px] leading-none text-muted-foreground">
+                Time
+              </span>
+              <span className="font-mono text-sm font-bold text-foreground">
+                <NumberFlow
+                  value={elapsedSeconds}
+                  format={{ minimumIntegerDigits: 3 }}
+                />
+                s
+              </span>
+            </div>
+          </div>
+
+          <div className="flex flex-col">
+            <span
+              className={cn(
+                'text-[10px] font-bold tracking-widest uppercase',
+                stats.hasWon
+                  ? 'text-chart-2'
+                  : stats.hasLost
+                    ? 'text-destructive'
+                    : 'text-muted-foreground',
+              )}>
+              {STATUS_LABEL[stats.status]}
+            </span>
+            <span className="font-mono text-xs font-bold text-foreground">
+              Cleared {stats.revealedSafeCount}/{stats.totalSafeCells}
+            </span>
+          </div>
+        </div>
+
+        {/* Right: Difficulty Presets + Dig/Flag Mode + Reset + Fullscreen */}
+        <div className="flex flex-wrap items-center gap-2">
           <div className="flex flex-wrap items-center gap-1">
             {DIFFICULTY_LIST.map((preset) => {
               const isActive = difficulty === preset.id;
@@ -119,13 +219,13 @@ export default function Minesweeper() {
                   type="button"
                   onClick={() => setDifficulty(preset.id)}
                   className={cn(
-                    'border px-2.5 py-1 text-[11px] font-medium tracking-wider uppercase transition-colors',
+                    'h-7 border px-2.5 text-[11px] font-medium tracking-wider uppercase transition-colors',
                     isActive
                       ? 'border-foreground bg-foreground text-background'
                       : 'border-border bg-secondary/40 text-muted-foreground hover:bg-secondary hover:text-foreground',
                   )}>
                   {preset.label}{' '}
-                  <span className="opacity-70">
+                  <span className="hidden opacity-70 md:inline">
                     ({preset.rows}×{preset.cols})
                   </span>
                 </button>
@@ -134,13 +234,13 @@ export default function Minesweeper() {
           </div>
 
           <div className="flex items-center gap-1.5">
-            <div className="flex items-center border border-border bg-secondary/30 p-0.5">
+            <div className="flex h-7 items-center border border-border bg-secondary/30 p-0.5">
               <button
                 type="button"
                 onClick={() => setInputMode('dig')}
                 title="Dig Mode (Left click reveals cells) — Shortcut: F"
                 className={cn(
-                  'flex items-center gap-1 px-2 py-1 text-[11px] font-medium tracking-wider uppercase transition-colors',
+                  'flex h-full items-center gap-1 px-2 text-[11px] font-medium tracking-wider uppercase transition-colors',
                   inputMode === 'dig'
                     ? 'bg-foreground text-background'
                     : 'text-muted-foreground hover:text-foreground',
@@ -153,7 +253,7 @@ export default function Minesweeper() {
                 onClick={() => setInputMode('flag')}
                 title="Flag Mode (Left click places flags) — Shortcut: F"
                 className={cn(
-                  'flex items-center gap-1 px-2 py-1 text-[11px] font-medium tracking-wider uppercase transition-colors',
+                  'flex h-full items-center gap-1 px-2 text-[11px] font-medium tracking-wider uppercase transition-colors',
                   inputMode === 'flag'
                     ? 'bg-accent text-accent-foreground'
                     : 'text-muted-foreground hover:text-foreground',
@@ -172,94 +272,66 @@ export default function Minesweeper() {
               <ArrowCounterClockwiseIcon className="size-3.5" />
               <span>Reset</span>
             </Button>
+
+            <FullscreenToggleButton
+              isFullscreen={isFullscreen}
+              onToggle={toggleFullscreen}
+            />
           </div>
         </div>
+      </div>
 
-        {/* Telemetry HUD bar: Mines remaining, Status & Safe cell progress, Elapsed Timer */}
-        <div className="grid grid-cols-3 items-center gap-2 border border-border bg-secondary/50 px-3 py-2 text-xs tracking-wider uppercase">
-          <div className="flex items-center gap-2">
-            <FlagBannerIcon className="size-4 shrink-0 text-chart-3" weight="fill" />
-            <div className="flex flex-col">
-              <span className="text-[10px] leading-none text-muted-foreground">Flags Left</span>
-              <span className="font-mono text-sm font-bold text-foreground">
-                <NumberFlow value={stats.flagsRemaining} format={{ minimumIntegerDigits: 2 }} />
-              </span>
-            </div>
-          </div>
-
-          <div className="flex flex-col items-center justify-center text-center">
-            <span
-              className={cn(
-                'text-[11px] font-bold tracking-widest uppercase',
-                stats.hasWon
-                  ? 'text-chart-2'
-                  : stats.hasLost
-                    ? 'text-destructive'
-                    : 'text-foreground',
-              )}>
-              {STATUS_LABEL[stats.status]}
-            </span>
-            <span className="text-[10px] text-muted-foreground">
-              Cleared {stats.revealedSafeCount}/{stats.totalSafeCells}
-            </span>
-          </div>
-
-          <div className="flex items-center justify-end gap-2">
-            <div className="flex flex-col items-end">
-              <span className="text-[10px] leading-none text-muted-foreground">Time</span>
-              <span className="font-mono text-sm font-bold text-foreground">
-                <NumberFlow value={elapsedSeconds} format={{ minimumIntegerDigits: 3 }} />s
-              </span>
-            </div>
-            <TimerIcon className="size-4 shrink-0 text-muted-foreground" />
-          </div>
-        </div>
-
-        {/* Win / Loss Outcome Banner */}
-        <AnimatePresence>
-          {isGameOver && (
-            <motion.div
-              initial={{ opacity: 0, y: -6 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -6 }}
-              transition={{ duration: 0.18 }}
-              className={cn(
-                'flex flex-wrap items-center justify-between gap-3 border px-3.5 py-2.5',
-                stats.hasWon
-                  ? 'border-foreground bg-accent text-accent-foreground'
-                  : 'border-destructive bg-destructive/15 text-foreground',
-              )}>
-              <div className="flex items-center gap-2.5">
-                {stats.hasWon ? (
-                  <CheckCircleIcon className="size-5 shrink-0" weight="fill" />
-                ) : (
-                  <WarningOctagonIcon className="size-5 shrink-0 text-destructive" weight="fill" />
-                )}
-                <div className="flex flex-col">
-                  <span className="font-heading text-base leading-none font-bold tracking-tight uppercase">
-                    {stats.hasWon ? 'Minefield Cleared!' : 'Mine Detonated!'}
-                  </span>
-                  <span className="mt-0.5 text-[11px] opacity-80">
-                    {stats.hasWon
-                      ? `All ${config.mines} mines isolated in ${elapsedSeconds}s.`
-                      : `Cleared ${stats.revealedSafeCount} of ${stats.totalSafeCells} safe sectors before detonation.`}
-                  </span>
-                </div>
+      {/* Win / Loss Outcome Banner */}
+      <AnimatePresence>
+        {isGameOver && (
+          <motion.div
+            initial={{ opacity: 0, y: -6 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -6 }}
+            transition={{ duration: 0.18 }}
+            className={cn(
+              'z-10 flex shrink-0 flex-wrap items-center justify-between gap-3 border-b px-4 py-2',
+              stats.hasWon
+                ? 'border-foreground bg-accent text-accent-foreground'
+                : 'border-destructive bg-destructive/15 text-foreground',
+            )}>
+            <div className="flex items-center gap-2.5">
+              {stats.hasWon ? (
+                <CheckCircleIcon className="size-5 shrink-0" weight="fill" />
+              ) : (
+                <WarningOctagonIcon
+                  className="size-5 shrink-0 text-destructive"
+                  weight="fill"
+                />
+              )}
+              <div className="flex flex-wrap items-baseline gap-2">
+                <span className="font-heading text-base leading-none font-bold tracking-tight uppercase">
+                  {stats.hasWon ? 'Minefield Cleared!' : 'Mine Detonated!'}
+                </span>
+                <span className="text-[11px] opacity-80">
+                  {stats.hasWon
+                    ? `All ${config.mines} mines isolated in ${elapsedSeconds}s.`
+                    : `Cleared ${stats.revealedSafeCount} of ${stats.totalSafeCells} safe sectors before detonation.`}
+                </span>
               </div>
+            </div>
 
-              <Button
-                size="sm"
-                variant={stats.hasWon ? 'default' : 'destructive'}
-                onClick={() => resetBoard()}
-                className="h-7 px-3 text-[11px]">
-                Play Again
-              </Button>
-            </motion.div>
-          )}
-        </AnimatePresence>
+            <Button
+              size="sm"
+              variant={stats.hasWon ? 'default' : 'destructive'}
+              onClick={() => resetBoard()}
+              className="h-7 px-3 text-[11px]">
+              Play Again
+            </Button>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
-        {/* Minefield Grid */}
-        <div className="max-w-full self-center overflow-x-auto border border-border bg-secondary/40 p-1.5">
+      {/* Main Responsive Minefield Arena */}
+      <div
+        ref={arenaRef}
+        className="relative flex min-h-0 w-full flex-1 items-center justify-center overflow-auto bg-card/30 p-3">
+        <div className="max-h-full max-w-full overflow-auto border border-border bg-secondary/40 p-1.5 shadow-xs">
           <div
             className="inline-flex flex-col gap-0.5"
             role="grid"
@@ -273,6 +345,7 @@ export default function Minesweeper() {
                     col={colIndex}
                     cell={cell}
                     difficulty={difficulty}
+                    cellSize={cellSize}
                     inputMode={inputMode}
                     hasLost={stats.hasLost}
                     isLocked={isGameOver}
@@ -281,12 +354,6 @@ export default function Minesweeper() {
               </div>
             ))}
           </div>
-        </div>
-
-        {/* Footer Controls Hint */}
-        <div className="flex flex-wrap items-center justify-between gap-2 text-[11px] tracking-wider text-muted-foreground uppercase">
-          <span>Left-Click: {inputMode === 'flag' ? 'Flag Cell' : 'Reveal / Chord Number'}</span>
-          <span>Right-Click: Flag Cell · Key [F]: Mode · Key [R]: Reset</span>
         </div>
       </div>
     </section>
@@ -298,6 +365,7 @@ const MinesweeperCell = React.memo(function MinesweeperCell({
   col,
   cell,
   difficulty,
+  cellSize,
   inputMode,
   hasLost,
   isLocked,
@@ -306,6 +374,7 @@ const MinesweeperCell = React.memo(function MinesweeperCell({
   col: number;
   cell: BoardCell;
   difficulty: DifficultyId;
+  cellSize: number;
   inputMode: 'dig' | 'flag';
   hasLost: boolean;
   isLocked: boolean;
@@ -314,14 +383,17 @@ const MinesweeperCell = React.memo(function MinesweeperCell({
   const flagCell = useSetAtom(toggleFlagAtom);
 
   const isWrongFlag = hasLost && cell.flagged && cell.value !== 'mine';
-  const isChordable = !isLocked && cell.revealed && typeof cell.value === 'number' && cell.value > 0;
+  const isChordable =
+    !isLocked &&
+    cell.revealed &&
+    typeof cell.value === 'number' &&
+    cell.value > 0;
 
   const handleClick = () => {
     if (isLocked) {
       return;
     }
 
-    // Clicking a revealed number always triggers chord reveal if neighbor flags match
     if (cell.revealed) {
       if (typeof cell.value === 'number' && cell.value > 0) {
         revealCell({ row, col });
@@ -354,6 +426,7 @@ const MinesweeperCell = React.memo(function MinesweeperCell({
   return (
     <Cell
       difficulty={difficulty}
+      cellSize={cellSize}
       isRevealed={cell.revealed}
       isFlagged={cell.flagged}
       isExploded={Boolean(cell.exploded)}
@@ -362,9 +435,17 @@ const MinesweeperCell = React.memo(function MinesweeperCell({
       onClick={handleClick}
       onContextMenu={handleContextMenu}
       aria-label={`Row ${row + 1}, Column ${col + 1}${
-        cell.flagged ? ', Flagged' : cell.revealed ? `, Revealed ${cell.value}` : ', Unrevealed'
+        cell.flagged
+          ? ', Flagged'
+          : cell.revealed
+            ? `, Revealed ${cell.value}`
+            : ', Unrevealed'
       }`}>
-      <CellContent cell={cell} isWrongFlag={isWrongFlag} difficulty={difficulty} />
+      <CellContent
+        cell={cell}
+        isWrongFlag={isWrongFlag}
+        cellSize={cellSize}
+      />
     </Cell>
   );
 });
@@ -372,25 +453,40 @@ const MinesweeperCell = React.memo(function MinesweeperCell({
 const CellContent = ({
   cell,
   isWrongFlag,
-  difficulty,
+  cellSize,
 }: {
   cell: BoardCell;
   isWrongFlag: boolean;
-  difficulty: DifficultyId;
+  cellSize: number;
 }) => {
-  const iconSize = difficulty === 'expert' ? 'size-3.5' : 'size-4';
+  const iconPx = Math.max(13, Math.floor(cellSize * 0.45));
+  const iconStyle = { width: iconPx, height: iconPx };
 
   if (isWrongFlag) {
     return (
       <span className="relative grid place-items-center">
-        <FlagBannerIcon className={cn(iconSize, 'text-muted-foreground opacity-50')} weight="fill" />
-        <XIcon className={cn(iconSize, 'absolute text-destructive')} weight="bold" />
+        <FlagBannerIcon
+          style={iconStyle}
+          className="text-muted-foreground opacity-50"
+          weight="fill"
+        />
+        <XIcon
+          style={iconStyle}
+          className="absolute text-destructive"
+          weight="bold"
+        />
       </span>
     );
   }
 
   if (cell.flagged && !cell.revealed) {
-    return <FlagBannerIcon className={cn(iconSize, 'text-chart-3')} weight="fill" />;
+    return (
+      <FlagBannerIcon
+        style={iconStyle}
+        className="text-chart-3"
+        weight="fill"
+      />
+    );
   }
 
   if (!cell.revealed) {
@@ -400,10 +496,10 @@ const CellContent = ({
   if (cell.value === 'mine') {
     return (
       <BombIcon
-        className={cn(
-          iconSize,
-          cell.exploded ? 'text-destructive-foreground' : 'text-destructive',
-        )}
+        style={iconStyle}
+        className={
+          cell.exploded ? 'text-destructive-foreground' : 'text-destructive'
+        }
         weight="fill"
       />
     );

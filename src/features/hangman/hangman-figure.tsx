@@ -49,7 +49,7 @@ export const HangmanFigure = ({ className, ...rest }: SVGMotionProps<SVGSVGEleme
       viewBox="60 25 380 450"
       fill="none"
       className={cn(
-        'h-40 w-40 shrink-0 transition-colors duration-300 sm:h-48 sm:w-48',
+        'h-44 w-44 shrink-0 transition-colors duration-300 sm:h-60 sm:w-60 lg:h-72 lg:w-72',
         stats.maxAttemptsReached
           ? 'text-destructive'
           : stats.hasWon

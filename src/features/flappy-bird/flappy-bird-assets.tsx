@@ -1,9 +1,18 @@
 'use client';
 
 import NumberFlow from '@number-flow/react';
+import {
+  ArrowCounterClockwiseIcon,
+  PlayIcon,
+  TrophyIcon,
+} from '@phosphor-icons/react';
 import { AnimatePresence, motion } from 'motion/react';
 import * as React from 'react';
 import { Button } from '@/components/ui/button';
+import {
+  FullscreenToggleButton,
+  useGameFullscreen,
+} from '@/features/common/use-game-fullscreen';
 import { cn } from '@/lib/utils';
 import {
   checkCollision,
@@ -28,7 +37,10 @@ const defaultMetrics = getGameMetrics({
   height: GAME_CONFIG.baselineHeight,
 });
 
-const drawBackground = (ctx: CanvasRenderingContext2D, metrics: GameMetrics) => {
+const drawBackground = (
+  ctx: CanvasRenderingContext2D,
+  metrics: GameMetrics,
+) => {
   const gradient = ctx.createLinearGradient(0, 0, 0, metrics.height);
   gradient.addColorStop(0, '#7dd3fc');
   gradient.addColorStop(0.55, '#bae6fd');
@@ -37,7 +49,11 @@ const drawBackground = (ctx: CanvasRenderingContext2D, metrics: GameMetrics) => 
   ctx.fillRect(0, 0, metrics.width, metrics.height);
 };
 
-const drawClouds = (ctx: CanvasRenderingContext2D, offset: number, metrics: GameMetrics) => {
+const drawClouds = (
+  ctx: CanvasRenderingContext2D,
+  offset: number,
+  metrics: GameMetrics,
+) => {
   ctx.fillStyle = 'rgba(255, 255, 255, 0.85)';
 
   const widthScale = metrics.width / GAME_CONFIG.baselineWidth;
@@ -48,9 +64,12 @@ const drawClouds = (ctx: CanvasRenderingContext2D, offset: number, metrics: Game
     { x: 120, y: 220, scale: 0.7 },
   ];
 
-  clouds.forEach((cloud, index) => {
+  for (let index = 0; index < clouds.length; index++) {
+    const cloud = clouds[index];
     const wrap = metrics.width + 120 * metrics.scale;
-    const x = ((cloud.x * widthScale - offset * (0.15 + index * 0.03)) % wrap) - 60 * metrics.scale;
+    const x =
+      ((cloud.x * widthScale - offset * (0.15 + index * 0.03)) % wrap) -
+      60 * metrics.scale;
     const y = cloud.y * metrics.scale;
     const size = 18 * cloud.scale * metrics.scale;
 
@@ -59,10 +78,14 @@ const drawClouds = (ctx: CanvasRenderingContext2D, offset: number, metrics: Game
     ctx.arc(x + size * 0.9, y - size * 0.2, size * 0.8, 0, Math.PI * 2);
     ctx.arc(x + size * 1.8, y, size * 0.9, 0, Math.PI * 2);
     ctx.fill();
-  });
+  }
 };
 
-const drawGround = (ctx: CanvasRenderingContext2D, offset: number, metrics: GameMetrics) => {
+const drawGround = (
+  ctx: CanvasRenderingContext2D,
+  offset: number,
+  metrics: GameMetrics,
+) => {
   const groundY = metrics.height - metrics.groundHeight;
 
   ctx.fillStyle = '#86efac';
@@ -73,17 +96,35 @@ const drawGround = (ctx: CanvasRenderingContext2D, offset: number, metrics: Game
 
   ctx.fillStyle = '#22c55e';
   const stripeWidth = 28 * metrics.scale;
-  for (let x = -((offset * 2) % stripeWidth); x < metrics.width; x += stripeWidth) {
-    ctx.fillRect(x, groundY + 14 * metrics.scale, stripeWidth / 2, 8 * metrics.scale);
+  for (
+    let x = -((offset * 2) % stripeWidth);
+    x < metrics.width;
+    x += stripeWidth
+  ) {
+    ctx.fillRect(
+      x,
+      groundY + 14 * metrics.scale,
+      stripeWidth / 2,
+      8 * metrics.scale,
+    );
   }
 };
 
-const drawPipe = (ctx: CanvasRenderingContext2D, pipe: Pipe, metrics: GameMetrics) => {
+const drawPipe = (
+  ctx: CanvasRenderingContext2D,
+  pipe: Pipe,
+  metrics: GameMetrics,
+) => {
   const { x, gapY } = pipe;
   const { pipeWidth, pipeGap, height, groundHeight, scale } = metrics;
 
   const drawPipeSegment = (segmentY: number, segmentHeight: number) => {
-    const gradient = ctx.createLinearGradient(x, segmentY, x + pipeWidth, segmentY);
+    const gradient = ctx.createLinearGradient(
+      x,
+      segmentY,
+      x + pipeWidth,
+      segmentY,
+    );
     gradient.addColorStop(0, '#22c55e');
     gradient.addColorStop(0.5, '#16a34a');
     gradient.addColorStop(1, '#15803d');
@@ -132,6 +173,8 @@ const drawBird = (
 };
 
 export const FlappyBirdCanvas = () => {
+  const { containerRef, isFullscreen, toggleFullscreen } =
+    useGameFullscreen<HTMLDivElement>();
   const wrapperRef = React.useRef<HTMLDivElement>(null);
   const canvasRef = React.useRef<HTMLCanvasElement>(null);
   const spriteRef = React.useRef<HTMLImageElement | null>(null);
@@ -179,14 +222,14 @@ export const FlappyBirdCanvas = () => {
 
   const activateOverlayButton = React.useCallback(() => {
     if (gameStatusRef.current === 'gameover') {
-      resetGame();
+      startGame();
       return;
     }
 
     if (gameStatusRef.current === 'idle') {
       startGame();
     }
-  }, [ resetGame, startGame ]);
+  }, [ startGame ]);
 
   const flap = React.useCallback(() => {
     if (gameStatusRef.current === 'playing') {
@@ -205,90 +248,117 @@ export const FlappyBirdCanvas = () => {
     }
   }, []);
 
-  const updateGame = React.useCallback((timestamp: number) => {
-    if (gameStatusRef.current !== 'playing') {
-      return;
-    }
+  const updateGame = React.useCallback(
+    (timestamp: number) => {
+      if (gameStatusRef.current !== 'playing') {
+        return;
+      }
 
-    const metrics = metricsRef.current;
-    const bird = birdRef.current;
-    bird.velocity = Math.min(bird.velocity + metrics.gravity, metrics.maxFallSpeed);
-    bird.y += bird.velocity;
-    bird.rotation = Math.min(Math.max(bird.velocity * 4 / metrics.scale, -25), 70);
-
-    pipesRef.current = pipesRef.current
-      .map((pipe) => ({ ...pipe, x: pipe.x - metrics.pipeSpeed }))
-      .filter((pipe) => pipe.x + metrics.pipeWidth > -20 * metrics.scale);
-
-    if (timestamp - lastPipeSpawnRef.current >= GAME_CONFIG.pipeSpawnInterval) {
-      pipesRef.current.push(createPipe(metrics.width + 40 * metrics.scale, metrics));
-      lastPipeSpawnRef.current = timestamp;
-    }
-
-    const scoreUpdate = updateScore(pipesRef.current, metrics.birdX, metrics.pipeWidth);
-    pipesRef.current = scoreUpdate.pipes;
-
-    if (scoreUpdate.scoreDelta > 0) {
-      scoreRef.current += scoreUpdate.scoreDelta;
-      setScore(scoreRef.current);
-    }
-
-    groundOffsetRef.current += metrics.pipeSpeed;
-
-    if (timestamp - lastSpriteUpdateRef.current >= GAME_CONFIG.spriteFrameDuration) {
-      spriteFrameRef.current = (spriteFrameRef.current + 1) % GAME_CONFIG.spriteFrames;
-      lastSpriteUpdateRef.current = timestamp;
-    }
-
-    if (checkCollision(bird, pipesRef.current, metrics)) {
-      endGame(scoreRef.current);
-    }
-  }, [ endGame ]);
-
-  const renderFrame = React.useCallback((timestamp: number) => {
-    const canvas = canvasRef.current;
-    const sprite = spriteRef.current;
-
-    if (!canvas) {
-      return;
-    }
-
-    const ctx = canvas.getContext('2d');
-    if (!ctx) {
-      return;
-    }
-
-    const dpr = window.devicePixelRatio || 1;
-    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-
-    if (gameStatusRef.current === 'playing') {
-      updateGame(timestamp);
-    }
-
-    const metrics = metricsRef.current;
-
-    drawBackground(ctx, metrics);
-    drawClouds(ctx, groundOffsetRef.current * 0.4, metrics);
-    pipesRef.current.forEach((pipe) => drawPipe(ctx, pipe, metrics));
-    drawGround(ctx, groundOffsetRef.current, metrics);
-
-    if (sprite && sprite.complete) {
-      drawBird(ctx, birdRef.current, sprite, spriteFrameRef.current, metrics);
-    } else {
-      ctx.fillStyle = '#facc15';
-      ctx.beginPath();
-      ctx.ellipse(
-        metrics.birdX + metrics.birdWidth / 2,
-        birdRef.current.y + metrics.birdHeight / 2,
-        metrics.birdWidth / 2,
-        metrics.birdHeight / 2,
-        0,
-        0,
-        Math.PI * 2,
+      const metrics = metricsRef.current;
+      const bird = birdRef.current;
+      bird.velocity = Math.min(
+        bird.velocity + metrics.gravity,
+        metrics.maxFallSpeed,
       );
-      ctx.fill();
-    }
-  }, [ updateGame ]);
+      bird.y += bird.velocity;
+      bird.rotation = Math.min(
+        Math.max((bird.velocity * 4) / metrics.scale, -25),
+        70,
+      );
+
+      pipesRef.current = pipesRef.current
+        .map((pipe) => ({ ...pipe, x: pipe.x - metrics.pipeSpeed }))
+        .filter((pipe) => pipe.x + metrics.pipeWidth > -20 * metrics.scale);
+
+      if (
+        timestamp - lastPipeSpawnRef.current >=
+        GAME_CONFIG.pipeSpawnInterval
+      ) {
+        pipesRef.current.push(
+          createPipe(metrics.width + 40 * metrics.scale, metrics),
+        );
+        lastPipeSpawnRef.current = timestamp;
+      }
+
+      const scoreUpdate = updateScore(
+        pipesRef.current,
+        metrics.birdX,
+        metrics.pipeWidth,
+      );
+      pipesRef.current = scoreUpdate.pipes;
+
+      if (scoreUpdate.scoreDelta > 0) {
+        scoreRef.current += scoreUpdate.scoreDelta;
+        setScore(scoreRef.current);
+      }
+
+      groundOffsetRef.current += metrics.pipeSpeed;
+
+      if (
+        timestamp - lastSpriteUpdateRef.current >=
+        GAME_CONFIG.spriteFrameDuration
+      ) {
+        spriteFrameRef.current =
+          (spriteFrameRef.current + 1) % GAME_CONFIG.spriteFrames;
+        lastSpriteUpdateRef.current = timestamp;
+      }
+
+      if (checkCollision(bird, pipesRef.current, metrics)) {
+        endGame(scoreRef.current);
+      }
+    },
+    [ endGame ],
+  );
+
+  const renderFrame = React.useCallback(
+    (timestamp: number) => {
+      const canvas = canvasRef.current;
+      const sprite = spriteRef.current;
+
+      if (!canvas) {
+        return;
+      }
+
+      const ctx = canvas.getContext('2d');
+      if (!ctx) {
+        return;
+      }
+
+      const dpr = window.devicePixelRatio || 1;
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+
+      if (gameStatusRef.current === 'playing') {
+        updateGame(timestamp);
+      }
+
+      const metrics = metricsRef.current;
+
+      drawBackground(ctx, metrics);
+      drawClouds(ctx, groundOffsetRef.current * 0.4, metrics);
+      for (const pipe of pipesRef.current) {
+        drawPipe(ctx, pipe, metrics);
+      }
+      drawGround(ctx, groundOffsetRef.current, metrics);
+
+      if (sprite?.complete) {
+        drawBird(ctx, birdRef.current, sprite, spriteFrameRef.current, metrics);
+      } else {
+        ctx.fillStyle = '#facc15';
+        ctx.beginPath();
+        ctx.ellipse(
+          metrics.birdX + metrics.birdWidth / 2,
+          birdRef.current.y + metrics.birdHeight / 2,
+          metrics.birdWidth / 2,
+          metrics.birdHeight / 2,
+          0,
+          0,
+          Math.PI * 2,
+        );
+        ctx.fill();
+      }
+    },
+    [ updateGame ],
+  );
 
   React.useEffect(() => {
     setBestScoreState(getBestScore());
@@ -308,30 +378,40 @@ export const FlappyBirdCanvas = () => {
       return;
     }
 
+    let rafId = 0;
     const applySize = () => {
-      const width = Math.max(1, wrapper.clientWidth);
-      const height = Math.max(1, wrapper.clientHeight);
-      const metrics = getGameMetrics({ width, height });
-      metricsRef.current = metrics;
+      window.cancelAnimationFrame(rafId);
+      rafId = window.requestAnimationFrame(() => {
+        const rect = wrapper.getBoundingClientRect();
+        const width = Math.max(1, Math.floor(rect.width));
+        const height = Math.max(1, Math.floor(rect.height));
+        const metrics = getGameMetrics({ width, height });
+        metricsRef.current = metrics;
 
-      const dpr = window.devicePixelRatio || 1;
-      canvas.width = Math.floor(width * dpr);
-      canvas.height = Math.floor(height * dpr);
-      const ctx = canvas.getContext('2d');
-      if (ctx) {
-        ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-      }
+        const dpr = window.devicePixelRatio || 1;
+        canvas.width = Math.floor(width * dpr);
+        canvas.height = Math.floor(height * dpr);
+        const ctx = canvas.getContext('2d');
+        if (ctx) {
+          ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+        }
 
-      clampBirdY(birdRef.current, metrics);
+        clampBirdY(birdRef.current, metrics);
+      });
     };
 
     applySize();
 
     const resizeObserver = new ResizeObserver(applySize);
     resizeObserver.observe(wrapper);
+    window.addEventListener('resize', applySize);
+    document.addEventListener('fullscreenchange', applySize);
 
     return () => {
+      window.cancelAnimationFrame(rafId);
       resizeObserver.disconnect();
+      window.removeEventListener('resize', applySize);
+      document.removeEventListener('fullscreenchange', applySize);
     };
   }, []);
 
@@ -359,6 +439,12 @@ export const FlappyBirdCanvas = () => {
     const { signal } = abortController;
 
     const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.code === 'KeyR' && !event.metaKey && !event.ctrlKey) {
+        event.preventDefault();
+        resetGame();
+        return;
+      }
+
       if (event.code !== 'Space' && event.code !== 'ArrowUp') {
         return;
       }
@@ -382,69 +468,148 @@ export const FlappyBirdCanvas = () => {
     return () => {
       abortController.abort();
     };
-  }, [ activateOverlayButton, flap ]);
+  }, [ activateOverlayButton, flap, resetGame ]);
 
   return (
-    <div ref={wrapperRef} className="relative h-full w-full">
-      <canvas
-        ref={canvasRef}
-        onClick={flap}
-        onTouchStart={(event) => {
-          event.preventDefault();
-          flap();
-        }}
-        className={cn([
-          'absolute inset-0 h-full w-full touch-none cursor-pointer',
-          'bg-sky-200 dark:bg-sky-950',
-        ])}
-        aria-label="Flappy Bird game canvas. Click or press space to flap."
-      />
+    <div
+      ref={containerRef}
+      className="relative flex h-full w-full flex-1 flex-col overflow-hidden bg-background">
+      {/* Unified Top Control & Telemetry HUD Bar */}
+      <div className="z-10 flex shrink-0 flex-wrap items-center justify-between gap-3 border-b border-border bg-card px-4 py-2 text-xs uppercase">
+        <div className="flex flex-wrap items-center gap-4 sm:gap-6">
+          <div className="flex flex-col">
+            <span className="text-[10px] leading-none text-muted-foreground">
+              Score
+            </span>
+            <span className="font-mono text-sm font-bold text-foreground">
+              <NumberFlow value={score} format={{ minimumIntegerDigits: 2 }} />
+            </span>
+          </div>
 
-      <div className="pointer-events-none absolute inset-x-0 top-0 z-10 flex items-center justify-between px-4 py-3">
-        <div className="border border-border bg-card/90 px-3 py-1 text-xs font-medium tracking-widest text-card-foreground uppercase">
-          Score // <NumberFlow value={score} />
+          <div className="flex flex-col">
+            <span className="flex items-center gap-1 text-[10px] leading-none text-muted-foreground">
+              <TrophyIcon className="size-3 text-chart-3" weight="fill" />
+              Best
+            </span>
+            <span className="font-mono text-sm font-bold text-foreground">
+              <NumberFlow
+                value={Math.max(bestScore, score)}
+                format={{ minimumIntegerDigits: 2 }}
+              />
+            </span>
+          </div>
+
+          <span
+            className={cn(
+              'border px-2.5 py-1 font-mono text-[11px] font-bold tracking-wider',
+              gameStatus === 'gameover'
+                ? 'border-destructive/60 bg-destructive/15 text-destructive'
+                : gameStatus === 'playing'
+                  ? 'border-foreground bg-accent text-accent-foreground'
+                  : 'border-border bg-secondary/50 text-foreground',
+            )}>
+            {gameStatus === 'idle'
+              ? 'Ready'
+              : gameStatus === 'playing'
+                ? 'In Flight'
+                : 'Crashed'}
+          </span>
         </div>
-        <div className="border border-border bg-card/90 px-3 py-1 text-xs font-medium tracking-widest text-card-foreground uppercase">
-          Best // <NumberFlow value={bestScore} />
+
+        <div className="flex flex-wrap items-center gap-1.5">
+          {gameStatus !== 'playing' ? (
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={activateOverlayButton}
+              className="h-7 gap-1.5 px-2.5 text-[11px]">
+              <PlayIcon className="size-3.5" weight="fill" />
+              <span>{gameStatus === 'gameover' ? 'Play Again' : 'Start'}</span>
+            </Button>
+          ) : (
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={flap}
+              className="h-7 gap-1.5 px-2.5 text-[11px]">
+              <span>Flap [Space]</span>
+            </Button>
+          )}
+
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={resetGame}
+            title="Reset Game (Shortcut: R)"
+            className="h-7 gap-1.5 px-2.5 text-[11px]">
+            <ArrowCounterClockwiseIcon className="size-3.5" />
+            <span>Reset</span>
+          </Button>
+
+          <FullscreenToggleButton
+            isFullscreen={isFullscreen}
+            onToggle={toggleFullscreen}
+          />
         </div>
       </div>
 
-      <AnimatePresence>
-        {gameStatus !== 'playing' && (
-          <motion.div
-            initial={{ opacity: 0, scale: 0.96 }}
-            animate={{ opacity: 1, scale: 1 }}
-            exit={{ opacity: 0, scale: 0.96 }}
-            className="absolute inset-0 z-20 grid place-items-center bg-background/60">
-            <div className="border-2 border-foreground/80 bg-card px-8 py-6 text-center text-card-foreground shadow-sm">
-              <span className="text-[10px] font-light tracking-widest text-muted-foreground uppercase">
-                {gameStatus === 'idle' ? 'MOD // 04 FLIGHT' : 'STATUS // TERMINATED'}
-              </span>
-              <h3 className="mt-1.5 font-heading text-4xl leading-none font-medium tracking-[-0.025em] uppercase">
-                {gameStatus === 'idle' ? 'Flappy Bird' : 'Game Over'}
-              </h3>
-              <p className="mt-2 text-xs leading-4 font-light text-muted-foreground">
-                {gameStatus === 'idle'
-                  ? 'Tap, click, or press Space to launch.'
-                  : `You scored ${score} point${score === 1 ? '' : 's'}.`}
-              </p>
-              {gameStatus === 'gameover' && (
-                <p className="mt-1 text-xs leading-4 font-light text-muted-foreground uppercase">
-                  Best score // {Math.max(bestScore, score)}
+      {/* Full-Screen Canvas Arena */}
+      <div
+        ref={wrapperRef}
+        className="relative min-h-0 w-full flex-1 overflow-hidden">
+        <canvas
+          ref={canvasRef}
+          onClick={flap}
+          onTouchStart={(event) => {
+            event.preventDefault();
+            flap();
+          }}
+          className={cn([
+            'absolute inset-0 h-full w-full cursor-pointer touch-none',
+            'bg-sky-200 dark:bg-sky-950',
+          ])}
+          aria-label="Flappy Bird game canvas. Click or press space to flap."
+        />
+
+        <AnimatePresence>
+          {gameStatus !== 'playing' && (
+            <motion.div
+              initial={{ opacity: 0, scale: 0.96 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.96 }}
+              className="absolute inset-0 z-20 grid place-items-center bg-background/60">
+              <div className="border-2 border-foreground/80 bg-card px-8 py-6 text-center text-card-foreground shadow-sm">
+                <span className="text-[10px] font-light tracking-widest text-muted-foreground uppercase">
+                  {gameStatus === 'idle'
+                    ? 'MOD // 04 FLIGHT'
+                    : 'STATUS // TERMINATED'}
+                </span>
+                <h3 className="mt-1.5 font-heading text-4xl leading-none font-medium tracking-[-0.025em] uppercase">
+                  {gameStatus === 'idle' ? 'Flappy Bird' : 'Game Over'}
+                </h3>
+                <p className="mt-2 text-xs leading-4 font-light text-muted-foreground">
+                  {gameStatus === 'idle'
+                    ? 'Tap, click, or press Space to launch.'
+                    : `You scored ${score} point${score === 1 ? '' : 's'}.`}
                 </p>
-              )}
-              <Button
-                className="mt-4 w-full"
-                onClick={(event) => {
-                  event.stopPropagation();
-                  activateOverlayButton();
-                }}>
-                {gameStatus === 'gameover' ? 'Play Again' : 'Start Game'}
-              </Button>
-            </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
+                {gameStatus === 'gameover' && (
+                  <p className="mt-1 text-xs leading-4 font-light text-muted-foreground uppercase">
+                    Best score // {Math.max(bestScore, score)}
+                  </p>
+                )}
+                <Button
+                  className="mt-4 w-full"
+                  onClick={(event) => {
+                    event.stopPropagation();
+                    activateOverlayButton();
+                  }}>
+                  {gameStatus === 'gameover' ? 'Play Again' : 'Start Game'}
+                </Button>
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
+      </div>
     </div>
   );
 };

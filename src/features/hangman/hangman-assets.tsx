@@ -12,8 +12,8 @@ import {
 import { useAtom, useAtomValue, useSetAtom } from 'jotai';
 import { AnimatePresence, motion, useAnimation } from 'motion/react';
 import * as React from 'react';
-import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
+import { FullscreenToggleButton } from '@/features/common/use-game-fullscreen';
 import { cn } from '@/lib/utils';
 import {
   guessLetterAtom,
@@ -35,7 +35,13 @@ const KEYBOARD_ROWS = [
 
 const DIFFICULTY_LIST = Object.values(HANGMAN_DIFFICULTIES);
 
-export const HangmanToolbar = () => {
+export const HangmanTopHud = ({
+  isFullscreen,
+  onToggleFullscreen,
+}: {
+  isFullscreen: boolean;
+  onToggleFullscreen: () => void;
+}) => {
   const difficulty = useAtomValue(hangmanDifficultyAtom);
   const stats = useAtomValue(hangmanStatsAtom);
   const setDifficulty = useSetAtom(setHangmanDifficultyAtom);
@@ -43,96 +49,111 @@ export const HangmanToolbar = () => {
   const resetHangman = useSetAtom(resetHangmanAtom);
 
   return (
-    <div className="flex w-full flex-wrap items-center justify-between gap-2 border border-border bg-card p-2">
-      <div className="flex flex-wrap items-center gap-1">
-        {DIFFICULTY_LIST.map((preset) => {
-          const isActive = difficulty === preset.id;
-          return (
-            <button
-              key={preset.id}
-              type="button"
-              onClick={() => setDifficulty(preset.id)}
-              className={cn(
-                'border px-2.5 py-1 text-[11px] font-medium tracking-wider uppercase transition-colors',
-                isActive
-                  ? 'border-foreground bg-foreground text-background'
-                  : 'border-border bg-secondary/40 text-muted-foreground hover:bg-secondary hover:text-foreground',
-              )}>
-              {preset.label}
-            </button>
-          );
-        })}
-      </div>
+    <div className="z-10 flex shrink-0 flex-wrap items-center justify-between gap-3 border-b border-border bg-card px-4 py-2 text-xs uppercase">
+      {/* Left: Telemetry (Attempts Left, Status, Misses) */}
+      <div className="flex flex-wrap items-center gap-4 sm:gap-6">
+        <div className="flex items-center gap-2">
+          <HeartBreakIcon
+            className={cn(
+              'size-4 shrink-0',
+              stats.maxAttemptsReached ? 'text-destructive' : 'text-chart-3',
+            )}
+            weight="fill"
+          />
+          <div className="flex flex-col">
+            <span className="text-[10px] leading-none text-muted-foreground">
+              Attempts Left
+            </span>
+            <span className="font-mono text-sm font-bold text-foreground">
+              <NumberFlow value={stats.attemptsRemaining} /> / {stats.maxAttempts}
+            </span>
+          </div>
+        </div>
 
-      <div className="flex items-center gap-1.5">
-        <Button
-          variant="outline"
-          size="sm"
-          disabled={stats.hintsRemaining <= 0 || stats.hasWon || stats.maxAttemptsReached}
-          onClick={() => revealHint()}
-          title="Reveal a random letter"
-          className="h-7 gap-1.5 px-2.5 text-[11px]">
-          <LightbulbIcon className="size-3.5 text-chart-3" weight="fill" />
-          <span>Hint ({stats.hintsRemaining})</span>
-        </Button>
-
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={() => resetHangman()}
-          title="Get a new word"
-          className="h-7 gap-1.5 px-2.5 text-[11px]">
-          <ArrowCounterClockwiseIcon className="size-3.5" />
-          <span>New Word</span>
-        </Button>
-      </div>
-    </div>
-  );
-};
-
-export const FailedAttemptsCounter = () => {
-  const stats = useAtomValue(hangmanStatsAtom);
-
-  return (
-    <div className="grid w-full grid-cols-3 items-center gap-2 border border-border bg-secondary/50 px-3 py-2 text-xs tracking-wider uppercase">
-      <div className="flex items-center gap-2">
-        <HeartBreakIcon
-          className={cn(
-            'size-4 shrink-0',
-            stats.maxAttemptsReached ? 'text-destructive' : 'text-chart-3',
-          )}
-          weight="fill"
-        />
         <div className="flex flex-col">
-          <span className="text-[10px] leading-none text-muted-foreground">Attempts Left</span>
-          <span className="font-mono text-sm font-bold text-foreground">
-            <NumberFlow value={stats.attemptsRemaining} /> / {stats.maxAttempts}
+          <span
+            className={cn(
+              'text-[10px] font-bold tracking-widest uppercase',
+              stats.hasWon
+                ? 'text-chart-2'
+                : stats.maxAttemptsReached
+                  ? 'text-destructive'
+                  : 'text-muted-foreground',
+            )}>
+            {stats.hasWon
+              ? 'Word Decoded'
+              : stats.maxAttemptsReached
+                ? 'Eliminated'
+                : 'In Progress'}
+          </span>
+          <span className="font-mono text-xs font-bold text-foreground">
+            {stats.word.length} Letters · {stats.correctLetters.length} Found
+          </span>
+        </div>
+
+        <div className="flex flex-col">
+          <span className="text-[10px] leading-none text-muted-foreground">
+            Misses
+          </span>
+          <span className="mt-0.5 font-mono text-xs font-bold tracking-widest text-destructive uppercase">
+            {stats.wrongLetters.length > 0 ? stats.wrongLetters.join(' ') : '—'}
           </span>
         </div>
       </div>
 
-      <div className="flex flex-col items-center justify-center text-center">
-        <span
-          className={cn(
-            'text-[11px] font-bold tracking-widest uppercase',
-            stats.hasWon
-              ? 'text-chart-2'
-              : stats.maxAttemptsReached
-                ? 'text-destructive'
-                : 'text-foreground',
-          )}>
-          {stats.hasWon ? 'Word Decoded' : stats.maxAttemptsReached ? 'Eliminated' : 'In Progress'}
-        </span>
-        <span className="text-[10px] text-muted-foreground">
-          {stats.word.length} Letters · {stats.correctLetters.length} Found
-        </span>
-      </div>
+      {/* Right: Difficulty Presets + Hint + New Word + Fullscreen */}
+      <div className="flex flex-wrap items-center gap-2">
+        <div className="flex flex-wrap items-center gap-1">
+          {DIFFICULTY_LIST.map((preset) => {
+            const isActive = difficulty === preset.id;
+            return (
+              <button
+                key={preset.id}
+                type="button"
+                onClick={() => setDifficulty(preset.id)}
+                className={cn(
+                  'h-7 border px-2.5 text-[11px] font-medium tracking-wider uppercase transition-colors',
+                  isActive
+                    ? 'border-foreground bg-foreground text-background'
+                    : 'border-border bg-secondary/40 text-muted-foreground hover:bg-secondary hover:text-foreground',
+                )}>
+                {preset.label}
+              </button>
+            );
+          })}
+        </div>
 
-      <div className="flex flex-col items-end justify-center text-right">
-        <span className="text-[10px] leading-none text-muted-foreground">Misses</span>
-        <span className="mt-0.5 font-mono text-xs font-bold tracking-widest text-destructive uppercase">
-          {stats.wrongLetters.length > 0 ? stats.wrongLetters.join(' ') : '—'}
-        </span>
+        <div className="flex items-center gap-1.5">
+          <Button
+            variant="outline"
+            size="sm"
+            disabled={
+              stats.hintsRemaining <= 0 ||
+              stats.hasWon ||
+              stats.maxAttemptsReached
+            }
+            onClick={() => revealHint()}
+            title="Reveal a random letter"
+            className="h-7 gap-1.5 px-2.5 text-[11px]">
+            <LightbulbIcon className="size-3.5 text-chart-3" weight="fill" />
+            <span>Hint ({stats.hintsRemaining})</span>
+          </Button>
+
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => resetHangman()}
+            title="Get a new word"
+            className="h-7 gap-1.5 px-2.5 text-[11px]">
+            <ArrowCounterClockwiseIcon className="size-3.5" />
+            <span>New Word</span>
+          </Button>
+
+          <FullscreenToggleButton
+            isFullscreen={isFullscreen}
+            onToggle={onToggleFullscreen}
+          />
+        </div>
       </div>
     </div>
   );
@@ -152,7 +173,7 @@ export const HangmanOutcomeBanner = () => {
           exit={{ opacity: 0, y: -6 }}
           transition={{ duration: 0.18 }}
           className={cn(
-            'flex w-full flex-wrap items-center justify-between gap-3 border px-3.5 py-2.5',
+            'z-10 flex w-full shrink-0 flex-wrap items-center justify-between gap-3 border-b px-4 py-2',
             stats.hasWon
               ? 'border-foreground bg-accent text-accent-foreground'
               : 'border-destructive bg-destructive/15 text-foreground',
@@ -161,13 +182,16 @@ export const HangmanOutcomeBanner = () => {
             {stats.hasWon ? (
               <CheckCircleIcon className="size-5 shrink-0" weight="fill" />
             ) : (
-              <WarningOctagonIcon className="size-5 shrink-0 text-destructive" weight="fill" />
+              <WarningOctagonIcon
+                className="size-5 shrink-0 text-destructive"
+                weight="fill"
+              />
             )}
-            <div className="flex flex-col">
+            <div className="flex flex-wrap items-baseline gap-2">
               <span className="font-heading text-base leading-none font-bold tracking-tight uppercase">
                 {stats.hasWon ? 'Word Decoded!' : 'Out of Attempts!'}
               </span>
-              <span className="mt-0.5 text-[11px] opacity-80">
+              <span className="text-[11px] opacity-80">
                 {stats.hasWon
                   ? `Solved "${stats.word.toUpperCase()}" with ${stats.attemptsRemaining} ${
                     stats.attemptsRemaining === 1 ? 'attempt' : 'attempts'
@@ -251,12 +275,13 @@ export const HangmanInput = () => {
           className="w-full">
           <motion.div
             animate={controls}
-            className="flex flex-wrap items-center justify-center gap-1.5 sm:gap-2">
+            className="flex flex-wrap items-center justify-center gap-2 sm:gap-2.5">
             {stats.word.split('').map((letter, index) => {
               const isGuessed = stats.correctLetters.includes(letter);
               const isHinted = hintedLetters.includes(letter);
               const isMissedOnLoss = stats.maxAttemptsReached && !isGuessed;
-              const isRevealed = isGuessed || stats.hasWon || stats.maxAttemptsReached;
+              const isRevealed =
+                isGuessed || stats.hasWon || stats.maxAttemptsReached;
 
               return (
                 <motion.div
@@ -270,7 +295,7 @@ export const HangmanInput = () => {
                     delay: index * 0.025,
                   }}
                   className={cn(
-                    'relative grid h-11 w-9 select-none place-items-center overflow-hidden border border-b-2 font-heading text-xl font-bold uppercase transition-colors duration-200 sm:h-12 sm:w-10 sm:text-2xl',
+                    'relative grid h-12 w-10 select-none place-items-center overflow-hidden border border-b-2 font-heading text-xl font-bold uppercase transition-colors duration-200 sm:h-14 sm:w-12 sm:text-2xl lg:h-16 lg:w-14 lg:text-3xl',
                     stats.hasWon
                       ? 'border-foreground bg-accent text-accent-foreground'
                       : isMissedOnLoss
@@ -303,7 +328,7 @@ export const HangmanInput = () => {
                         animate={{ opacity: 0.25, scale: 1 }}
                         exit={{ opacity: 0, scale: 0.5 }}
                         transition={{ duration: 0.12 }}
-                        className="inline-block size-1.5 bg-muted-foreground"
+                        className="inline-block size-2 bg-muted-foreground"
                       />
                     )}
                   </AnimatePresence>
@@ -323,9 +348,11 @@ export const HangmanKeyboard = () => {
   const isLocked = stats.hasWon || stats.maxAttemptsReached;
 
   return (
-    <div className="flex w-full max-w-lg flex-col items-center gap-1.5">
+    <div className="mx-auto flex w-full max-w-4xl shrink-0 flex-col items-center gap-1.5 sm:gap-2">
       {KEYBOARD_ROWS.map((row, rowIndex) => (
-        <div key={rowIndex} className="flex w-full justify-center gap-1 sm:gap-1.5">
+        <div
+          key={rowIndex}
+          className="flex w-full justify-center gap-1.5 sm:gap-2">
           {row.map((letter) => {
             const isCorrect = stats.correctLetters.includes(letter);
             const isWrong = stats.wrongLetters.includes(letter);
@@ -340,7 +367,7 @@ export const HangmanKeyboard = () => {
                 onClick={() => guessLetter(letter)}
                 aria-label={`Guess letter ${letter.toUpperCase()}`}
                 className={cn(
-                  'grid h-9 min-w-7 flex-1 max-w-11 select-none place-items-center border font-mono text-xs font-bold uppercase transition-colors sm:h-10 sm:text-sm',
+                  'grid h-10 min-w-7 flex-1 max-w-14 select-none place-items-center border font-mono text-xs font-bold uppercase transition-colors sm:h-12 sm:text-sm',
                   isCorrect
                     ? 'border-foreground bg-accent text-accent-foreground'
                     : isWrong
@@ -370,34 +397,24 @@ export const HangmanErrorAlert = () => {
   }, [ error, setError ]);
 
   return (
-    <div className="min-h-12 w-full max-w-md">
-      <AnimatePresence mode="wait">
-        {error && (
-          <motion.div
-            key={`${error.title}-${error.message}`}
-            initial={{ opacity: 0, y: -6, scale: 0.97 }}
-            animate={{ opacity: 1, y: 0, scale: 1 }}
-            exit={{ opacity: 0, y: -6, scale: 0.97 }}
-            transition={{ duration: 0.16 }}>
-            <Alert variant="destructive" className="py-2">
-              <WarningCircleIcon className="size-4" />
-              <AlertTitle className="text-xs font-bold uppercase">{error.title}</AlertTitle>
-              <AlertDescription className="text-xs">{error.message}</AlertDescription>
-            </Alert>
-          </motion.div>
-        )}
-      </AnimatePresence>
-    </div>
-  );
-};
-
-export const ResetHangman = () => {
-  const stats = useAtomValue(hangmanStatsAtom);
-  const resetHangman = useSetAtom(resetHangmanAtom);
-
-  return (
-    <Button onClick={() => resetHangman()}>
-      {stats.hasWon || stats.maxAttemptsReached ? 'Play Again' : 'Restart'}
-    </Button>
+    <AnimatePresence mode="wait">
+      {error && (
+        <motion.div
+          key={`${error.title}-${error.message}`}
+          initial={{ opacity: 0, y: -6 }}
+          animate={{ opacity: 1, y: 0 }}
+          exit={{ opacity: 0, y: -6 }}
+          transition={{ duration: 0.16 }}
+          className="z-10 flex w-full shrink-0 items-center gap-2.5 border-b border-destructive bg-destructive/15 px-4 py-2 text-foreground">
+          <WarningCircleIcon className="size-4 shrink-0 text-destructive" />
+          <div className="flex flex-wrap items-baseline gap-2">
+            <span className="font-heading text-xs leading-none font-bold tracking-tight text-destructive uppercase">
+              {error.title}
+            </span>
+            <span className="text-xs opacity-85">{error.message}</span>
+          </div>
+        </motion.div>
+      )}
+    </AnimatePresence>
   );
 };
