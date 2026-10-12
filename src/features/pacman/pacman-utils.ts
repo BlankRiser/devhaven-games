@@ -15,36 +15,41 @@ export type GhostId = 'blinky' | 'pinky' | 'inky' | 'clyde';
 export type GhostMode = 'scatter' | 'chase' | 'frightened' | 'eaten';
 export type PacmanGameStatus = 'ready' | 'playing' | 'paused' | 'gameover' | 'victory';
 
-export const MAZE_COLS = 21;
-export const MAZE_ROWS = 22;
-export const TILE_SIZE = 24;
-export const STAGE_WIDTH = MAZE_COLS * TILE_SIZE; // 504px
-export const STAGE_HEIGHT = MAZE_ROWS * TILE_SIZE; // 528px
+export const MAZE_COLS = 31;
+export const MAZE_ROWS = 19;
+export const TILE_SIZE = 28;
+export const STAGE_WIDTH = MAZE_COLS * TILE_SIZE; // 868px widescreen
+export const STAGE_HEIGHT = MAZE_ROWS * TILE_SIZE; // 532px widescreen
 
-// Classic symmetric 21x22 Arcade Maze
+const GHOST_CENTER_COL = 15;
+const GHOST_EXIT_ROW = 6;
+const GHOST_HOUSE_ROW = 8;
+const TUNNEL_ROW = 8;
+const FRUIT_ROW = 10;
+const PACMAN_START_ROW = 13;
+
+// Symmetric 31x19 Widescreen Arcade Maze (center column = 15)
 export const PACMAN_MAZE_TEMPLATE: ReadonlyArray<ReadonlyArray<TileValue>> = [
-  [ 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1 ], // R0
-  [ 1, 3, 2, 2, 2, 2, 2, 2, 2, 2, 1, 2, 2, 2, 2, 2, 2, 2, 2, 3, 1 ], // R1
-  [ 1, 2, 1, 1, 1, 2, 1, 1, 1, 2, 1, 2, 1, 1, 1, 2, 1, 1, 1, 2, 1 ], // R2
-  [ 1, 2, 1, 1, 1, 2, 1, 1, 1, 2, 1, 2, 1, 1, 1, 2, 1, 1, 1, 2, 1 ], // R3
-  [ 1, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 1 ], // R4
-  [ 1, 2, 1, 1, 1, 2, 1, 2, 1, 1, 1, 1, 1, 2, 1, 2, 1, 1, 1, 2, 1 ], // R5
-  [ 1, 2, 2, 2, 2, 2, 1, 2, 2, 2, 1, 2, 2, 2, 1, 2, 2, 2, 2, 2, 1 ], // R6
-  [ 1, 1, 1, 1, 1, 2, 1, 1, 1, 0, 1, 0, 1, 1, 1, 2, 1, 1, 1, 1, 1 ], // R7
-  [ 1, 1, 1, 1, 1, 2, 1, 0, 0, 0, 0, 0, 0, 0, 1, 2, 1, 1, 1, 1, 1 ], // R8 (Blinky spawns at 8,10)
-  [ 1, 1, 1, 1, 1, 2, 1, 0, 1, 1, 5, 1, 1, 0, 1, 2, 1, 1, 1, 1, 1 ], // R9 (Ghost Door at 9,10)
-  [ 0, 0, 0, 0, 0, 2, 0, 0, 1, 4, 4, 4, 1, 0, 0, 2, 0, 0, 0, 0, 0 ], // R10 (Warp Tunnel + Ghost House)
-  [ 1, 1, 1, 1, 1, 2, 1, 0, 1, 1, 1, 1, 1, 0, 1, 2, 1, 1, 1, 1, 1 ], // R11
-  [ 1, 1, 1, 1, 1, 2, 1, 0, 0, 0, 0, 0, 0, 0, 1, 2, 1, 1, 1, 1, 1 ], // R12 (Fruit spawns at 12,10)
-  [ 1, 1, 1, 1, 1, 2, 1, 0, 1, 1, 1, 1, 1, 0, 1, 2, 1, 1, 1, 1, 1 ], // R13
-  [ 1, 2, 2, 2, 2, 2, 2, 2, 2, 2, 1, 2, 2, 2, 2, 2, 2, 2, 2, 2, 1 ], // R14
-  [ 1, 2, 1, 1, 1, 2, 1, 1, 1, 2, 1, 2, 1, 1, 1, 2, 1, 1, 1, 2, 1 ], // R15
-  [ 1, 3, 2, 2, 1, 2, 2, 2, 2, 2, 0, 2, 2, 2, 2, 2, 1, 2, 2, 3, 1 ], // R16 (Pac-Man spawns at 16,10)
-  [ 1, 1, 1, 2, 1, 2, 1, 2, 1, 1, 1, 1, 1, 2, 1, 2, 1, 2, 1, 1, 1 ], // R17
-  [ 1, 2, 2, 2, 2, 2, 1, 2, 2, 2, 1, 2, 2, 2, 1, 2, 2, 2, 2, 2, 1 ], // R18
-  [ 1, 2, 1, 1, 1, 1, 1, 1, 1, 2, 1, 2, 1, 1, 1, 1, 1, 1, 1, 2, 1 ], // R19
-  [ 1, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 1 ], // R20
-  [ 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1 ], // R21
+  //0  1  2  3  4  5  6  7  8  9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27 28 29 30
+  [ 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1 ], // R0
+  [ 1, 3, 2, 2, 2, 2, 2, 1, 2, 2, 2, 2, 2, 2, 2, 1, 2, 2, 2, 2, 2, 2, 2, 1, 2, 2, 2, 2, 2, 3, 1 ], // R1
+  [ 1, 2, 1, 1, 1, 1, 2, 1, 2, 1, 1, 1, 1, 1, 2, 1, 2, 1, 1, 1, 1, 1, 2, 1, 2, 1, 1, 1, 1, 2, 1 ], // R2
+  [ 1, 2, 1, 1, 1, 1, 2, 2, 2, 2, 2, 1, 2, 2, 2, 2, 2, 2, 2, 1, 2, 2, 2, 2, 2, 1, 1, 1, 1, 2, 1 ], // R3
+  [ 1, 2, 2, 2, 2, 2, 2, 1, 1, 1, 2, 1, 2, 1, 1, 1, 1, 1, 2, 1, 2, 1, 1, 1, 2, 2, 2, 2, 2, 2, 1 ], // R4
+  [ 1, 1, 1, 2, 1, 1, 2, 2, 2, 2, 2, 2, 2, 2, 2, 1, 2, 2, 2, 2, 2, 2, 2, 2, 2, 1, 1, 2, 1, 1, 1 ], // R5
+  [ 1, 1, 1, 2, 1, 1, 2, 1, 1, 2, 1, 1, 0, 0, 0, 0, 0, 0, 0, 1, 1, 2, 1, 1, 2, 1, 1, 2, 1, 1, 1 ], // R6 (Blinky spawns at 6,15)
+  [ 1, 2, 2, 2, 2, 2, 2, 1, 1, 2, 1, 1, 0, 1, 1, 5, 1, 1, 0, 1, 1, 2, 1, 1, 2, 2, 2, 2, 2, 2, 1 ], // R7 (Ghost Door at 7,15)
+  [ 0, 0, 0, 2, 1, 1, 2, 0, 0, 2, 0, 0, 0, 1, 4, 4, 4, 1, 0, 0, 0, 2, 0, 0, 2, 1, 1, 2, 0, 0, 0 ], // R8 (Warp Tunnel + Ghost House)
+  [ 1, 2, 2, 2, 2, 2, 2, 1, 1, 2, 1, 1, 0, 1, 1, 1, 1, 1, 0, 1, 1, 2, 1, 1, 2, 2, 2, 2, 2, 2, 1 ], // R9
+  [ 1, 1, 1, 2, 1, 1, 2, 1, 1, 2, 1, 1, 0, 0, 0, 0, 0, 0, 0, 1, 1, 2, 1, 1, 2, 1, 1, 2, 1, 1, 1 ], // R10 (Fruit spawns at 10,15)
+  [ 1, 1, 1, 2, 1, 1, 2, 2, 2, 2, 2, 2, 2, 2, 2, 1, 2, 2, 2, 2, 2, 2, 2, 2, 2, 1, 1, 2, 1, 1, 1 ], // R11
+  [ 1, 2, 2, 2, 2, 2, 2, 1, 1, 1, 2, 1, 2, 1, 1, 1, 1, 1, 2, 1, 2, 1, 1, 1, 2, 2, 2, 2, 2, 2, 1 ], // R12
+  [ 1, 2, 1, 1, 1, 1, 2, 2, 2, 2, 2, 1, 2, 2, 2, 0, 2, 2, 2, 1, 2, 2, 2, 2, 2, 1, 1, 1, 1, 2, 1 ], // R13 (Pac-Man spawns at 13,15)
+  [ 1, 2, 1, 1, 1, 1, 2, 1, 2, 1, 1, 1, 1, 1, 2, 1, 2, 1, 1, 1, 1, 1, 2, 1, 2, 1, 1, 1, 1, 2, 1 ], // R14
+  [ 1, 3, 2, 2, 1, 1, 2, 1, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 1, 2, 1, 1, 2, 2, 3, 1 ], // R15
+  [ 1, 1, 1, 2, 1, 1, 2, 1, 1, 1, 2, 1, 1, 1, 1, 1, 1, 1, 1, 1, 2, 1, 1, 1, 2, 1, 1, 2, 1, 1, 1 ], // R16
+  [ 1, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 1, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 1 ], // R17
+  [ 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1 ], // R18
 ];
 
 export const GHOST_COLORS: Record<GhostId, number> = {
@@ -62,8 +67,8 @@ export const GHOST_SCATTER_TARGETS: Record<GhostId, GridCoord> = {
 };
 
 export interface PacmanActor {
-  row: number; // Floating-point tile row (integer = tile center)
-  col: number; // Floating-point tile col (integer = tile center)
+  row: number;
+  col: number;
   dir: CardinalDirection;
   nextDir: CardinalDirection;
   mouthAngle: number;
@@ -146,8 +151,8 @@ export const cloneMazeTemplate = (): { maze: TileValue[][]; totalPellets: number
 
 export const createInitialActors = (): { pacman: PacmanActor; ghosts: GhostActor[] } => ({
   pacman: {
-    row: 16,
-    col: 10,
+    row: PACMAN_START_ROW,
+    col: GHOST_CENTER_COL,
     dir: 'left',
     nextDir: 'left',
     mouthAngle: 0.2,
@@ -158,8 +163,8 @@ export const createInitialActors = (): { pacman: PacmanActor; ghosts: GhostActor
       id: 'blinky',
       name: 'Blinky',
       color: GHOST_COLORS.blinky,
-      row: 8,
-      col: 10,
+      row: GHOST_EXIT_ROW,
+      col: GHOST_CENTER_COL,
       dir: 'left',
       mode: 'scatter',
       releaseDelay: 0,
@@ -170,8 +175,8 @@ export const createInitialActors = (): { pacman: PacmanActor; ghosts: GhostActor
       id: 'pinky',
       name: 'Pinky',
       color: GHOST_COLORS.pinky,
-      row: 10,
-      col: 10,
+      row: GHOST_HOUSE_ROW,
+      col: GHOST_CENTER_COL,
       dir: 'up',
       mode: 'scatter',
       releaseDelay: 1.5,
@@ -182,8 +187,8 @@ export const createInitialActors = (): { pacman: PacmanActor; ghosts: GhostActor
       id: 'inky',
       name: 'Inky',
       color: GHOST_COLORS.inky,
-      row: 10,
-      col: 9,
+      row: GHOST_HOUSE_ROW,
+      col: GHOST_CENTER_COL - 1,
       dir: 'up',
       mode: 'scatter',
       releaseDelay: 4.0,
@@ -194,8 +199,8 @@ export const createInitialActors = (): { pacman: PacmanActor; ghosts: GhostActor
       id: 'clyde',
       name: 'Clyde',
       color: GHOST_COLORS.clyde,
-      row: 10,
-      col: 11,
+      row: GHOST_HOUSE_ROW,
+      col: GHOST_CENTER_COL + 1,
       dir: 'up',
       mode: 'scatter',
       releaseDelay: 6.5,
@@ -227,8 +232,8 @@ export const createInitialWorld = (highScore = 0, level = 1): PacmanWorldState =
     ghosts,
     fruit: {
       active: false,
-      row: 12,
-      col: 10,
+      row: FRUIT_ROW,
+      col: GHOST_CENTER_COL,
       timer: 0,
       points: level * 150,
     },
@@ -269,7 +274,7 @@ const computeGhostTarget = (
   };
 
   if (ghost.mode === 'eaten') {
-    return { row: 8, col: 10 };
+    return { row: GHOST_EXIT_ROW, col: GHOST_CENTER_COL };
   }
 
   if (ghost.mode === 'scatter') {
@@ -495,12 +500,12 @@ export const stepPacmanWorld = (
       world.highScore = world.score;
     }
 
-    // Spawn bonus fruit at 45 and 115 pellets eaten
-    if (world.pelletsEatenInLevel === 45 || world.pelletsEatenInLevel === 115) {
+    // Spawn bonus fruit at 60 and 150 pellets eaten
+    if (world.pelletsEatenInLevel === 60 || world.pelletsEatenInLevel === 150) {
       world.fruit = {
         active: true,
-        row: 12,
-        col: 10,
+        row: FRUIT_ROW,
+        col: GHOST_CENTER_COL,
         timer: 9.5,
         points: world.level * 150,
       };
@@ -524,7 +529,7 @@ export const stepPacmanWorld = (
     }
 
     if (world.pelletsRemaining <= 0) {
-      // Level Cleared -> Advance to next level or victory
+      // Level Cleared -> Advance to next level
       world.level += 1;
       const { maze, totalPellets } = cloneMazeTemplate();
       const { pacman: freshPac, ghosts: freshGhosts } = createInitialActors();
@@ -538,8 +543,8 @@ export const stepPacmanWorld = (
       world.respawnFreezeTimer = 1.1;
       world.popups.push({
         id: Math.random(),
-        x: 10.5 * TILE_SIZE,
-        y: 12 * TILE_SIZE,
+        x: (GHOST_CENTER_COL + 0.5) * TILE_SIZE,
+        y: FRUIT_ROW * TILE_SIZE,
         text: `LEVEL ${world.level}!`,
         ttl: 1.4,
       });
@@ -578,26 +583,29 @@ export const stepPacmanWorld = (
       continue;
     }
 
-    // Exit Ghost House smoothly toward (8, 10)
+    // Exit Ghost House smoothly toward (GHOST_EXIT_ROW, GHOST_CENTER_COL)
     if (ghost.inHouse) {
       const exitSpeed = 4.5 * dt;
-      if (Math.abs(ghost.col - 10) > 0.08) {
-        ghost.col += Math.sign(10 - ghost.col) * Math.min(Math.abs(10 - ghost.col), exitSpeed);
+      if (Math.abs(ghost.col - GHOST_CENTER_COL) > 0.08) {
+        ghost.col +=
+          Math.sign(GHOST_CENTER_COL - ghost.col) *
+          Math.min(Math.abs(GHOST_CENTER_COL - ghost.col), exitSpeed);
       } else {
-        ghost.col = 10;
+        ghost.col = GHOST_CENTER_COL;
         ghost.row -= exitSpeed;
-        if (ghost.row <= 8) {
-          ghost.row = 8;
+        if (ghost.row <= GHOST_EXIT_ROW) {
+          ghost.row = GHOST_EXIT_ROW;
           ghost.inHouse = false;
           ghost.dir = Math.random() < 0.5 ? 'left' : 'right';
-          ghost.lastDecisionKey = '8,10';
+          ghost.lastDecisionKey = `${GHOST_EXIT_ROW},${GHOST_CENTER_COL}`;
         }
       }
       continue;
     }
 
     const isTunnelSlowdown =
-      Math.round(ghost.row) === 10 && (ghost.col < 4 || ghost.col > MAZE_COLS - 5);
+      Math.round(ghost.row) === TUNNEL_ROW &&
+      (ghost.col < 4 || ghost.col > MAZE_COLS - 5);
     const speed =
       ghost.mode === 'eaten'
         ? 12.5
@@ -613,10 +621,15 @@ export const stepPacmanWorld = (
     const wrappedGCol = wrapIndex(gCol, MAZE_COLS);
     const tileKey = `${gRow},${wrappedGCol}`;
 
-    // If eaten eyes reached above the ghost door (8, 10), revive into active wave mode
-    if (ghost.mode === 'eaten' && gRow === 8 && wrappedGCol === 10 && distCenter < 0.25) {
-      ghost.row = 8;
-      ghost.col = 10;
+    // If eaten eyes reached above the ghost door, revive into active wave mode
+    if (
+      ghost.mode === 'eaten' &&
+      gRow === GHOST_EXIT_ROW &&
+      wrappedGCol === GHOST_CENTER_COL &&
+      distCenter < 0.25
+    ) {
+      ghost.row = GHOST_EXIT_ROW;
+      ghost.col = GHOST_CENTER_COL;
       ghost.mode = world.currentWaveMode;
       ghost.dir = Math.random() < 0.5 ? 'left' : 'right';
       ghost.lastDecisionKey = tileKey;
@@ -734,7 +747,7 @@ export const pacmanHudAtom = atom<PacmanHudSnapshot>({
   highScore: 0,
   lives: 3,
   level: 1,
-  pelletsRemaining: 184,
+  pelletsRemaining: 280,
   status: 'ready',
   frightenedSeconds: 0,
   fps: 120,

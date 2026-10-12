@@ -8,7 +8,7 @@ import { GAMES_LIST } from '@/features/games-list';
 export default function GameSlugPage() {
   const { slug } = useParams<{ slug: string }>();
 
-  const game = GAMES_LIST.find((game) => game.slug === slug);
+  const game = GAMES_LIST.find((item) => item.slug === slug);
   const GameComponent = game?.component;
 
   if (!GameComponent) {
@@ -20,14 +20,14 @@ export default function GameSlugPage() {
   }
 
   return (
-    <div className="flex h-full flex-1 flex-col p-3 md:p-6">
+    <div className="flex h-[calc(100svh-3.5rem)] w-full flex-1 flex-col overflow-hidden">
       <Suspense
         fallback={
-          <div className="grid h-full w-full place-items-center border border-border bg-card p-6">
+          <div className="grid h-full w-full place-items-center bg-card p-6">
             <Skeleton className="h-48 w-48" />
           </div>
         }>
-        <section className="grid h-full w-full flex-1 place-items-center">
+        <section className="flex h-full min-h-0 w-full flex-1 flex-col overflow-hidden">
           <GameComponent />
         </section>
       </Suspense>
