@@ -42,6 +42,17 @@ const NativeFrameRateBooster = ({
 
   const handleTick = React.useCallback(
     (ticker: { deltaMS: number; FPS: number }) => {
+      // Ensure renderer dimensions stay synced on every tick (handles async init / fullscreen exit)
+      if (
+        app?.renderer &&
+        canvasWidth > 0 &&
+        canvasHeight > 0 &&
+        (Math.round(app.renderer.width / app.renderer.resolution) !== canvasWidth ||
+          Math.round(app.renderer.height / app.renderer.resolution) !== canvasHeight)
+      ) {
+        app.renderer.resize(canvasWidth, canvasHeight);
+      }
+
       if (!onFpsUpdate) return;
       frameCountRef.current += 1;
       elapsedMsRef.current += ticker.deltaMS;
@@ -53,7 +64,7 @@ const NativeFrameRateBooster = ({
         elapsedMsRef.current = 0;
       }
     },
-    [ onFpsUpdate ],
+    [ app, canvasHeight, canvasWidth, onFpsUpdate ],
   );
 
   useTick(handleTick);
@@ -94,9 +105,12 @@ export const PixiStage = ({
     const element = containerRef.current;
     if (!element) return;
 
+    let rafId = 0;
+
     const updateSize = () => {
-      const nextWidth = Math.max(300, Math.floor(element.clientWidth));
-      const nextHeight = Math.max(240, Math.floor(element.clientHeight));
+      const rect = element.getBoundingClientRect();
+      const nextWidth = Math.max(200, Math.floor(rect.width));
+      const nextHeight = Math.max(200, Math.floor(rect.height));
       setBounds((prev) =>
         prev && prev.width === nextWidth && prev.height === nextHeight
           ? prev
@@ -104,11 +118,25 @@ export const PixiStage = ({
       );
     };
 
+    const scheduleUpdate = () => {
+      window.cancelAnimationFrame(rafId);
+      rafId = window.requestAnimationFrame(updateSize);
+    };
+
     updateSize();
 
-    const observer = new ResizeObserver(updateSize);
+    const observer = new ResizeObserver(scheduleUpdate);
     observer.observe(element);
-    return () => observer.disconnect();
+
+    window.addEventListener('resize', scheduleUpdate);
+    document.addEventListener('fullscreenchange', scheduleUpdate);
+
+    return () => {
+      window.cancelAnimationFrame(rafId);
+      observer.disconnect();
+      window.removeEventListener('resize', scheduleUpdate);
+      document.removeEventListener('fullscreenchange', scheduleUpdate);
+    };
   }, [ fitContainer ]);
 
   const resolution =
@@ -140,31 +168,32 @@ export const PixiStage = ({
       ref={containerRef}
       style={fitContainer ? undefined : { width, height }}
       className={cn(
-        'relative overflow-hidden select-none',
+        'relative min-h-0 min-w-0 overflow-hidden select-none',
         fitContainer && 'h-full w-full flex-1',
         className,
       )}>
       {bounds && (
-        <Application
-          width={canvasWidth}
-          height={canvasHeight}
-          resizeTo={fitContainer ? containerRef : undefined}
-          backgroundColor={backgroundColor}
-          antialias
-          autoDensity
-          resolution={resolution}
-          powerPreference="high-performance"
-          preference="webgl"
-          className="block h-full w-full">
-          <NativeFrameRateBooster
-            canvasWidth={canvasWidth}
-            canvasHeight={canvasHeight}
-            onFpsUpdate={onFpsUpdate}
-          />
-          <pixiContainer x={offsetX} y={offsetY} scale={{ x: scaleX, y: scaleY }}>
-            {children}
-          </pixiContainer>
-        </Application>
+        <div className="absolute inset-0 overflow-hidden">
+          <Application
+            width={canvasWidth}
+            height={canvasHeight}
+            backgroundColor={backgroundColor}
+            antialias
+            autoDensity
+            resolution={resolution}
+            powerPreference="high-performance"
+            preference="webgl"
+            className="block">
+            <NativeFrameRateBooster
+              canvasWidth={canvasWidth}
+              canvasHeight={canvasHeight}
+              onFpsUpdate={onFpsUpdate}
+            />
+            <pixiContainer x={offsetX} y={offsetY} scale={{ x: scaleX, y: scaleY }}>
+              {children}
+            </pixiContainer>
+          </Application>
+        </div>
       )}
     </div>
   );
