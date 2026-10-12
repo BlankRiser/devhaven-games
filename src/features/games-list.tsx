@@ -5,6 +5,8 @@ import dynamic from 'next/dynamic';
 const FlappyBird = dynamic(() => import('./flappy-bird/flappy-bird'), { ssr: false });
 const Hangman = dynamic(() => import('./hangman/hangman'), { ssr: false });
 const Minesweeper = dynamic(() => import('./minesweeper/minesweeper'), { ssr: false });
+const Pacman = dynamic(() => import('./pacman/pacman'), { ssr: false });
+const SpiderSolitaire = dynamic(() => import('./spider-solitaire/spider-solitaire'), { ssr: false });
 const TicTacToe = dynamic(() => import('./tic-tac-toe/tic-tac-toe'), { ssr: false });
 
 export type GameCategoryId = 'board-games' | '2d-platformer' | 'word-puzzle' | 'card-games';
@@ -80,6 +82,34 @@ export const GAMES_LIST = [
     color: 'green',
     url: '/games/minesweeper',
     component: Minesweeper,
+  },
+  {
+    slug: 'spider-solitaire',
+    status: 'completed' as const,
+    label: 'Spider Solitaire',
+    description: 'Build descending King-to-Ace runs of the same suit across 10 columns.',
+    category: 'card-games' as GameCategoryId,
+    categoryLabel: 'Card Games',
+    players: '1 Player',
+    tags: [ 'card', 'solitaire', 'spider', 'deck', 'patience', 'strategy' ],
+    icon: 'gamepad',
+    color: 'green',
+    url: '/games/spider-solitaire',
+    component: SpiderSolitaire,
+  },
+  {
+    slug: 'pacman',
+    status: 'completed' as const,
+    label: 'Pac-Man',
+    description: 'Navigate the neon maze, gobble power pellets, and outsmart the four ghosts.',
+    category: '2d-platformer' as GameCategoryId,
+    categoryLabel: '2D Platformer',
+    players: '1 Player',
+    tags: [ 'arcade', 'maze', 'pacman', 'ghosts', 'retro', '2d', 'pixi' ],
+    icon: 'gamepad',
+    color: 'green',
+    url: '/games/pacman',
+    component: Pacman,
   },
   {
     slug: 'flappy-bird',

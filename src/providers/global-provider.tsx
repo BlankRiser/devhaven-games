@@ -20,8 +20,7 @@ const queryClient = new QueryClient({
   },
 });
 
-export const GlobalProvider = ({ children }: { children: React.ReactNode }) => {
-  return (
+export const GlobalProvider = ({ children }: { readonly children: React.ReactNode }) => (
     <ThemeProvider attribute="class" defaultTheme="light" enableSystem={false} storageKey="theme">
       <QueryClientProvider client={queryClient}>
         <TooltipProvider>
@@ -30,7 +29,7 @@ export const GlobalProvider = ({ children }: { children: React.ReactNode }) => {
             <SidebarInset>
               <header className="flex h-14 shrink-0 items-center gap-3 border-b border-border bg-background px-4">
                 <SidebarTrigger className="-ml-1" />
-                <Separator orientation="vertical" className="mr-1 h-4" />
+                <Separator orientation="vertical" className="mr-1 h-full" />
                 <div className="flex w-full items-center justify-between gap-4">
                   <GameName />
                   <ThemeSwitcher />
@@ -44,7 +43,6 @@ export const GlobalProvider = ({ children }: { children: React.ReactNode }) => {
       </QueryClientProvider>
     </ThemeProvider>
   );
-};
 
 const GameName = () => {
   const { slug } = useParams<{ slug: string }>();

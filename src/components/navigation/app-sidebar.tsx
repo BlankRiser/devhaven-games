@@ -27,8 +27,9 @@ import {
   SidebarMenuSubItem,
   SidebarRail,
 } from '@/components/ui/sidebar';
-import { GAME_CATEGORIES, getVisibleGames, type GameCategoryId } from '@/features/games-list';
+import { GAME_CATEGORIES, getVisibleGames  } from '@/features/games-list';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '../ui/collapsible';
+import type {GameCategoryId} from '@/features/games-list';
 
 const CATEGORY_ICONS: Record<GameCategoryId, React.ComponentType<{ className?: string }>> = {
   'board-games': CheckerboardIcon,
@@ -37,24 +38,23 @@ const CATEGORY_ICONS: Record<GameCategoryId, React.ComponentType<{ className?: s
   'card-games': CardsIcon,
 };
 
-export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
-  return (
-    <Sidebar collapsible="icon" {...props}>
-      <SidebarHeader className="border-b border-sidebar-border p-2">
+export const AppSidebar = ({ ...properties }: React.ComponentProps<typeof Sidebar>) => (
+    <Sidebar collapsible="icon" {...properties}>
+      <SidebarHeader className="flex h-14 shrink-0 justify-center border-b border-sidebar-border px-2 py-0">
         <SidebarMenu>
           <SidebarMenuItem>
             <SidebarMenuButton
               size="lg"
               render={<Link href="/" />}
-              className="border border-transparent hover:border-sidebar-border">
-              <div className="flex aspect-square size-8 items-center justify-center bg-sidebar-primary text-sidebar-primary-foreground">
+              className="h-10 border border-transparent hover:border-sidebar-border">
+              <div className="flex aspect-square size-8 shrink-0 items-center justify-center bg-sidebar-primary text-sidebar-primary-foreground">
                 <GameControllerIcon className="size-4" weight="fill" />
               </div>
-              <div className="flex flex-col gap-0 leading-none">
-                <span className="text-[10px] font-light tracking-widest text-sidebar-foreground/70 uppercase">
+              <div className="flex flex-col justify-center gap-0 leading-none">
+                <span className="text-[10px] leading-none font-light tracking-widest text-sidebar-foreground/70 uppercase">
                   DevHaven
                 </span>
-                <span className="font-heading text-2xl leading-none font-semibold tracking-[-0.025em] uppercase">
+                <span className="font-heading text-xl leading-none font-semibold tracking-[-0.025em] uppercase">
                   Games
                 </span>
               </div>
@@ -95,18 +95,17 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
       </SidebarFooter>
       <SidebarRail />
     </Sidebar>
-  );
-}
+  )
 
 const NavMain = () => {
   const pathname = usePathname();
   const visibleGames = getVisibleGames();
 
   const categoryGroups = GAME_CATEGORIES.map((category) => ({
-    ...category,
-    icon: CATEGORY_ICONS[category.id],
-    items: visibleGames.filter((game) => game.category === category.id),
-  }));
+              ...category,
+              icon: CATEGORY_ICONS[category.id],
+              items: visibleGames.filter((game) => game.category === category.id),
+            }));
 
   return (
     <SidebarGroup>
