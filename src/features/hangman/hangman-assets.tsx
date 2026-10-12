@@ -1,169 +1,358 @@
 'use client';
 
 import NumberFlow from '@number-flow/react';
-import { useAtom, useSetAtom } from 'jotai';
-import { useResetAtom } from 'jotai/utils';
-import { AlertCircle } from 'lucide-react';
+import {
+  ArrowCounterClockwiseIcon,
+  CheckCircleIcon,
+  HeartBreakIcon,
+  LightbulbIcon,
+  WarningCircleIcon,
+  WarningOctagonIcon,
+} from '@phosphor-icons/react';
+import { useAtom, useAtomValue, useSetAtom } from 'jotai';
 import { AnimatePresence, motion, useAnimation } from 'motion/react';
 import * as React from 'react';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import {
-  failedAttemptsAtom,
-  getRandomUnrevealedLetter,
+  guessLetterAtom,
+  HANGMAN_DIFFICULTIES,
+  hangmanDifficultyAtom,
   hangmanErrorAtom,
   hangmanStatsAtom,
-  lettersAtom,
-  uniqueWordAtom,
+  hintedLettersAtom,
+  resetHangmanAtom,
+  revealHintAtom,
+  setHangmanDifficultyAtom,
 } from './hangman-utils';
 
-const shakeContainer = {
-  start: () => ({
-    rotate: [ 0, 2, -2, 2, 0 ],
-    transition: {
-      repeat: 1,
-      duration: 0.25,
-    },
-  }),
-  reset: {
-    rotate: 0,
-  },
-};
+const KEYBOARD_ROWS = [
+  [ 'q', 'w', 'e', 'r', 't', 'y', 'u', 'i', 'o', 'p' ],
+  [ 'a', 's', 'd', 'f', 'g', 'h', 'j', 'k', 'l' ],
+  [ 'z', 'x', 'c', 'v', 'b', 'n', 'm' ],
+] as const;
 
-export const HangmanInput = () => {
-  const [ word ] = useAtom(uniqueWordAtom);
-  const [ stats ] = useAtom(hangmanStatsAtom);
+const DIFFICULTY_LIST = Object.values(HANGMAN_DIFFICULTIES);
 
-  const setLetters = useSetAtom(lettersAtom);
-  const setFailedAttempts = useSetAtom(failedAttemptsAtom);
-  const setError = useSetAtom(hangmanErrorAtom);
-
-  const controls = useAnimation();
-
-  const handleKeyPress = React.useCallback(
-    (e: KeyboardEvent) => {
-      const keyInput = e.key.toLowerCase();
-
-      // Reset animation as soon as user types
-      controls.stop();
-      controls.set('reset');
-
-      if (stats.maxAttemptsReached || stats.hasWon) return;
-
-      if (!/^[a-z]$/.test(keyInput)) {
-        // Only alert for single characters that aren't letters (avoid alerting for Shift, Alt, etc.)
-        if (e.key.length === 1) {
-          setError({
-            title: 'Invalid Input',
-            message: 'Please enter a valid letter (A-Z).',
-          });
-        }
-        return;
-      }
-
-      if (!word) return;
-
-      if (stats.correctLetters.includes(keyInput)) {
-        return;
-      }
-
-      if (word.includes(keyInput)) {
-        setLetters((values) => [ ...values, keyInput ]);
-        return;
-      }
-
-      controls.start('start');
-      setFailedAttempts((failedAttempts) => failedAttempts + 1);
-      setError({
-        title: 'Wrong Guess',
-        message: `"${keyInput.toUpperCase()}" is not in the word`,
-      });
-
-      const revealedLetter = getRandomUnrevealedLetter(word, stats.correctLetters);
-      if (revealedLetter) {
-        setLetters((values) => [ ...values, revealedLetter ]);
-      }
-    },
-    [ stats.maxAttemptsReached, stats.hasWon, stats.correctLetters, word, setLetters, controls, setFailedAttempts, setError ],
-  );
-
-  React.useEffect(() => {
-    const abortController = new AbortController();
-    const signal = abortController.signal;
-
-    document.addEventListener('keydown', (e) => handleKeyPress(e), {
-      signal,
-    });
-
-    return () => {
-      abortController.abort();
-    };
-  }, [ handleKeyPress, setLetters, word ]);
+export const HangmanToolbar = () => {
+  const difficulty = useAtomValue(hangmanDifficultyAtom);
+  const stats = useAtomValue(hangmanStatsAtom);
+  const setDifficulty = useSetAtom(setHangmanDifficultyAtom);
+  const revealHint = useSetAtom(revealHintAtom);
+  const resetHangman = useSetAtom(resetHangmanAtom);
 
   return (
-    <React.Suspense>
-      <div className="grid place-items-center p-2">
-        <motion.div
-          className="flex gap-2 flex-wrap justify-center md:flex-nowrap"
-          variants={shakeContainer}
-          animate={controls}>
-          {word.split('').map((letter, index) => {
-            return (
-              <motion.input
-                initial={{
-                  x: index * 25,
-                }}
-                animate={{
-                  x: 0,
-                }}
-                transition={{
-                  type: 'spring',
-                  stiffness: 100,
-                  damping: 20,
-                  mass: 1,
-                  delay: index * 0.05,
-                  duration: 0.5,
-                }}
-                key={`${word}-${index}`}
-                className={cn([
-                  'w-8 aspect-square border-b capitalize grid place-items-center',
-                  'bg-zinc-100 dark:bg-zinc-900 border-b-zinc-700 dark:border-b-zinc-600',
-                  stats.maxAttemptsReached && 'bg-rose-100 dark:bg-rose-950 border-b-rose-700 dark:border-b-rose-600',
-                  stats.hasWon && 'bg-emerald-200 dark:bg-emerald-900 border-b-emerald-700 dark:border-b-emerald-600',
-                ])}
-                type="text"
-                maxLength={1}
-                readOnly
-                value={
-                  stats.correctLetters.includes(letter) || stats.hasWon || stats.maxAttemptsReached ? letter : ''
-                }
-                autoFocus={index === 0}
-                onFocus={(e) => e.target.select()}
-              />
-            );
-          })}
-        </motion.div>
+    <div className="flex w-full flex-wrap items-center justify-between gap-2 border border-border bg-card p-2">
+      <div className="flex flex-wrap items-center gap-1">
+        {DIFFICULTY_LIST.map((preset) => {
+          const isActive = difficulty === preset.id;
+          return (
+            <button
+              key={preset.id}
+              type="button"
+              onClick={() => setDifficulty(preset.id)}
+              className={cn(
+                'border px-2.5 py-1 text-[11px] font-medium tracking-wider uppercase transition-colors',
+                isActive
+                  ? 'border-foreground bg-foreground text-background'
+                  : 'border-border bg-secondary/40 text-muted-foreground hover:bg-secondary hover:text-foreground',
+              )}>
+              {preset.label}
+            </button>
+          );
+        })}
       </div>
-    </React.Suspense>
+
+      <div className="flex items-center gap-1.5">
+        <Button
+          variant="outline"
+          size="sm"
+          disabled={stats.hintsRemaining <= 0 || stats.hasWon || stats.maxAttemptsReached}
+          onClick={() => revealHint()}
+          title="Reveal a random letter"
+          className="h-7 gap-1.5 px-2.5 text-[11px]">
+          <LightbulbIcon className="size-3.5 text-chart-3" weight="fill" />
+          <span>Hint ({stats.hintsRemaining})</span>
+        </Button>
+
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={() => resetHangman()}
+          title="Get a new word"
+          className="h-7 gap-1.5 px-2.5 text-[11px]">
+          <ArrowCounterClockwiseIcon className="size-3.5" />
+          <span>New Word</span>
+        </Button>
+      </div>
+    </div>
   );
 };
 
 export const FailedAttemptsCounter = () => {
-  const [ failedAttempts ] = useAtom(failedAttemptsAtom);
-  const [ stats ] = useAtom(hangmanStatsAtom);
-
-  const maxAttempts = 6;
+  const stats = useAtomValue(hangmanStatsAtom);
 
   return (
-    <div
-      className={cn([
-        'text-xl text-zinc-600 dark:text-zinc-400',
-        stats.maxAttemptsReached && 'text-rose-400 dark:text-rose-900',
-        stats.hasWon && 'text-emerald-600 dark:text-emerald-400',
-      ])}>
-      <span>Attempts Left: </span>
-      <NumberFlow value={maxAttempts - failedAttempts} />
+    <div className="grid w-full grid-cols-3 items-center gap-2 border border-border bg-secondary/50 px-3 py-2 text-xs tracking-wider uppercase">
+      <div className="flex items-center gap-2">
+        <HeartBreakIcon
+          className={cn(
+            'size-4 shrink-0',
+            stats.maxAttemptsReached ? 'text-destructive' : 'text-chart-3',
+          )}
+          weight="fill"
+        />
+        <div className="flex flex-col">
+          <span className="text-[10px] leading-none text-muted-foreground">Attempts Left</span>
+          <span className="font-mono text-sm font-bold text-foreground">
+            <NumberFlow value={stats.attemptsRemaining} /> / {stats.maxAttempts}
+          </span>
+        </div>
+      </div>
+
+      <div className="flex flex-col items-center justify-center text-center">
+        <span
+          className={cn(
+            'text-[11px] font-bold tracking-widest uppercase',
+            stats.hasWon
+              ? 'text-chart-2'
+              : stats.maxAttemptsReached
+                ? 'text-destructive'
+                : 'text-foreground',
+          )}>
+          {stats.hasWon ? 'Word Decoded' : stats.maxAttemptsReached ? 'Eliminated' : 'In Progress'}
+        </span>
+        <span className="text-[10px] text-muted-foreground">
+          {stats.word.length} Letters · {stats.correctLetters.length} Found
+        </span>
+      </div>
+
+      <div className="flex flex-col items-end justify-center text-right">
+        <span className="text-[10px] leading-none text-muted-foreground">Misses</span>
+        <span className="mt-0.5 font-mono text-xs font-bold tracking-widest text-destructive uppercase">
+          {stats.wrongLetters.length > 0 ? stats.wrongLetters.join(' ') : '—'}
+        </span>
+      </div>
+    </div>
+  );
+};
+
+export const HangmanOutcomeBanner = () => {
+  const stats = useAtomValue(hangmanStatsAtom);
+  const resetHangman = useSetAtom(resetHangmanAtom);
+  const isGameOver = stats.hasWon || stats.maxAttemptsReached;
+
+  return (
+    <AnimatePresence>
+      {isGameOver && (
+        <motion.div
+          initial={{ opacity: 0, y: -6 }}
+          animate={{ opacity: 1, y: 0 }}
+          exit={{ opacity: 0, y: -6 }}
+          transition={{ duration: 0.18 }}
+          className={cn(
+            'flex w-full flex-wrap items-center justify-between gap-3 border px-3.5 py-2.5',
+            stats.hasWon
+              ? 'border-foreground bg-accent text-accent-foreground'
+              : 'border-destructive bg-destructive/15 text-foreground',
+          )}>
+          <div className="flex items-center gap-2.5">
+            {stats.hasWon ? (
+              <CheckCircleIcon className="size-5 shrink-0" weight="fill" />
+            ) : (
+              <WarningOctagonIcon className="size-5 shrink-0 text-destructive" weight="fill" />
+            )}
+            <div className="flex flex-col">
+              <span className="font-heading text-base leading-none font-bold tracking-tight uppercase">
+                {stats.hasWon ? 'Word Decoded!' : 'Out of Attempts!'}
+              </span>
+              <span className="mt-0.5 text-[11px] opacity-80">
+                {stats.hasWon
+                  ? `Solved "${stats.word.toUpperCase()}" with ${stats.attemptsRemaining} ${
+                    stats.attemptsRemaining === 1 ? 'attempt' : 'attempts'
+                  } remaining.`
+                  : `The secret word was "${stats.word.toUpperCase()}".`}
+              </span>
+            </div>
+          </div>
+
+          <Button
+            size="sm"
+            variant={stats.hasWon ? 'default' : 'destructive'}
+            onClick={() => resetHangman()}
+            className="h-7 px-3 text-[11px]">
+            Play Again
+          </Button>
+        </motion.div>
+      )}
+    </AnimatePresence>
+  );
+};
+
+export const HangmanInput = () => {
+  const stats = useAtomValue(hangmanStatsAtom);
+  const hintedLetters = useAtomValue(hintedLettersAtom);
+  const guessLetter = useSetAtom(guessLetterAtom);
+  const resetHangman = useSetAtom(resetHangmanAtom);
+  const controls = useAnimation();
+  const prevFailedRef = React.useRef(stats.failedAttempts);
+
+  React.useEffect(() => {
+    if (stats.failedAttempts > prevFailedRef.current) {
+      void controls.start({
+        x: [ 0, -7, 7, -5, 5, -2, 2, 0 ],
+        transition: { duration: 0.32, ease: 'easeInOut' },
+      });
+    }
+    prevFailedRef.current = stats.failedAttempts;
+  }, [ stats.failedAttempts, controls ]);
+
+  React.useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (
+        e.target instanceof HTMLInputElement ||
+        e.target instanceof HTMLTextAreaElement ||
+        e.metaKey ||
+        e.ctrlKey ||
+        e.altKey
+      ) {
+        return;
+      }
+
+      if ((stats.hasWon || stats.maxAttemptsReached) && e.key === 'Enter') {
+        e.preventDefault();
+        resetHangman();
+        return;
+      }
+
+      if (stats.hasWon || stats.maxAttemptsReached) {
+        return;
+      }
+
+      if (e.key.length === 1) {
+        guessLetter(e.key);
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [ guessLetter, resetHangman, stats.hasWon, stats.maxAttemptsReached ]);
+
+  return (
+    <div className="grid w-full place-items-center py-2">
+      <AnimatePresence mode="wait">
+        <motion.div
+          key={stats.word || 'empty'}
+          initial={{ opacity: 0, y: 6 }}
+          animate={{ opacity: 1, y: 0 }}
+          exit={{ opacity: 0, y: -6 }}
+          transition={{ duration: 0.16, ease: 'easeOut' }}
+          className="w-full">
+          <motion.div
+            animate={controls}
+            className="flex flex-wrap items-center justify-center gap-1.5 sm:gap-2">
+            {stats.word.split('').map((letter, index) => {
+              const isGuessed = stats.correctLetters.includes(letter);
+              const isHinted = hintedLetters.includes(letter);
+              const isMissedOnLoss = stats.maxAttemptsReached && !isGuessed;
+              const isRevealed = isGuessed || stats.hasWon || stats.maxAttemptsReached;
+
+              return (
+                <motion.div
+                  key={`${stats.word}-${index}`}
+                  initial={{ opacity: 0, y: 8, scale: 0.92 }}
+                  animate={{ opacity: 1, y: 0, scale: 1 }}
+                  transition={{
+                    type: 'spring',
+                    stiffness: 340,
+                    damping: 26,
+                    delay: index * 0.025,
+                  }}
+                  className={cn(
+                    'relative grid h-11 w-9 select-none place-items-center overflow-hidden border border-b-2 font-heading text-xl font-bold uppercase transition-colors duration-200 sm:h-12 sm:w-10 sm:text-2xl',
+                    stats.hasWon
+                      ? 'border-foreground bg-accent text-accent-foreground'
+                      : isMissedOnLoss
+                        ? 'border-destructive/60 border-b-destructive bg-destructive/15 text-destructive'
+                        : isHinted
+                          ? 'border-chart-3/60 border-b-chart-3 bg-secondary/80 text-foreground'
+                          : isGuessed
+                            ? 'border-border border-b-foreground bg-secondary/70 text-foreground'
+                            : 'border-border border-b-foreground/70 bg-card text-foreground',
+                  )}>
+                  <AnimatePresence mode="wait" initial={false}>
+                    {isRevealed ? (
+                      <motion.span
+                        key={`revealed-${letter}`}
+                        initial={{ opacity: 0, y: 8, scale: 0.65 }}
+                        animate={{ opacity: 1, y: 0, scale: 1 }}
+                        exit={{ opacity: 0, y: -6, scale: 0.65 }}
+                        transition={{
+                          type: 'spring',
+                          stiffness: 420,
+                          damping: 24,
+                        }}
+                        className="inline-block leading-none">
+                        {letter}
+                      </motion.span>
+                    ) : (
+                      <motion.span
+                        key="placeholder"
+                        initial={{ opacity: 0, scale: 0.5 }}
+                        animate={{ opacity: 0.25, scale: 1 }}
+                        exit={{ opacity: 0, scale: 0.5 }}
+                        transition={{ duration: 0.12 }}
+                        className="inline-block size-1.5 bg-muted-foreground"
+                      />
+                    )}
+                  </AnimatePresence>
+                </motion.div>
+              );
+            })}
+          </motion.div>
+        </motion.div>
+      </AnimatePresence>
+    </div>
+  );
+};
+
+export const HangmanKeyboard = () => {
+  const stats = useAtomValue(hangmanStatsAtom);
+  const guessLetter = useSetAtom(guessLetterAtom);
+  const isLocked = stats.hasWon || stats.maxAttemptsReached;
+
+  return (
+    <div className="flex w-full max-w-lg flex-col items-center gap-1.5">
+      {KEYBOARD_ROWS.map((row, rowIndex) => (
+        <div key={rowIndex} className="flex w-full justify-center gap-1 sm:gap-1.5">
+          {row.map((letter) => {
+            const isCorrect = stats.correctLetters.includes(letter);
+            const isWrong = stats.wrongLetters.includes(letter);
+            const isTried = isCorrect || isWrong;
+
+            return (
+              <motion.button
+                key={letter}
+                type="button"
+                whileTap={!isTried && !isLocked ? { scale: 0.92 } : undefined}
+                disabled={isTried || isLocked}
+                onClick={() => guessLetter(letter)}
+                aria-label={`Guess letter ${letter.toUpperCase()}`}
+                className={cn(
+                  'grid h-9 min-w-7 flex-1 max-w-11 select-none place-items-center border font-mono text-xs font-bold uppercase transition-colors sm:h-10 sm:text-sm',
+                  isCorrect
+                    ? 'border-foreground bg-accent text-accent-foreground'
+                    : isWrong
+                      ? 'border-destructive/30 bg-destructive/15 text-destructive/70 line-through opacity-60'
+                      : 'border-border bg-card text-foreground hover:bg-secondary active:bg-secondary/80 disabled:opacity-50',
+                )}>
+                {letter}
+              </motion.button>
+            );
+          })}
+        </div>
+      ))}
     </div>
   );
 };
@@ -175,23 +364,25 @@ export const HangmanErrorAlert = () => {
     if (error) {
       const timer = setTimeout(() => {
         setError(null);
-      }, 3000);
+      }, 2400);
       return () => clearTimeout(timer);
     }
   }, [ error, setError ]);
 
   return (
-    <div className="min-h-16 w-full max-w-xs px-2">
-      <AnimatePresence>
+    <div className="min-h-12 w-full max-w-md">
+      <AnimatePresence mode="wait">
         {error && (
           <motion.div
-            initial={{ opacity: 0, y: -8, scale: 0.95 }}
+            key={`${error.title}-${error.message}`}
+            initial={{ opacity: 0, y: -6, scale: 0.97 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
-            exit={{ opacity: 0, y: -8, scale: 0.95 }}>
-            <Alert variant="destructive" className="shadow-lg border-rose-200 dark:border-rose-900">
-              <AlertCircle className="h-4 w-4" />
-              <AlertTitle>{error.title}</AlertTitle>
-              <AlertDescription>{error.message}</AlertDescription>
+            exit={{ opacity: 0, y: -6, scale: 0.97 }}
+            transition={{ duration: 0.16 }}>
+            <Alert variant="destructive" className="py-2">
+              <WarningCircleIcon className="size-4" />
+              <AlertTitle className="text-xs font-bold uppercase">{error.title}</AlertTitle>
+              <AlertDescription className="text-xs">{error.message}</AlertDescription>
             </Alert>
           </motion.div>
         )}
@@ -201,18 +392,12 @@ export const HangmanErrorAlert = () => {
 };
 
 export const ResetHangman = () => {
-  const [ stats ] = useAtom(hangmanStatsAtom);
-  const resetHistory = useResetAtom(lettersAtom);
-  const resetFailedAttempts = useResetAtom(failedAttemptsAtom);
-  const resetError = useResetAtom(hangmanErrorAtom);
-  const [ , resetWord ] = useAtom(uniqueWordAtom);
+  const stats = useAtomValue(hangmanStatsAtom);
+  const resetHangman = useSetAtom(resetHangmanAtom);
 
-  const reset = () => {
-    resetHistory();
-    resetFailedAttempts();
-    resetError();
-    resetWord();
-  };
-
-  return <Button onClick={reset}>{stats.hasWon || stats.maxAttemptsReached ? 'Play Again' : 'Restart'}</Button>;
+  return (
+    <Button onClick={() => resetHangman()}>
+      {stats.hasWon || stats.maxAttemptsReached ? 'Play Again' : 'Restart'}
+    </Button>
+  );
 };

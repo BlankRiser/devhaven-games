@@ -1,4 +1,4 @@
-import { Info } from 'lucide-react';
+import { InfoIcon } from '@phosphor-icons/react';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { useIsMobile } from '@/hooks/use-mobile';
 
@@ -10,13 +10,15 @@ export const MobileBanner = () => {
   }
 
   return (
-    <div className="p-2">
+    <div className="border-b border-border p-3">
       <Alert>
-        <Info />
-        <AlertTitle>Full Experience on Desktop</AlertTitle>
+        <InfoIcon />
+        <AlertTitle className="font-heading text-base font-medium tracking-wider uppercase">
+          Full Experience on Desktop
+        </AlertTitle>
         <AlertDescription>
-          This website was designed for desktop browsers. For the best gameplay, features, and visuals, please switch to
-          a desktop device.
+          This platform is calibrated for desktop viewports. Switch to a desktop terminal for
+          optimal local multiplayer controls.
         </AlertDescription>
       </Alert>
     </div>

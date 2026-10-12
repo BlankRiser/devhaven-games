@@ -82,14 +82,20 @@ export default function TicTacToe(){
   };
 
   return (
-    <section className="border rounded-md border-zinc-200 dark:border-zinc-800 w-full h-full overflow-hidden">
-      <div className="grid place-items-center h-full w-full">
+    <section className="h-full w-full overflow-hidden border border-border bg-card/40">
+      <div className="grid h-full w-full place-items-center p-4">
         <div className="flex flex-col gap-3">
-          <div 
-            className={`
-              p-1 rounded-md flex flex-col gap-1 relative border overflow-hidden
-            border-zinc-200 dark:border-zinc-800  bg-zinc-100 dark:bg-zinc-900
-            `}>
+          <div className="flex items-center justify-between border border-border bg-secondary/50 px-3 py-1.5 text-xs tracking-wider text-muted-foreground uppercase">
+            <span>Grid // 3x3</span>
+            <span>
+              {winner === null
+                ? `Turn: ${turn.toUpperCase()}`
+                : winner === 'draw'
+                  ? 'Outcome: Draw'
+                  : `Cleared: ${winner.toUpperCase()}`}
+            </span>
+          </div>
+          <div className="relative flex flex-col gap-1 overflow-hidden border border-border bg-secondary/40 p-1">
             {board.map((columns, idx) => {
               return (
                 <div key={idx} className="flex flex-row gap-1">
@@ -97,8 +103,8 @@ export default function TicTacToe(){
                     return (
                       <Cell key={idx + jdx} isSelected={value !== null} onClick={() => handleCellClick(idx, jdx)}>
                         <AnimatePresence>
-                          {value === 'x' && <AnimatedCross className="text-indigo-400 size-6 md:size-12" />}
-                          {value === 'o' && <AnimatedCircle className="text-teal-400 size-6 md:size-12" />}
+                          {value === 'x' && <AnimatedCross className="size-8 text-foreground md:size-12" />}
+                          {value === 'o' && <AnimatedCircle className="size-8 text-chart-2 md:size-12" />}
                         </AnimatePresence>
                       </Cell>
                     );
@@ -109,19 +115,19 @@ export default function TicTacToe(){
             <AnimatePresence>
               {winner !== null && (
                 <motion.div
-                  initial={{ opacity: 0, scale: 0 }}
+                  initial={{ opacity: 0, scale: 0.95 }}
                   animate={{ opacity: 1, scale: 1 }}
-                  exit={{ opacity: 0, scale: 0 }}
-                  className="absolute inset-0 w-full h-full grid place-items-center bg-zinc-100 dark:bg-zinc-900">
-                  {winner === 'x' && <AnimatedCross className="size-40 md:size-56 text-indigo-400" />}
-                  {winner === 'o' && <AnimatedCircle className="size-40 md:size-56 text-teal-400" />}
+                  exit={{ opacity: 0, scale: 0.95 }}
+                  className="absolute inset-0 grid h-full w-full place-items-center bg-card/95">
+                  {winner === 'x' && <AnimatedCross className="size-40 text-foreground md:size-56" />}
+                  {winner === 'o' && <AnimatedCircle className="size-40 text-chart-2 md:size-56" />}
                   {winner === 'draw' && (
                     <motion.span
-                      initial={{ scale: 0.5, opacity: 0 }}
+                      initial={{ scale: 0.85, opacity: 0 }}
                       animate={{ scale: 1, opacity: 1 }}
-                      transition={{ type: 'spring', bounce: 0.5 }}
-                      className="text-5xl border-zinc-200 dark:border-zinc-800 md:text-7xl font-bold text-zinc-700 dark:text-zinc-300">
-                      Draw!
+                      transition={{ duration: 0.2 }}
+                      className="border-2 border-foreground px-4 py-2 font-heading text-5xl font-medium tracking-[-0.025em] text-foreground uppercase md:text-7xl">
+                      Draw
                     </motion.span>
                   )}
                 </motion.div>

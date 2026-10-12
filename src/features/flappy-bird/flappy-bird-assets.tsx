@@ -400,12 +400,12 @@ export const FlappyBirdCanvas = () => {
         aria-label="Flappy Bird game canvas. Click or press space to flap."
       />
 
-      <div className="pointer-events-none absolute inset-x-0 top-0 z-10 flex items-center justify-between px-4 py-3 text-zinc-800">
-        <div className="text-sm font-semibold drop-shadow-sm">
-          Score: <NumberFlow value={score} />
+      <div className="pointer-events-none absolute inset-x-0 top-0 z-10 flex items-center justify-between px-4 py-3">
+        <div className="border border-border bg-card/90 px-3 py-1 text-xs font-medium tracking-widest text-card-foreground uppercase">
+          Score // <NumberFlow value={score} />
         </div>
-        <div className="text-sm font-semibold drop-shadow-sm">
-          Best: <NumberFlow value={bestScore} />
+        <div className="border border-border bg-card/90 px-3 py-1 text-xs font-medium tracking-widest text-card-foreground uppercase">
+          Best // <NumberFlow value={bestScore} />
         </div>
       </div>
 
@@ -415,23 +415,26 @@ export const FlappyBirdCanvas = () => {
             initial={{ opacity: 0, scale: 0.96 }}
             animate={{ opacity: 1, scale: 1 }}
             exit={{ opacity: 0, scale: 0.96 }}
-            className="absolute inset-0 z-20 grid place-items-center bg-zinc-950/35 backdrop-blur-[1px]">
-            <div className="rounded-lg border border-zinc-200/20 bg-zinc-950/80 px-6 py-5 text-center text-zinc-50 shadow-xl">
-              <h3 className="text-2xl font-semibold tracking-tight">
+            className="absolute inset-0 z-20 grid place-items-center bg-background/60">
+            <div className="border-2 border-foreground/80 bg-card px-8 py-6 text-center text-card-foreground shadow-sm">
+              <span className="text-[10px] font-light tracking-widest text-muted-foreground uppercase">
+                {gameStatus === 'idle' ? 'MOD // 04 FLIGHT' : 'STATUS // TERMINATED'}
+              </span>
+              <h3 className="mt-1.5 font-heading text-4xl leading-none font-medium tracking-[-0.025em] uppercase">
                 {gameStatus === 'idle' ? 'Flappy Bird' : 'Game Over'}
               </h3>
-              <p className="mt-2 text-sm text-zinc-300">
+              <p className="mt-2 text-xs leading-4 font-light text-muted-foreground">
                 {gameStatus === 'idle'
-                  ? 'Tap, click, or press Space to start.'
+                  ? 'Tap, click, or press Space to launch.'
                   : `You scored ${score} point${score === 1 ? '' : 's'}.`}
               </p>
               {gameStatus === 'gameover' && (
-                <p className="mt-1 text-xs text-zinc-400">
-                  Best score: {Math.max(bestScore, score)}
+                <p className="mt-1 text-xs leading-4 font-light text-muted-foreground uppercase">
+                  Best score // {Math.max(bestScore, score)}
                 </p>
               )}
               <Button
-                className="mt-4"
+                className="mt-4 w-full"
                 onClick={(event) => {
                   event.stopPropagation();
                   activateOverlayButton();

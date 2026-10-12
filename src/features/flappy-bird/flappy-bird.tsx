@@ -4,7 +4,7 @@ import { FlappyBirdCanvas } from './flappy-bird-assets';
 
 export default function FlappyBird() {
   return (
-    <section className="relative border rounded-md border-zinc-200 dark:border-zinc-800 w-full h-full overflow-hidden">
+    <section className="relative h-full w-full overflow-hidden border border-border bg-card">
       <FlappyBirdCanvas />
     </section>
   );
