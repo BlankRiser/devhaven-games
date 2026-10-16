@@ -132,9 +132,8 @@ Response:
 
 ### Prerequisites
 
-1. **Cloudflare Account**: [Sign up for Cloudflare](https://dash.cloudflare.com/sign-up).
-2. **Workers Paid Plan**: Cloudflare Durable Objects is a **Workers Paid** feature ($5/month). You must have the Workers Paid subscription active on your Cloudflare account to use Durable Objects.
-3. **Cloudflare Account ID**: Found on your Cloudflare dashboard overview page on the right sidebar.
+1. **Cloudflare Account**: [Sign up for Cloudflare](https://dash.cloudflare.com/sign-up). Works on both **Workers Free** (via SQLite-backed Durable Objects) and Workers Paid plans.
+2. **Cloudflare Account ID**: Found on your Cloudflare dashboard overview page on the right sidebar.
 
 ---
 
@@ -210,5 +209,5 @@ Once your backend is deployed (e.g. at `https://backend.<subdomain>.workers.dev`
 - **`compatibility_date`**: Set to `"2025-02-14"`.
 - **`compatibility_flags`**: Includes `["nodejs_compat"]`.
 - **`durable_objects`**: Binds the `GameRoom` class to `env.GAME_ROOM`.
-- **`migrations`**: Configures migration tag `v1` registering `GameRoom`.
+- **`migrations`**: Configures migration tag `v1` registering `GameRoom` via `new_sqlite_classes`.
 - **`dev.port`**: Fixed to `8787` for consistent local frontend connection.
