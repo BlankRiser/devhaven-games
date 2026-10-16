@@ -9,15 +9,16 @@ import {
   MagnifyingGlassIcon,
   PuzzlePieceIcon,
   UsersIcon,
+  UsersThreeIcon,
   XIcon,
 } from "@phosphor-icons/react";
 import { matchSorter } from "match-sorter";
 import Link from "next/link";
 import * as React from "react";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { GAME_CATEGORIES, getVisibleGames } from "@/features/games-list";
 import type { GameCategoryId } from "@/features/games-list";
+import { GAME_CATEGORIES, getVisibleGames } from "@/features/games-list";
+import { Input } from "@/components/ui/input";
+import { Button, buttonVariants } from "@/components/ui/button";
 
 const CATEGORY_ICONS: Record<
   GameCategoryId,
@@ -30,7 +31,7 @@ const CATEGORY_ICONS: Record<
   "word-puzzle": PuzzlePieceIcon,
 };
 
-export default function Home() {
+const Home = () =>{
   const [searchQuery, setSearchQuery] = React.useState("");
   const [activeCategory, setActiveCategory] = React.useState<
     GameCategoryId | "all"
@@ -43,9 +44,12 @@ export default function Home() {
       activeCategory === "all"
         ? visibleGames
         : visibleGames.filter(
-            (game) =>
-              game.category === activeCategory ||
-              (activeCategory === "multiplayer" && Boolean(game.supportsMultiplayer))
+            (game) => {
+              return game.category === activeCategory ||
+              (activeCategory === "multiplayer" &&
+                (game.supportsMultiplayer === true ||
+                  game.category === "multiplayer"));
+            }
           );
 
     const trimmed = searchQuery.trim();
@@ -65,10 +69,18 @@ export default function Home() {
         : GAME_CATEGORIES.filter((cat) => cat.id === activeCategory);
 
     return categoriesToConsider
-      .map((category) => ({
-        ...category,
-        games: filteredGames.filter((game) => game.category === category.id),
-      }))
+      .map((category) => {
+        return {
+          ...category,
+          games: filteredGames.filter((game) => {
+            return category.id === "multiplayer"
+              ? (game.supportsMultiplayer === true ||
+                  game.category === "multiplayer")
+              : game.category === category.id;
+          }
+          ),
+        };
+      })
       .filter((group) => group.games.length > 0 || activeCategory === group.id);
   }, [activeCategory, filteredGames]);
 
@@ -106,8 +118,8 @@ export default function Home() {
                 id="game-search"
                 type="search"
                 value={searchQuery}
-                onChange={(e) => {
-                  setSearchQuery(e.target.value);
+                onChange={(event) => {
+                  setSearchQuery(event.target.value);
                 }}
                 placeholder="Search by title, genre, or tag..."
                 className="h-10 border-0 bg-transparent px-2.5 text-xs focus-visible:border-0"
@@ -148,8 +160,12 @@ export default function Home() {
 
         {GAME_CATEGORIES.map((category) => {
           const Icon = CATEGORY_ICONS[category.id];
-          const count = visibleGames.filter(
-            (g) => g.category === category.id
+          const count = visibleGames.filter((g) => {
+            return category.id === "multiplayer"
+              ? (g.supportsMultiplayer === true ||
+                  g.category === "multiplayer")
+              : g.category === category.id;
+          }
           ).length;
           const isSelected = activeCategory === category.id;
 
@@ -176,7 +192,7 @@ export default function Home() {
 
       {/* Categorized Game Sections */}
       <div className="divide-foreground/80 flex flex-1 flex-col divide-y-2">
-        {filteredGames.length === 0 && activeCategory === "all" ? (
+        {activeCategory === "all" && filteredGames.length === 0 ? (
           <section className="grid flex-1 place-items-center p-12 text-center">
             <div className="flex max-w-md flex-col items-center">
               <GameControllerIcon className="text-muted-foreground size-8" />
@@ -265,15 +281,27 @@ export default function Home() {
                                 <UsersIcon className="size-3.5" />
                                 {game.players}
                               </span>
-                              <span
-                                className={
-                                  isReady
-                                    ? "border-tertiary-foreground/20 bg-tertiary text-tertiary-foreground border px-2 py-0.5 text-[10px] leading-4 font-medium tracking-widest uppercase"
-                                    : "border-border bg-secondary text-secondary-foreground border px-2 py-0.5 text-[10px] leading-4 font-light tracking-widest uppercase"
-                                }
-                              >
-                                {isReady ? "Ready" : "Beta / WIP"}
-                              </span>
+                              <div className="flex items-center gap-1.5">
+                                {game.supportsMultiplayer === true ? (
+                                  <span className="border-emerald-500/40 bg-emerald-500/10 text-emerald-400 inline-flex items-center justify-center border px-1.5 py-0.5">
+                                    <UsersThreeIcon
+                                      className="size-3.5"
+                                      weight="fill"
+                                      aria-hidden="true"
+                                    />
+                                    <span className="sr-only">Multiplayer Supported</span>
+                                  </span>
+                                ) : null}
+                                <span
+                                  className={
+                                    isReady
+                                      ? "border-tertiary-foreground/20 bg-tertiary text-tertiary-foreground border px-2 py-0.5 text-[10px] leading-4 font-medium tracking-widest uppercase"
+                                      : "border-border bg-secondary text-secondary-foreground border px-2 py-0.5 text-[10px] leading-4 font-light tracking-widest uppercase"
+                                  }
+                                >
+                                  {isReady ? "Ready" : "Beta / WIP"}
+                                </span>
+                              </div>
                             </div>
 
                             {/* 6px gap to Title block */}
@@ -292,15 +320,16 @@ export default function Home() {
 
                           {/* 8px gap to CTA button */}
                           <div className="mt-2 pt-4">
-                            <Button
-                              variant="default"
-                              size="sm"
-                              render={<Link href={game.url} />}
-                              className="w-full justify-between"
-                            >
+                            <Link href={game.url} className={buttonVariants({
+                                variant: 'default',
+                                size: 'sm',
+                                className: "w-full justify-between"
+
+                              })}>
+                            
                               <span>Play Now</span>
                               <ArrowRightIcon data-icon="inline-end" />
-                            </Button>
+                            </Link>
                           </div>
                         </article>
                       );
@@ -315,3 +344,4 @@ export default function Home() {
     </div>
   );
 }
+export default Home

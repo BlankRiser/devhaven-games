@@ -69,7 +69,23 @@ export const GAME_CATEGORIES: GameCategory[] = [
   },
 ];
 
-export const GAMES_LIST = [
+export interface GameItem {
+  category: GameCategoryId;
+  categoryLabel: string;
+  color: string;
+  component: React.ComponentType;
+  description: string;
+  icon: string;
+  label: string;
+  players: string;
+  slug: string;
+  status: "completed" | "wip";
+  supportsMultiplayer?: boolean;
+  tags: string[];
+  url: string;
+}
+
+export const GAMES_LIST: GameItem[] = [
   {
     category: "board-games" as GameCategoryId,
     categoryLabel: "Board Games",

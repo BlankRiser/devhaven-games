@@ -10,9 +10,17 @@ import {
   LinkSimpleIcon,
   PuzzlePieceIcon,
   UsersIcon,
+  UsersThreeIcon,
 } from "@phosphor-icons/react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import {
+  Collapsible,
+  CollapsibleContent,
+  CollapsibleTrigger,
+} from "../ui/collapsible";
+import type { GameCategoryId } from "@/features/games-list";
+import { GAME_CATEGORIES, getVisibleGames } from "@/features/games-list";
 import {
   Sidebar,
   SidebarContent,
@@ -28,15 +36,8 @@ import {
   SidebarMenuSubItem,
   SidebarRail,
 } from "@/components/ui/sidebar";
-import { GAME_CATEGORIES, getVisibleGames } from "@/features/games-list";
-import {
-  Collapsible,
-  CollapsibleContent,
-  CollapsibleTrigger,
-} from "../ui/collapsible";
-import type { GameCategoryId } from "@/features/games-list";
 
-const CATEGORY_ICONS: Record<
+const categoryIcons: Record<
   GameCategoryId,
   React.ComponentType<{ className?: string }>
 > = {
@@ -49,7 +50,8 @@ const CATEGORY_ICONS: Record<
 
 export const AppSidebar = ({
   ...properties
-}: React.ComponentProps<typeof Sidebar>) => (
+}: React.ComponentProps<typeof Sidebar>) => {
+  return(
   <Sidebar collapsible="icon" {...properties}>
     <SidebarHeader className="border-sidebar-border flex h-14 shrink-0 justify-center border-b px-2 py-0">
       <SidebarMenu>
@@ -83,7 +85,7 @@ export const AppSidebar = ({
           <SidebarMenuButton
             render={
               <a
-                href="http://github.com/BlankRiser"
+                href="https://github.com/BlankRiser"
                 target="_blank"
                 rel="noreferrer"
               />
@@ -115,21 +117,24 @@ export const AppSidebar = ({
     </SidebarFooter>
     <SidebarRail />
   </Sidebar>
-);
+)};
 
 const NavMain = () => {
   const pathname = usePathname();
   const visibleGames = getVisibleGames();
 
-  const categoryGroups = GAME_CATEGORIES.map((category) => ({
-    ...category,
-    icon: CATEGORY_ICONS[category.id],
-    items: visibleGames.filter((game) =>
-      category.id === "multiplayer"
-        ? Boolean(game.supportsMultiplayer || game.category === "multiplayer")
-        : game.category === category.id
-    ),
-  }));
+  const categoryGroups = GAME_CATEGORIES.map((category) => {
+    return {
+      ...category,
+      icon: categoryIcons[category.id],
+      items: visibleGames.filter((game) => {
+        return category.id === "multiplayer"
+          ? (game.supportsMultiplayer === true || game.category === "multiplayer")
+          : game.category === category.id;
+      }
+      ),
+    };
+  });
 
   return (
     <SidebarGroup>
@@ -171,6 +176,16 @@ const NavMain = () => {
                             className="text-xs tracking-wider uppercase"
                           >
                             <span>{subItem.label}</span>
+                            {subItem.supportsMultiplayer === true ? (
+                              <span className="text-emerald-500 ml-auto flex items-center">
+                                <UsersThreeIcon
+                                  className="size-3.5 shrink-0"
+                                  weight="fill"
+                                  aria-hidden="true"
+                                />
+                                <span className="sr-only">Multiplayer Supported</span>
+                              </span>
+                            ) : null}
                           </SidebarMenuSubButton>
                         </SidebarMenuSubItem>
                       );

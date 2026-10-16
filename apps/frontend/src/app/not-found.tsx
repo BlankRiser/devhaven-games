@@ -1,7 +1,8 @@
 import { ArrowLeftIcon } from "@phosphor-icons/react/dist/ssr";
 import Link from "next/link";
-import { Button } from "@/components/ui/button";
+import { buttonVariants } from "@/components/ui/button";
 
+// eslint-disable-next-line react/function-component-definition
 export default function NotFound() {
   return (
     <div className="grid h-full w-full flex-1 place-items-center p-6">
@@ -16,10 +17,10 @@ export default function NotFound() {
           Could not locate the requested module in the shipping manifest.
         </p>
         <div className="mt-2 pt-2">
-          <Button render={<Link href="/" />}>
+          <Link href="/" className={buttonVariants({variant: 'default'})} >
             <ArrowLeftIcon data-icon="inline-start" />
             <span>Return to Manifest</span>
-          </Button>
+          </Link>
         </div>
       </div>
     </div>

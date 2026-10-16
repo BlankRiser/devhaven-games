@@ -1,32 +1,25 @@
 import core from "ultracite/eslint/core";
-import typeAware from "ultracite/eslint/type-aware";
+import next from "ultracite/eslint/next";
 import react from "ultracite/eslint/react";
 import tanstack from "ultracite/eslint/tanstack";
 import tanstackTypeAware from "ultracite/eslint/tanstack/type-aware";
-import next from "ultracite/eslint/next";
+import typeAware from "ultracite/eslint/type-aware";
 
+const frontendFiles = ["apps/frontend/**/*.{ts,tsx,js,jsx}"]
+const withFrontendFiles = (configs) => configs.map((config) => ({ ...config, files: frontendFiles, }));
+
+// eslint-disable-next-line unicorn/no-top-level-side-effects
 export default [
   ...core,
   ...typeAware,
-  ...react.map((config) => ({
-    ...config,
-    files: ["apps/frontend/**/*.{ts,tsx,js,jsx}"],
-  })),
-  ...tanstack.map((config) => ({
-    ...config,
-    files: ["apps/frontend/**/*.{ts,tsx,js,jsx}"],
-  })),
-  ...tanstackTypeAware.map((config) => ({
-    ...config,
-    files: ["apps/frontend/**/*.{ts,tsx,js,jsx}"],
-  })),
-  ...next.map((config) => ({
-    ...config,
-    files: ["apps/frontend/**/*.{ts,tsx,js,jsx}"],
-  })),
+  ...withFrontendFiles(react),
+  ...withFrontendFiles(tanstack),
+  ...withFrontendFiles(tanstackTypeAware),
+  ...withFrontendFiles(next),
   {
-    files: ["apps/frontend/**/*.{ts,tsx,js,jsx}"],
+    files: frontendFiles,
     rules: {
+      "arrow-body-style": "off",
       "react-doctor/use-lazy-motion": "off",
     },
     settings: {
