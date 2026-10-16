@@ -59,5 +59,8 @@
   "cSpell.words": [
     "pacman",
     "ultracite"
-  ]
+  ],
+  "[jsonc]": {
+    "editor.defaultFormatter": "vscode.json-language-features"
+  }
 }

@@ -1,0 +1,151 @@
+@import "tailwindcss";
+@import "tw-animate-css";
+@import "shadcn/tailwind.css";
+
+@plugin "tailwindcss-animate";
+
+@custom-variant dark (&:where(.dark, .dark *, [data-theme="dark"], [data-theme="dark"]));
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+
+  body {
+    @apply bg-background text-foreground;
+
+    font-feature-settings:
+      "tnum" on,
+      "zero" on;
+  }
+
+  html {
+    @apply font-sans;
+  }
+}
+
+@theme inline {
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+  --radius-2xl: calc(var(--radius) * 1.8);
+  --radius-3xl: calc(var(--radius) * 2.2);
+  --radius-4xl: calc(var(--radius) * 2.6);
+  --font-heading: var(--font-heading);
+  --font-sans: var(--font-sans);
+  --font-mono: var(--font-sans);
+  --color-sidebar-ring: var(--sidebar-ring);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar: var(--sidebar);
+  --color-chart-5: var(--chart-5);
+  --color-chart-4: var(--chart-4);
+  --color-chart-3: var(--chart-3);
+  --color-chart-2: var(--chart-2);
+  --color-chart-1: var(--chart-1);
+  --color-ring: var(--ring);
+  --color-input: var(--input);
+  --color-border: var(--border);
+  --color-destructive: var(--destructive);
+  --color-tertiary-foreground: var(--tertiary-foreground);
+  --color-tertiary: var(--tertiary);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-accent: var(--accent);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-muted: var(--muted);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-secondary: var(--secondary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-primary: var(--primary);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-popover: var(--popover);
+  --color-card-foreground: var(--card-foreground);
+  --color-card: var(--card);
+  --color-foreground: var(--foreground);
+  --color-background: var(--background);
+}
+
+/*
+  Design System Palette (from CARGA Shipping Manifest Spec):
+  - Primary (Parchment):  #F0E6C8 -> oklch(0.925 0.041 91.72)
+  - Secondary (Espresso): #332B1C -> oklch(0.293 0.028 82.80)
+  - Tertiary (Pistachio): #E2F4C8 -> oklch(0.943 0.061 125.66)
+  - Neutral (Carbon):     #121212 -> oklch(0.182 0.005 85.00)
+*/
+:root {
+  --radius: 0rem;
+  --background: oklch(92.5% 0.041 91.72deg);
+  --foreground: oklch(18.2% 0.005 85deg);
+  --card: oklch(94.2% 0.034 91.65deg);
+  --card-foreground: oklch(18.2% 0.005 85deg);
+  --popover: oklch(94.2% 0.034 91.65deg);
+  --popover-foreground: oklch(18.2% 0.005 85deg);
+  --primary: oklch(29.3% 0.028 82.8deg);
+  --primary-foreground: oklch(92.5% 0.041 91.72deg);
+  --secondary: oklch(88.4% 0.05 90.53deg);
+  --secondary-foreground: oklch(29.3% 0.028 82.8deg);
+  --tertiary: oklch(94.3% 0.061 125.66deg);
+  --tertiary-foreground: oklch(29.8% 0.037 128.14deg);
+  --muted: oklch(89.2% 0.046 90.8deg);
+  --muted-foreground: oklch(46.5% 0.034 81.5deg);
+  --accent: oklch(94.3% 0.061 125.66deg);
+  --accent-foreground: oklch(18.2% 0.005 85deg);
+  --destructive: oklch(47.8% 0.144 29.31deg);
+  --border: oklch(29.3% 0.028 82.8deg / 32%);
+  --input: oklch(29.3% 0.028 82.8deg / 45%);
+  --ring: oklch(29.3% 0.028 82.8deg);
+  --chart-1: oklch(29.3% 0.028 82.8deg);
+  --chart-2: oklch(44.3% 0.054 127.17deg);
+  --chart-3: oklch(38.8% 0.067 258.55deg);
+  --chart-4: oklch(74% 0.066 127.42deg);
+  --chart-5: oklch(53.4% 0.038 81.77deg);
+  --sidebar: oklch(88.4% 0.05 90.53deg);
+  --sidebar-foreground: oklch(18.2% 0.005 85deg);
+  --sidebar-primary: oklch(29.3% 0.028 82.8deg);
+  --sidebar-primary-foreground: oklch(92.5% 0.041 91.72deg);
+  --sidebar-accent: oklch(94.3% 0.061 125.66deg);
+  --sidebar-accent-foreground: oklch(18.2% 0.005 85deg);
+  --sidebar-border: oklch(29.3% 0.028 82.8deg / 32%);
+  --sidebar-ring: oklch(29.3% 0.028 82.8deg);
+}
+
+.dark {
+  --background: oklch(18.2% 0.005 85deg);
+  --foreground: oklch(92.5% 0.041 91.72deg);
+  --card: oklch(21.8% 0.014 83.5deg);
+  --card-foreground: oklch(92.5% 0.041 91.72deg);
+  --popover: oklch(21.8% 0.014 83.5deg);
+  --popover-foreground: oklch(92.5% 0.041 91.72deg);
+  --primary: oklch(92.5% 0.041 91.72deg);
+  --primary-foreground: oklch(18.2% 0.005 85deg);
+  --secondary: oklch(29.3% 0.028 82.8deg);
+  --secondary-foreground: oklch(92.5% 0.041 91.72deg);
+  --tertiary: oklch(32.5% 0.045 127.5deg);
+  --tertiary-foreground: oklch(94.3% 0.061 125.66deg);
+  --muted: oklch(25% 0.018 82.8deg);
+  --muted-foreground: oklch(71% 0.036 88deg);
+  --accent: oklch(29.3% 0.028 82.8deg);
+  --accent-foreground: oklch(94.3% 0.061 125.66deg);
+  --destructive: oklch(64.5% 0.165 27.5deg);
+  --border: oklch(92.5% 0.041 91.72deg / 22%);
+  --input: oklch(92.5% 0.041 91.72deg / 32%);
+  --ring: oklch(94.3% 0.061 125.66deg);
+  --chart-1: oklch(92.5% 0.041 91.72deg);
+  --chart-2: oklch(94.3% 0.061 125.66deg);
+  --chart-3: oklch(65% 0.085 258.55deg);
+  --chart-4: oklch(74% 0.066 127.42deg);
+  --chart-5: oklch(63.5% 0.037 81.88deg);
+  --sidebar: oklch(15.5% 0.007 84deg);
+  --sidebar-foreground: oklch(92.5% 0.041 91.72deg);
+  --sidebar-primary: oklch(94.3% 0.061 125.66deg);
+  --sidebar-primary-foreground: oklch(18.2% 0.005 85deg);
+  --sidebar-accent: oklch(29.3% 0.028 82.8deg);
+  --sidebar-accent-foreground: oklch(94.3% 0.061 125.66deg);
+  --sidebar-border: oklch(92.5% 0.041 91.72deg / 20%);
+  --sidebar-ring: oklch(94.3% 0.061 125.66deg);
+}

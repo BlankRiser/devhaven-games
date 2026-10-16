@@ -1,23 +1,49 @@
 # DevHaven Games
 
-Building games for fun. Learning new technologies.
+A web-based gaming platform configured as a **Bun monorepo** with offline and real-time multiplayer support.
 
-### Tech Stack
+## Architecture
 
-- [Next.js](https://nextjs.org/)
-- [Tailwind CSS](https://tailwindcss.com/)
-- [Shadcn UI](https://ui.shadcn.com/)
-- [motion](https://motion.dev/)
+- **`apps/frontend`**: Next.js 15 App Router web application with Tailwind CSS 4, shadcn/ui, Jotai, and Motion.
+- **`apps/backend`**: Real-time multiplayer game server built on **Cloudflare Workers**, **Hono**, and **Durable Objects** with WebSocket Hibernation.
 
-### TODO
+## Getting Started
 
-- [x] Tic Tac Toe
-- [x] Hangman
-- [ ] Minesweeper (WIP)
-- [ ] Snake
-- [ ] Tetris
-- [ ] Block breaker using balls
-- [ ] Flappy bird
-- [ ] Pong
-- [ ] Space Invaders
-- [ ] Pacman
+### Prerequisites
+
+- [Bun](https://bun.sh/) (v1.3+ recommended)
+
+### Installation
+
+```bash
+bun install
+```
+
+### Development
+
+Run all apps concurrently:
+```bash
+bun dev
+```
+
+Or run individual apps:
+```bash
+# Frontend (Next.js)
+bun dev:frontend
+
+# Backend (Cloudflare Workers + Hono)
+bun dev:backend
+```
+
+### Building & Typechecking
+
+```bash
+# Typecheck backend
+bun --filter backend typecheck
+
+# Build frontend
+bun build:frontend
+
+# Deploy backend
+bun --filter backend deploy
+```
