@@ -1,6 +1,7 @@
 import type {
   ClientMessage,
   GameType,
+  HostLeaveAction,
   PlayerRole,
   RoomState,
   ServerMessage,
@@ -9,6 +10,7 @@ import type {
 export interface ConnectOptions {
   backendUrl: string;
   gameType?: GameType;
+  hostLeaveAction?: HostLeaveAction;
   name: string;
   onClose?: (event: CloseEvent) => void;
   onError?: (event: Event) => void;
@@ -28,9 +30,11 @@ export interface EventCallbackMap {
   }) => void;
   error: (payload: { code?: string; message: string }) => void;
   game_state_updated: (payload: { gameState: unknown; status: string }) => void;
+  host_left: (payload: { message: string }) => void;
   player_joined: (payload: { player: unknown }) => void;
   player_left: (payload: { name: string; playerId: string }) => void;
   pong: (payload: { timestamp: number }) => void;
+  room_closed: (payload: { reason: string }) => void;
   room_state: (state: RoomState) => void;
 }
 
@@ -43,10 +47,14 @@ export class MultiplayerClient {
     this.disconnect();
 
     const wsProtocol = options.backendUrl.startsWith("https") ? "wss" : "ws";
-    const host = options.backendUrl.replace(/^https?:\/\//u, "");
+    const trimmedUrl = options.backendUrl.endsWith("/")
+      ? options.backendUrl.slice(0, -1)
+      : options.backendUrl;
+    const host = trimmedUrl.replace(/^https?:\/\//u, "");
 
     const parameters = new URLSearchParams({
       gameType: options.gameType ?? "tic-tac-toe",
+      hostLeaveAction: options.hostLeaveAction ?? "keep_going",
       name: options.name,
       role: options.role ?? "player",
       roomId: options.roomId,

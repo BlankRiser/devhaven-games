@@ -2,66 +2,76 @@ export type GameType = "tic-tac-toe" | "hangman" | "minesweeper" | "generic";
 
 export type PlayerRole = "player" | "spectator";
 
+export type HostLeaveAction = "end_session" | "keep_going";
+
 export interface Player {
+  connectedAt: number;
   id: string;
+  isReady: boolean;
   name: string;
   role: PlayerRole;
   symbol?: string;
-  isReady: boolean;
-  connectedAt: number;
 }
 
-export type RoomStatus = "waiting" | "in_progress" | "finished";
+export type RoomStatus = "finished" | "in_progress" | "waiting";
 
 export interface RoomState<TGameState = unknown> {
-  id: string;
+  createdAt: number;
+  gameState: TGameState;
   gameType: GameType;
-  status: RoomStatus;
   hostId: string;
+  hostLeaveAction: HostLeaveAction;
+  id: string;
   players: Record<string, Player>;
   spectators: Record<string, Player>;
-  gameState: TGameState;
-  createdAt: number;
+  status: RoomStatus;
   updatedAt: number;
 }
 
 export interface WebSocketAttachment {
-  playerId: string;
-  name: string;
-  role: PlayerRole;
   joinedAt: number;
+  name: string;
+  playerId: string;
+  role: PlayerRole;
 }
 
 // Client to Server Messages
 export type ClientMessage =
   | {
+      payload: {
+        hostLeaveAction?: HostLeaveAction;
+        name: string;
+        playerId?: string;
+        role?: PlayerRole;
+      };
       type: "join";
-      payload: { name: string; playerId?: string; role?: PlayerRole };
     }
-  | { type: "ready"; payload: { isReady: boolean } }
-  | { type: "game_action"; payload: unknown }
+  | { payload: { isReady: boolean }; type: "ready" }
+  | { payload: unknown; type: "game_action" }
   | { type: "reset" }
-  | { type: "chat"; payload: { message: string } }
+  | { payload: { message: string }; type: "chat" }
   | { type: "ping" };
 
 // Server to Client Messages
 export type ServerMessage<TGameState = unknown> =
-  | { type: "room_state"; payload: RoomState<TGameState> }
-  | { type: "player_joined"; payload: { player: Player } }
-  | { type: "player_left"; payload: { playerId: string; name: string } }
-  | { type: "game_action"; payload: { playerId: string; action: unknown } }
+  | { payload: RoomState<TGameState>; type: "room_state" }
+  | { payload: { player: Player }; type: "player_joined" }
+  | { payload: { name: string; playerId: string }; type: "player_left" }
+  | { payload: { action: unknown; playerId: string }; type: "game_action" }
   | {
-      type: "game_state_updated";
       payload: { gameState: TGameState; status: RoomStatus };
+      type: "game_state_updated";
     }
   | {
-      type: "chat_message";
       payload: {
+        message: string;
         playerId: string;
         playerName: string;
-        message: string;
         timestamp: number;
       };
+      type: "chat_message";
     }
-  | { type: "error"; payload: { message: string; code?: string } }
-  | { type: "pong"; payload: { timestamp: number } };
+  | { payload: { code?: string; message: string }; type: "error" }
+  | { payload: { message: string }; type: "host_left" }
+  | { payload: { reason: string }; type: "room_closed" }
+  | { payload: { timestamp: number }; type: "pong" };

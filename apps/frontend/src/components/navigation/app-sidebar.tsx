@@ -9,6 +9,7 @@ import {
   JoystickIcon,
   LinkSimpleIcon,
   PuzzlePieceIcon,
+  UsersIcon,
 } from "@phosphor-icons/react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
@@ -39,10 +40,11 @@ const CATEGORY_ICONS: Record<
   GameCategoryId,
   React.ComponentType<{ className?: string }>
 > = {
-  "board-games": CheckerboardIcon,
   "2d-platformer": JoystickIcon,
-  "word-puzzle": PuzzlePieceIcon,
+  "board-games": CheckerboardIcon,
   "card-games": CardsIcon,
+  multiplayer: UsersIcon,
+  "word-puzzle": PuzzlePieceIcon,
 };
 
 export const AppSidebar = ({
@@ -122,7 +124,11 @@ const NavMain = () => {
   const categoryGroups = GAME_CATEGORIES.map((category) => ({
     ...category,
     icon: CATEGORY_ICONS[category.id],
-    items: visibleGames.filter((game) => game.category === category.id),
+    items: visibleGames.filter((game) =>
+      category.id === "multiplayer"
+        ? Boolean(game.supportsMultiplayer || game.category === "multiplayer")
+        : game.category === category.id
+    ),
   }));
 
   return (

@@ -51,14 +51,20 @@ export const assignPlayerSymbols = (
   const [firstId, secondId] = Object.keys(players);
   const updatedSymbols: Record<string, "O" | "X"> = { ...state.playerSymbols };
 
-  if (typeof firstId === "string" && !Object.hasOwn(updatedSymbols, firstId)) {
-    updatedSymbols[firstId] = "X";
-    players[firstId].symbol = "X";
+  if (typeof firstId === "string") {
+    if (!Object.hasOwn(updatedSymbols, firstId)) {
+      updatedSymbols[firstId] = "X";
+    }
+    players[firstId].symbol = updatedSymbols[firstId];
   }
 
-  if (typeof secondId === "string" && !Object.hasOwn(updatedSymbols, secondId)) {
-    updatedSymbols[secondId] = "O";
-    players[secondId].symbol = "O";
+  if (typeof secondId === "string") {
+    if (!Object.hasOwn(updatedSymbols, secondId)) {
+      const taken =
+        typeof firstId === "string" ? updatedSymbols[firstId] : undefined;
+      updatedSymbols[secondId] = taken === "X" ? "O" : "X";
+    }
+    players[secondId].symbol = updatedSymbols[secondId];
   }
 
   return {

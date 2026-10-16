@@ -1,7 +1,7 @@
 import { Hono } from "hono";
 import { cors } from "hono/cors";
 import type { GameRoom } from "./room";
-import type { GameType } from "./types";
+import type { GameType, HostLeaveAction } from "./types";
 
 export { GameRoom } from "./room";
 
@@ -12,6 +12,7 @@ export interface CloudflareBindings {
 
 interface CreateRoomRequest {
   gameType?: GameType;
+  hostLeaveAction?: HostLeaveAction;
   roomId?: string;
 }
 
@@ -36,26 +37,26 @@ app.use(
 // Root informational endpoint
 app.get("/", (c) => {
   return c.json({
-              endpoints: {
-                createRoom: "POST /rooms",
-                getRoom: "GET /rooms/:roomId",
-                health: "GET /health",
-                websocket: "GET /rooms/:roomId/ws",
-              },
-              engine: "Cloudflare Workers + Hono + Durable Objects",
-              service: "dev-games-multiplayer-backend",
-              supportedGames: ["generic", "hangman", "minesweeper", "tic-tac-toe"],
-              version: "0.1.0",
-            });
+    endpoints: {
+      createRoom: "POST /rooms",
+      getRoom: "GET /rooms/:roomId",
+      health: "GET /health",
+      websocket: "GET /rooms/:roomId/ws",
+    },
+    engine: "Cloudflare Workers + Hono + Durable Objects",
+    service: "dev-games-multiplayer-backend",
+    supportedGames: ["generic", "hangman", "minesweeper", "tic-tac-toe"],
+    version: "0.1.0",
+  });
 });
 
 // Health check endpoint
 app.get("/health", (c) => {
   return c.json({
-              env: c.env.ENVIRONMENT ?? "development",
-              status: "ok",
-              timestamp: Date.now(),
-            });
+    env: c.env.ENVIRONMENT ?? "development",
+    status: "ok",
+    timestamp: Date.now(),
+  });
 });
 
 // Create room or generate a new room ID
@@ -67,6 +68,8 @@ app.post("/rooms", async (c) => {
     body = {};
   }
 
+  const hostLeaveAction: HostLeaveAction =
+    body.hostLeaveAction === "end_session" ? "end_session" : "keep_going";
   const gameType: GameType = body.gameType ?? "tic-tac-toe";
   const customId =
     typeof body.roomId === "string" && body.roomId.trim().length > 0
@@ -76,8 +79,9 @@ app.post("/rooms", async (c) => {
 
   return c.json({
     gameType,
+    hostLeaveAction,
     roomId,
-    websocketUrl: `/rooms/${roomId}/ws?gameType=${gameType}`,
+    websocketUrl: `/rooms/${roomId}/ws?gameType=${gameType}&hostLeaveAction=${hostLeaveAction}`,
   });
 });
 
@@ -109,8 +113,14 @@ app.get("/rooms/:roomId/ws", async (c) => {
   const id = c.env.GAME_ROOM.idFromName(roomId);
   const stub = c.env.GAME_ROOM.get(id);
 
-  // Forward the WebSocket handshake request to the Durable Object
-  return await stub.fetch(c.req.raw);
+  // Ensure roomId query parameter is present on the forwarded request
+  const url = new URL(c.req.raw.url);
+  if (!url.searchParams.has("roomId")) {
+    url.searchParams.set("roomId", roomId);
+  }
+
+  const forwardRequest = new Request(url.href, c.req.raw);
+  return await stub.fetch(forwardRequest);
 });
 
 // eslint-disable-next-line promise/prefer-await-to-callbacks

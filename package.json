@@ -12,6 +12,7 @@
     "build": "bun --filter '*' build",
     "build:frontend": "bun --filter frontend build",
     "build:backend": "bun --filter backend build",
+    "test:multiplayer": "bun --filter backend test:multiplayer",
     "lint": "bun --filter '*' lint",
     "check": "ultracite check",
     "fix": "ultracite fix"

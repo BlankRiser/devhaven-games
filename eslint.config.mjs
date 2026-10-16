@@ -26,10 +26,21 @@ export default [
   })),
   {
     files: ["apps/frontend/**/*.{ts,tsx,js,jsx}"],
+    rules: {
+      "react-doctor/use-lazy-motion": "off",
+    },
     settings: {
       next: {
         rootDir: ["apps/frontend/"],
       },
+    },
+  },
+  {
+    files: ["apps/frontend/src/features/common/multiplayer/**/*.{ts,tsx}"],
+    rules: {
+      "@typescript-eslint/no-unsafe-type-assertion": "off",
+      "unicorn/consistent-class-member-order": "off",
+      "unicorn/try-complexity": "off",
     },
   },
   {
@@ -43,6 +54,20 @@ export default [
       "unicorn/consistent-class-member-order": "off",
       "unicorn/no-invalid-response-options": "off",
       "unicorn/no-top-level-side-effects": "off",
+    },
+  },
+  {
+    files: ["apps/backend/scripts/**/*.{ts,tsx}"],
+    rules: {
+      "@typescript-eslint/array-type": "off",
+      "promise/avoid-new": "off",
+      "sonarjs/max-union-size": "off",
+      "sonarjs/pseudo-random": "off",
+      "unicorn/consistent-boolean-name": "off",
+      "unicorn/no-process-exit": "off",
+      "unicorn/prefer-early-return": "off",
+      "unicorn/prefer-error-is-error": "off",
+      "unicorn/try-complexity": "off",
     },
   },
 ];

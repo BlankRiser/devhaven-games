@@ -26,53 +26,74 @@ const TicTacToe = dynamic(
 );
 
 export type GameCategoryId =
-  "board-games" | "2d-platformer" | "word-puzzle" | "card-games";
+  | "board-games"
+  | "2d-platformer"
+  | "word-puzzle"
+  | "card-games"
+  | "multiplayer";
 
 export interface GameCategory {
+  description: string;
   id: GameCategoryId;
   label: string;
-  description: string;
 }
 
 export const GAME_CATEGORIES: GameCategory[] = [
   {
-    id: "board-games",
-    label: "Board Games",
+    description:
+      "Cross-device real-time multiplayer games with room codes and instant invite links.",
+    id: "multiplayer",
+    label: "Online Multiplayer",
+  },
+  {
     description:
       "Grid-based tactics, tabletop classics, and head-to-head strategy.",
+    id: "board-games",
+    label: "Board Games",
   },
   {
-    id: "2d-platformer",
-    label: "2D Platformer",
     description:
       "Fast-paced side-scrolling action and reflex arcade challenges.",
+    id: "2d-platformer",
+    label: "2D Platformer",
   },
   {
+    description: "Vocabulary deduction, logic riddles, and brain teasers.",
     id: "word-puzzle",
     label: "Word & Puzzle",
-    description: "Vocabulary deduction, logic riddles, and brain teasers.",
   },
   {
+    description: "Classic deck games and tabletop card showdowns.",
     id: "card-games",
     label: "Card Games",
-    description: "Classic deck games and tabletop card showdowns.",
   },
 ];
 
 export const GAMES_LIST = [
   {
-    slug: "tic-tac-toe",
-    status: "completed" as const,
-    label: "Tic Tac Toe",
-    description: "Take turns marking X and O on a 3x3 grid to win.",
     category: "board-games" as GameCategoryId,
     categoryLabel: "Board Games",
-    players: "2 Players",
-    tags: ["board", "grid", "strategy", "2p", "classic", "local multiplayer"],
-    icon: "gamepad",
     color: "green",
-    url: "/games/tic-tac-toe",
     component: TicTacToe,
+    description:
+      "Take turns marking X and O on a 3x3 grid to win. Supports local & cross-device online play.",
+    icon: "gamepad",
+    label: "Tic Tac Toe",
+    players: "1-2 Players",
+    slug: "tic-tac-toe",
+    status: "completed" as const,
+    supportsMultiplayer: true,
+    tags: [
+      "board",
+      "grid",
+      "strategy",
+      "2p",
+      "classic",
+      "multiplayer",
+      "online multiplayer",
+      "local multiplayer",
+    ],
+    url: "/games/tic-tac-toe",
   },
   {
     slug: "hangman",

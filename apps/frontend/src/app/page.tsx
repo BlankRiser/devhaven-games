@@ -23,10 +23,11 @@ const CATEGORY_ICONS: Record<
   GameCategoryId,
   React.ComponentType<{ className?: string }>
 > = {
-  "board-games": CheckerboardIcon,
   "2d-platformer": JoystickIcon,
-  "word-puzzle": PuzzlePieceIcon,
+  "board-games": CheckerboardIcon,
   "card-games": CardsIcon,
+  multiplayer: UsersIcon,
+  "word-puzzle": PuzzlePieceIcon,
 };
 
 export default function Home() {
@@ -41,7 +42,11 @@ export default function Home() {
     const byCategory =
       activeCategory === "all"
         ? visibleGames
-        : visibleGames.filter((game) => game.category === activeCategory);
+        : visibleGames.filter(
+            (game) =>
+              game.category === activeCategory ||
+              (activeCategory === "multiplayer" && Boolean(game.supportsMultiplayer))
+          );
 
     const trimmed = searchQuery.trim();
     if (!trimmed) {

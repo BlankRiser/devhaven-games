@@ -230,7 +230,7 @@ export const canDropRunOnColumn = (
   }
 
   const targetBottomCard = targetColumn.at(-1);
-  if (!targetBottomCard.faceUp) {
+  if (!targetBottomCard || !targetBottomCard.faceUp) {
     return false;
   }
 
@@ -256,8 +256,9 @@ export const extractCompletedRuns = (
       const col = nextColumns[colIndex];
 
       // First flip exposed bottom card if face-down
-      if (col.length > 0 && !col.at(-1).faceUp) {
-        col.at(-1).faceUp = true;
+      const exposedBottom = col.at(-1);
+      if (exposedBottom && !exposedBottom.faceUp) {
+        exposedBottom.faceUp = true;
       }
 
       if (col.length >= 13) {
@@ -272,8 +273,9 @@ export const extractCompletedRuns = (
         if (isCompleteKingToAce) {
           col.splice(startIndex, 13);
           nextCompleted.push(targetSuit);
-          if (col.length > 0 && !col.at(-1).faceUp) {
-            col.at(-1).faceUp = true;
+          const newlyExposed = col.at(-1);
+          if (newlyExposed && !newlyExposed.faceUp) {
+            newlyExposed.faceUp = true;
           }
           isChecked = true;
         }
@@ -311,7 +313,7 @@ export const findBestDestinationColumn = (
     } else {
       const targetBottom = targetCol.at(-1);
       // Prefer same-suit connection, and prefer longer existing same-suit runs
-      score = targetBottom.suit === movingTop.suit ? 100 : 50;
+      score = targetBottom && targetBottom.suit === movingTop.suit ? 100 : 50;
     }
 
     if (!(score > bestScore)) {
