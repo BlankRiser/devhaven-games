@@ -56,8 +56,5 @@
   "emmet.showExpandedAbbreviation": "never",
   "js/ts.tsdk.path": "node_modules/typescript/lib",
   "js/ts.tsdk.promptToUseWorkspaceVersion": true,
-  "cSpell.words": [
-    "pacman",
-    "ultracite"
-  ]
+  "cSpell.words": ["pacman", "ultracite"]
 }
