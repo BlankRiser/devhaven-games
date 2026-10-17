@@ -1,6 +1,6 @@
 {
-  "$schema": "node_modules/wrangler/config-schema.json",
-  "name": "backend",
+  "$schema": "../../node_modules/wrangler/config-schema.json",
+  "name": "games-backend",
   "main": "src/index.ts",
   "compatibility_date": "2025-02-14",
   "compatibility_flags": [
