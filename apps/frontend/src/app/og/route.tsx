@@ -1,132 +1,368 @@
+import fs from "node:fs/promises";
+import path from "node:path";
 import { ImageResponse } from "next/og";
 import type { NextRequest } from "next/server";
 
-export const runtime = "edge";
+export const runtime = "nodejs";
 
-export async function GET(request: NextRequest) {
+const fontNameHeading = "Barlow Condensed";
+const fontNameMono = "IBM Plex Mono";
+const defaultSpec = "SYS-00";
+const defaultTitle = "DevHaven Games";
+const defaultDesc =
+  "Play free online browser games, and multiplayer arcade games instantly. No downloads or installation required.";
+const defaultCategory = "Arcade Library";
+const defaultPlayers = "1-2 Players";
+const fullDimension = "100%";
+const spaceBetweenLayout = "space-between";
+const columnLayout = "column";
+
+const engineLabel = "[ ZERO-INSTALL BROWSER ENGINE ]";
+const multiplayerLabel = "● REAL-TIME WEBSOCKET MULTIPLAYER";
+const localSessionLabel = "⚡ INSTANT LOCAL SESSION";
+const noAdsLabel = "0 ADS // NO TRACKING";
+const footerSpecLabel = "OPEN SOURCE";
+
+const toArrayBuffer = (buffer: Buffer): ArrayBuffer => {
+  const arrayBuffer = new ArrayBuffer(buffer.byteLength);
+  const view = new Uint8Array(arrayBuffer);
+  view.set(buffer);
+  return arrayBuffer;
+};
+
+const loadFontBuffer = async (
+  fontFilename: string
+): Promise<ArrayBuffer | null> => {
+  const primaryPath = path.join(
+    process.cwd(),
+    "apps/frontend/src/assets/fonts",
+    fontFilename
+  );
+  const fallbackPath = path.join(
+    process.cwd(),
+    "src/assets/fonts",
+    fontFilename
+  );
+
+  try {
+    const fileBuffer = await fs.readFile(primaryPath);
+    return toArrayBuffer(fileBuffer);
+  } catch {
+    try {
+      const fileBuffer = await fs.readFile(fallbackPath);
+      return toArrayBuffer(fileBuffer);
+    } catch {
+      return null;
+    }
+  }
+};
+
+const barlowPromise = loadFontBuffer("BarlowCondensed-SemiBold.ttf");
+const ibmPromise = loadFontBuffer("IBMPlexMono-Regular.ttf");
+
+type ImageResponseOptions = NonNullable<
+  ConstructorParameters<typeof ImageResponse>[1]
+>;
+
+interface CustomFontItem {
+  data: ArrayBuffer;
+  name: string;
+  style: "normal";
+  weight: 400 | 600;
+}
+
+const pillBadgeStyle = {
+  alignItems: "center" as const,
+  backgroundColor: "#201B15",
+  border: "1px solid #332B1C",
+  color: "#9C927F",
+  display: "flex" as const,
+  fontSize: "12px",
+  letterSpacing: "0.08em",
+  padding: "6px 14px",
+  textTransform: "uppercase" as const,
+};
+
+const getHandler = async (request: NextRequest): Promise<Response> => {
   const { searchParams } = request.nextUrl;
-  const postTitle = searchParams.get("title");
+  const rawTitle = searchParams.get("title");
+  const rawDescription = searchParams.get("description");
+  const rawCategory = searchParams.get("category");
+  const rawPlayers = searchParams.get("players");
+  const rawSpec = searchParams.get("spec");
+  const isMultiplayer = searchParams.get("multiplayer") === "true";
 
-  const geistSansFont = fetch(
-    new URL(
-      "https://cdn.jsdelivr.net/fontsource/fonts/geist-sans@latest/latin-500-normal.ttf",
-      import.meta.url
-    )
-  ).then(async (res) => await res.arrayBuffer());
+  const cleanTitle = rawTitle === null ? "" : rawTitle.trim();
+  const cleanDescription =
+    rawDescription === null ? "" : rawDescription.trim();
+  const cleanCategory = rawCategory === null ? "" : rawCategory.trim();
+  const cleanPlayers = rawPlayers === null ? "" : rawPlayers.trim();
+  const cleanSpec = rawSpec === null ? "" : rawSpec.trim();
 
-  const geistMonoFont = fetch(
-    new URL(
-      "https://cdn.jsdelivr.net/fontsource/fonts/geist-mono@latest/latin-400-normal.ttf",
-      import.meta.url
-    )
-  ).then(async (res) => await res.arrayBuffer());
+  const displayTitle = cleanTitle.length > 0 ? cleanTitle : defaultTitle;
+  const displayDescription =
+    cleanDescription.length > 0 ? cleanDescription : defaultDesc;
+  const displayCategory =
+    cleanCategory.length > 0 ? cleanCategory : defaultCategory;
+  const displayPlayers =
+    cleanPlayers.length > 0 ? cleanPlayers : defaultPlayers;
+  const displaySpec = cleanSpec.length > 0 ? cleanSpec : defaultSpec;
 
-  const geistSansFontData = await geistSansFont;
-  const geistMonoFontData = await geistMonoFont;
+  const [barlowData, ibmData] = await Promise.all([
+    barlowPromise,
+    ibmPromise,
+  ]);
+
+  const loadedFonts: CustomFontItem[] = [];
+
+  if (barlowData !== null) {
+    loadedFonts.push({
+      data: barlowData,
+      name: fontNameHeading,
+      style: "normal",
+      weight: 600,
+    });
+  }
+
+  if (ibmData !== null) {
+    loadedFonts.push({
+      data: ibmData,
+      name: fontNameMono,
+      style: "normal",
+      weight: 400,
+    });
+  }
+
+  const fontFamilyHeading =
+    loadedFonts.length > 0 ? fontNameHeading : "sans-serif";
+  const fontFamilyMono = loadedFonts.length > 0 ? fontNameMono : "monospace";
+
+  const imageOptions: ImageResponseOptions = {
+    height: 630,
+    width: 1200,
+  };
+
+  if (loadedFonts.length > 0) {
+    imageOptions.fonts = loadedFonts;
+  }
 
   return new ImageResponse(
     <div
       style={{
-        height: "100%",
-        width: "100%",
+        backgroundColor: "#121212",
         display: "flex",
-        flexDirection: "column",
-        alignItems: "flex-start",
-        justifyContent: "flex-start",
-        backgroundColor: "black",
-        padding: "48px",
+        flexDirection: columnLayout,
+        height: fullDimension,
+        justifyContent: spaceBetweenLayout,
+        padding: "44px",
+        width: fullDimension,
       }}
     >
       <div
         style={{
+          backgroundColor: "#171410",
+          border: "2px solid #2B241C",
           display: "flex",
-          flexDirection: "column",
-          justifyContent: "space-between",
-          gap: 20,
+          flexDirection: columnLayout,
+          height: fullDimension,
+          justifyContent: spaceBetweenLayout,
+          padding: "40px",
+          position: "relative",
+          width: fullDimension,
         }}
       >
+        {/* Top Header Bar */}
         <div
           style={{
-            display: "flex",
-            justifyContent: "center",
             alignItems: "center",
-            width: "100vw",
-            height: "100%",
-            fontSize: 120,
-            fontFamily: "Geist Sans",
-            color: "white",
-            textTransform: "capitalize",
+            display: "flex",
+            justifyContent: spaceBetweenLayout,
+            width: fullDimension,
           }}
         >
-          {postTitle ?? "Games"}
-        </div>
-      </div>
-      <div
-        style={{
-          display: "flex",
-          flexDirection: "column",
-          marginTop: "auto",
-          width: "100%",
-          gap: 24,
-        }}
-      >
-        <div
-          style={{
-            display: "flex",
-            width: "100%",
-            margin: "0px auto",
-            border: "4px solid #171717",
-            borderRadius: "4px",
-          }}
-        />
+            <div
+              style={{
+                alignItems: "center",
+                backgroundColor: "#E2F4C8",
+                color: "#121212",
+                display: "flex",
+                fontFamily: fontFamilyMono,
+                fontSize: "14px",
+                fontWeight: 700,
+                height: "26px",
+                justifyContent: "center",
+                letterSpacing: "0.1em",
+                padding: "0 10px",
+              }}
+            >
+              DEVHAVEN
+            </div>
 
+          {/* Category & Spec Badges */}
+          <div
+            style={{
+              alignItems: "center",
+              display: "flex",
+              gap: "10px",
+            }}
+          >
+            <div
+              style={{
+                backgroundColor: "#201B15",
+                border: "1px solid #332B1C",
+                color: "#9C927F",
+                display: "flex",
+                fontFamily: fontFamilyMono,
+                fontSize: "12px",
+                letterSpacing: "0.1em",
+                padding: "4px 10px",
+              }}
+            >
+              {displaySpec}
+            </div>
+            <div
+              style={{
+                backgroundColor: "#1F2917",
+                border: "1px solid #3B4D28",
+                color: "#E2F4C8",
+                display: "flex",
+                fontFamily: fontFamilyMono,
+                fontSize: "12px",
+                fontWeight: 600,
+                letterSpacing: "0.12em",
+                padding: "4px 12px",
+                textTransform: "uppercase",
+              }}
+            >
+              {displayCategory}
+            </div>
+          </div>
+        </div>
+
+        {/* Center Game Title and Description */}
         <div
           style={{
             display: "flex",
-            justifyContent: "space-between",
-            alignItems: "center",
-            width: "100%",
-            padding: "0px 8px",
+            flexDirection: columnLayout,
+            gap: "14px",
+            marginBottom: "auto",
+            marginTop: "auto",
+            paddingBottom: "16px",
+            paddingTop: "16px",
           }}
         >
           <div
             style={{
-              display: "flex",
-              fontFamily: "Geist Sans",
-              color: "white",
-              fontSize: 40,
+              color: "#8E8472",
+              fontFamily: fontFamilyMono,
+              fontSize: "13px",
+              letterSpacing: "0.18em",
+              textTransform: "uppercase",
             }}
           >
-            Ram Shankar Choudhary
+            {engineLabel}
           </div>
           <div
             style={{
-              display: "flex",
-              fontFamily: "Geist Sans",
-              color: "white",
-              fontSize: 40,
+              color: "#F0E6C8",
+              fontFamily: fontFamilyHeading,
+              fontSize: displayTitle.length > 14 ? "80px" : "96px",
+              fontWeight: 600,
+              letterSpacing: "-0.02em",
+              lineHeight: 0.95,
+              textTransform: "uppercase",
             }}
           >
-            ram.codes
+            {displayTitle}
+          </div>
+          <div
+            style={{
+              color: "#AFA593",
+              fontFamily: fontFamilyMono,
+              fontSize: "20px",
+              lineHeight: 1.45,
+              maxWidth: "960px",
+            }}
+          >
+            {displayDescription}
+          </div>
+        </div>
+
+        {/* Feature & Badges Strip */}
+        <div
+          style={{
+            alignItems: "center",
+            display: "flex",
+            gap: "12px",
+            marginBottom: "18px",
+          }}
+        >
+          <div
+            style={{
+              ...pillBadgeStyle,
+              color: "#F0E6C8",
+            }}
+          >
+            {`👥 ${displayPlayers}`}
+          </div>
+
+          {isMultiplayer ? (
+            <div
+              style={{
+                ...pillBadgeStyle,
+                backgroundColor: "#162719",
+                border: "1px solid #2B5731",
+                color: "#68D391",
+                fontWeight: 600,
+              }}
+            >
+              {multiplayerLabel}
+            </div>
+          ) : (
+            <div style={pillBadgeStyle}>{localSessionLabel}</div>
+          )}
+
+          <div style={pillBadgeStyle}>{noAdsLabel}</div>
+        </div>
+
+        {/* Bottom Technical Watermark Bar */}
+        <div
+          style={{
+            alignItems: "center",
+            borderTop: "1px solid #2B241C",
+            display: "flex",
+            justifyContent: spaceBetweenLayout,
+            paddingTop: "16px",
+            width: fullDimension,
+          }}
+        >
+          <div
+            style={{
+              color: "#F0E6C8",
+              fontFamily: fontFamilyMono,
+              fontSize: "16px",
+              fontWeight: 600,
+              letterSpacing: "0.1em",
+            }}
+          >
+            games.ram.codes
+          </div>
+          <div
+            style={{
+              color: "#6D6453",
+              fontFamily: fontFamilyMono,
+              fontSize: "12px",
+              letterSpacing: "0.15em",
+              textTransform: "uppercase",
+            }}
+          >
+            {footerSpecLabel}
           </div>
         </div>
       </div>
     </div>,
-    {
-      width: 1920,
-      height: 1080,
-      fonts: [
-        {
-          name: "Geist Sans",
-          data: geistSansFontData,
-          style: "normal",
-        },
-        {
-          name: "Geist Mono",
-          data: geistMonoFontData,
-          style: "normal",
-        },
-      ],
-    }
+    imageOptions
   );
-}
+};
+
+export { getHandler as GET };
