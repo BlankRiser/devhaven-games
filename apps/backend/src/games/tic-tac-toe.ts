@@ -49,22 +49,24 @@ export const assignPlayerSymbols = (
   players: Record<string, Player>
 ): TicTacToeState => {
   const [firstId, secondId] = Object.keys(players);
-  const updatedSymbols: Record<string, "O" | "X"> = { ...state.playerSymbols };
+  const updatedSymbols: Record<string, "O" | "X"> = {};
 
   if (typeof firstId === "string") {
-    if (!Object.hasOwn(updatedSymbols, firstId)) {
-      updatedSymbols[firstId] = "X";
-    }
-    players[firstId].symbol = updatedSymbols[firstId];
+    const existing = Object.hasOwn(state.playerSymbols, firstId)
+      ? state.playerSymbols[firstId]
+      : "X";
+    updatedSymbols[firstId] = existing;
+    players[firstId].symbol = existing;
   }
 
   if (typeof secondId === "string") {
-    if (!Object.hasOwn(updatedSymbols, secondId)) {
-      const taken =
-        typeof firstId === "string" ? updatedSymbols[firstId] : undefined;
-      updatedSymbols[secondId] = taken === "X" ? "O" : "X";
-    }
-    players[secondId].symbol = updatedSymbols[secondId];
+    const taken = firstId ? updatedSymbols[firstId] : undefined;
+    const fallback: "O" | "X" = taken === "X" ? "O" : "X";
+    const existing = Object.hasOwn(state.playerSymbols, secondId)
+      ? state.playerSymbols[secondId]
+      : fallback;
+    updatedSymbols[secondId] = existing;
+    players[secondId].symbol = existing;
   }
 
   return {
@@ -111,15 +113,16 @@ export const handleTicTacToeAction = (
 
   const { cellIndex, type } = rawAction as Record<string, unknown>;
 
-  if (type !== "move" || typeof cellIndex !== "number") {
+  if (type !== "move" || !Number.isSafeInteger(cellIndex)) {
     return {
-      error: "Invalid action type or cellIndex",
+      error: "Invalid action type or cellIndex. cellIndex must be an integer.",
       newState: state,
       status: "in_progress",
     };
   }
 
-  if (cellIndex < 0 || cellIndex > 8) {
+  const index = cellIndex as number;
+  if (index < 0 || index > 8) {
     return {
       error: "cellIndex must be between 0 and 8",
       newState: state,
@@ -153,7 +156,7 @@ export const handleTicTacToeAction = (
     };
   }
 
-  if (state.board[cellIndex] !== null) {
+  if (state.board[index] !== null) {
     return {
       error: "This cell is already occupied.",
       newState: state,
@@ -162,7 +165,7 @@ export const handleTicTacToeAction = (
   }
 
   const newBoard = [...state.board];
-  newBoard[cellIndex] = playerSymbol;
+  newBoard[index] = playerSymbol;
 
   const { winner, winningLine } = checkWinner(newBoard, playerSymbol);
 

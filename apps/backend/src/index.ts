@@ -6,6 +6,7 @@ import type { GameType, HostLeaveAction } from "./types";
 export { GameRoom } from "./room";
 
 export interface CloudflareBindings {
+  ALLOWED_ORIGINS?: string;
   ENVIRONMENT?: string;
   GAME_ROOM: DurableObjectNamespace<GameRoom>;
 }
@@ -15,6 +16,81 @@ interface CreateRoomRequest {
   hostLeaveAction?: HostLeaveAction;
   roomId?: string;
 }
+
+interface RateLimitBucket {
+  count: number;
+  resetAt: number;
+}
+
+const ROOM_ID_PATTERN = /^[a-z0-9_-]{3,64}$/u;
+const roomCreationRateLimits = new Map<string, RateLimitBucket>();
+
+const isRateLimitAllowed = (
+  store: Map<string, RateLimitBucket>,
+  key: string,
+  limit: number,
+  windowMs: number
+): boolean => {
+  const now = Date.now();
+  if (store.size > 2000) {
+    for (const [storedKey, value] of store) {
+      if (now > value.resetAt) {
+        store.delete(storedKey);
+      }
+    }
+  }
+
+  const bucket = store.get(key);
+  if (!bucket || now > bucket.resetAt) {
+    store.set(key, { count: 1, resetAt: now + windowMs });
+    return true;
+  }
+
+  if (bucket.count >= limit) {
+    return false;
+  }
+
+  bucket.count += 1;
+  return true;
+};
+
+const parseOriginHostname = (origin: string): string | null => {
+  try {
+    const parsed = new URL(origin);
+    return parsed.hostname.toLowerCase();
+  } catch {
+    return null;
+  }
+};
+
+const isAllowedOrigin = (
+  originHeader: string | undefined,
+  allowedConfig?: string
+): boolean => {
+  if (typeof originHeader !== "string" || originHeader.length === 0) {
+    return true;
+  }
+
+  const hostname = parseOriginHostname(originHeader);
+  if (typeof hostname !== "string") {
+    return false;
+  }
+
+  if (hostname === "localhost" || hostname === "127.0.0.1") {
+    return true;
+  }
+
+  if (typeof allowedConfig === "string" && allowedConfig.length > 0) {
+    const allowedSet = new Set(
+      allowedConfig.split(",").map((item) => item.trim().toLowerCase())
+    );
+    if (allowedSet.has(originHeader.toLowerCase()) || allowedSet.has(hostname)) {
+      return true;
+    }
+  }
+
+  return hostname.endsWith(".vercel.app") || hostname.endsWith(".pages.dev");
+};
 
 const app = new Hono<{ Bindings: CloudflareBindings }>();
 
@@ -61,6 +137,21 @@ app.get("/health", (c) => {
 
 // Create room or generate a new room ID
 app.post("/rooms", async (c) => {
+  const clientIp =
+    c.req.header("cf-connecting-ip") ??
+    c.req.header("x-forwarded-for") ??
+    "unknown";
+
+  if (!isRateLimitAllowed(roomCreationRateLimits, clientIp, 20, 60_000)) {
+    return c.json(
+      {
+        error: "Too Many Requests",
+        message: "Room creation rate limit exceeded. Please wait a minute.",
+      },
+      429
+    );
+  }
+
   let body: CreateRoomRequest;
   try {
     body = await c.req.json<CreateRoomRequest>();
@@ -71,11 +162,23 @@ app.post("/rooms", async (c) => {
   const hostLeaveAction: HostLeaveAction =
     body.hostLeaveAction === "end_session" ? "end_session" : "keep_going";
   const gameType: GameType = body.gameType ?? "tic-tac-toe";
-  const customId =
+  const rawCustomId =
     typeof body.roomId === "string" && body.roomId.trim().length > 0
       ? body.roomId.trim().toLowerCase()
       : null;
-  const roomId = customId ?? `${gameType}-${crypto.randomUUID().slice(0, 6)}`;
+
+  if (rawCustomId !== null && !ROOM_ID_PATTERN.test(rawCustomId)) {
+    return c.json(
+      {
+        error: "Bad Request",
+        message:
+          "Invalid roomId. Must be between 3 and 64 characters (alphanumeric, dash, underscore).",
+      },
+      400
+    );
+  }
+
+  const roomId = rawCustomId ?? `${gameType}-${crypto.randomUUID().slice(0, 6)}`;
 
   return c.json({
     gameType,
@@ -88,6 +191,16 @@ app.post("/rooms", async (c) => {
 // Get room status from the Durable Object
 app.get("/rooms/:roomId", async (c) => {
   const roomId = c.req.param("roomId");
+  if (!ROOM_ID_PATTERN.test(roomId)) {
+    return c.json(
+      {
+        error: "Bad Request",
+        message: "Invalid roomId format",
+      },
+      400
+    );
+  }
+
   const id = c.env.GAME_ROOM.idFromName(roomId);
   const stub = c.env.GAME_ROOM.get(id);
 
@@ -103,10 +216,18 @@ app.get("/rooms/:roomId", async (c) => {
 // WebSocket connection endpoint to join a multiplayer room
 app.get("/rooms/:roomId/ws", async (c) => {
   const roomId = c.req.param("roomId");
-  const upgradeHeader = c.req.header("Upgrade");
+  if (!ROOM_ID_PATTERN.test(roomId)) {
+    return c.text("Invalid roomId format", 400);
+  }
 
+  const upgradeHeader = c.req.header("Upgrade");
   if (upgradeHeader !== "websocket") {
     return c.text("Expected Upgrade: websocket", 426);
+  }
+
+  const origin = c.req.header("Origin");
+  if (!isAllowedOrigin(origin, c.env.ALLOWED_ORIGINS)) {
+    return c.text("Forbidden: Invalid Origin", 403);
   }
 
   // Get or create deterministic Durable Object instance for this room ID
