@@ -15,10 +15,10 @@ import {
 import { matchSorter } from "match-sorter";
 import Link from "next/link";
 import * as React from "react";
-import type { GameCategoryId } from "@/features/games-list";
 import { GAME_CATEGORIES, getVisibleGames } from "@/features/games-list";
 import { Input } from "@/components/ui/input";
 import { Button, buttonVariants } from "@/components/ui/button";
+import type { GameCategoryId } from "@/features/games-list";
 
 const CATEGORY_ICONS: Record<
   GameCategoryId,
@@ -31,7 +31,7 @@ const CATEGORY_ICONS: Record<
   "word-puzzle": PuzzlePieceIcon,
 };
 
-const Home = () =>{
+const Home = () => {
   const [searchQuery, setSearchQuery] = React.useState("");
   const [activeCategory, setActiveCategory] = React.useState<
     GameCategoryId | "all"
@@ -43,14 +43,14 @@ const Home = () =>{
     const byCategory =
       activeCategory === "all"
         ? visibleGames
-        : visibleGames.filter(
-            (game) => {
-              return game.category === activeCategory ||
+        : visibleGames.filter((game) => {
+            return (
+              game.category === activeCategory ||
               (activeCategory === "multiplayer" &&
                 (game.supportsMultiplayer === true ||
-                  game.category === "multiplayer"));
-            }
-          );
+                  game.category === "multiplayer"))
+            );
+          });
 
     const trimmed = searchQuery.trim();
     if (!trimmed) {
@@ -74,11 +74,10 @@ const Home = () =>{
           ...category,
           games: filteredGames.filter((game) => {
             return category.id === "multiplayer"
-              ? (game.supportsMultiplayer === true ||
-                  game.category === "multiplayer")
+              ? game.supportsMultiplayer === true ||
+                  game.category === "multiplayer"
               : game.category === category.id;
-          }
-          ),
+          }),
         };
       })
       .filter((group) => group.games.length > 0 || activeCategory === group.id);
@@ -162,11 +161,9 @@ const Home = () =>{
           const Icon = CATEGORY_ICONS[category.id];
           const count = visibleGames.filter((g) => {
             return category.id === "multiplayer"
-              ? (g.supportsMultiplayer === true ||
-                  g.category === "multiplayer")
+              ? g.supportsMultiplayer === true || g.category === "multiplayer"
               : g.category === category.id;
-          }
-          ).length;
+          }).length;
           const isSelected = activeCategory === category.id;
 
           return (
@@ -283,13 +280,15 @@ const Home = () =>{
                               </span>
                               <div className="flex items-center gap-1.5">
                                 {game.supportsMultiplayer === true ? (
-                                  <span className="border-emerald-500/40 bg-emerald-500/10 text-emerald-400 inline-flex items-center justify-center border px-1.5 py-0.5">
+                                  <span className="inline-flex items-center justify-center border border-emerald-500/40 bg-emerald-500/10 px-1.5 py-0.5 text-emerald-400">
                                     <UsersThreeIcon
                                       className="size-3.5"
                                       weight="fill"
                                       aria-hidden="true"
                                     />
-                                    <span className="sr-only">Multiplayer Supported</span>
+                                    <span className="sr-only">
+                                      Multiplayer Supported
+                                    </span>
                                   </span>
                                 ) : null}
                                 <span
@@ -320,13 +319,14 @@ const Home = () =>{
 
                           {/* 8px gap to CTA button */}
                           <div className="mt-2 pt-4">
-                            <Link href={game.url} className={buttonVariants({
-                                variant: 'default',
-                                size: 'sm',
-                                className: "w-full justify-between"
-
-                              })}>
-                            
+                            <Link
+                              href={game.url}
+                              className={buttonVariants({
+                                variant: "default",
+                                size: "sm",
+                                className: "w-full justify-between",
+                              })}
+                            >
                               <span>Play Now</span>
                               <ArrowRightIcon data-icon="inline-end" />
                             </Link>
@@ -343,5 +343,5 @@ const Home = () =>{
       </div>
     </div>
   );
-}
-export default Home
+};
+export default Home;

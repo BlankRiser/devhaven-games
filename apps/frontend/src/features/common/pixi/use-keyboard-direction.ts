@@ -108,11 +108,13 @@ export const useArcadeDirection = ({
     };
   }, [onPauseToggle, onPrimaryAction, onReset, queueDirection]);
 
-  const touchHandlers = React.useMemo(
-    () => ({
+  const touchHandlers = React.useMemo(() => {
+    return {
       onTouchStart: (event: React.TouchEvent<HTMLElement>) => {
         const touch = event.touches[0];
-        if (!touch) return;
+        if (!touch) {
+          return;
+        }
         touchStartReference.current = { x: touch.clientX, y: touch.clientY };
       },
       onTouchEnd: (event: React.TouchEvent<HTMLElement>) => {
@@ -140,9 +142,8 @@ export const useArcadeDirection = ({
           queueDirection(dy > 0 ? "down" : "up");
         }
       },
-    }),
-    [queueDirection]
-  );
+    };
+  }, [queueDirection]);
 
   return {
     inputRef: inputReference,

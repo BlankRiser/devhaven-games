@@ -90,7 +90,9 @@ export const TicTacToeOnlineBoard = ({
               }}
               className={cn(
                 isWinningCell && "bg-accent/70",
-                !isOnlineTurn && value === null && "cursor-not-allowed opacity-90"
+                !isOnlineTurn &&
+                  value === null &&
+                  "cursor-not-allowed opacity-90"
               )}
               aria-label={cellLabel}
             >

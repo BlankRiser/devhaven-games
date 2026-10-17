@@ -41,10 +41,11 @@ export const DIRECTION_ANGLES: Record<CardinalDirection, number> = {
 export const clampDeltaSeconds = (
   deltaMS: number,
   maxDeltaSeconds = 0.05
-): number =>
-  !Number.isFinite(deltaMS) || deltaMS <= 0
+): number => {
+  return !Number.isFinite(deltaMS) || deltaMS <= 0
     ? 1 / 120
     : Math.min(deltaMS / 1000, maxDeltaSeconds);
+};
 
 export const distanceSquared = (a: Vector2D, b: Vector2D): number => {
   const dx = a.x - b.x;

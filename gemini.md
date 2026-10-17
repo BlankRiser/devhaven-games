@@ -3,12 +3,14 @@
 ## Project Overview
 
 **DevHaven Games** is a monorepo gaming platform powered by **Bun workspaces**. It features:
+
 - **`apps/frontend`**: A web-based gaming application developed with **Next.js 15**, Tailwind CSS 4, shadcn/ui, Jotai, and Motion.
 - **`apps/backend`**: A real-time multiplayer backend powered by **Cloudflare Workers**, **Hono**, and **Durable Objects** with WebSocket hibernation.
 
 ## Technology Stack
 
 ### Frontend (`apps/frontend`)
+
 - **Framework**: [Next.js 15](https://nextjs.org/) (App Router, Turbopack)
 - **Language**: [TypeScript](https://www.typescriptlang.org/)
 - **UI Components**: [shadcn/ui](https://ui.shadcn.com/), [Radix UI](https://www.radix-ui.com/)
@@ -20,6 +22,7 @@
 - **Typography**: [Geist](https://vercel.com/font) (Sans & Mono)
 
 ### Backend (`apps/backend`)
+
 - **Runtime**: [Cloudflare Workers](https://developers.cloudflare.com/workers/)
 - **Web Framework**: [Hono](https://hono.dev/)
 - **Multiplayer & State**: [Cloudflare Durable Objects](https://developers.cloudflare.com/durable-objects/) with WebSocket Hibernation API

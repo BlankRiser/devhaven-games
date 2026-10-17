@@ -5,8 +5,9 @@ import tanstack from "ultracite/eslint/tanstack";
 import tanstackTypeAware from "ultracite/eslint/tanstack/type-aware";
 import typeAware from "ultracite/eslint/type-aware";
 
-const frontendFiles = ["apps/frontend/**/*.{ts,tsx,js,jsx}"]
-const withFrontendFiles = (configs) => configs.map((config) => ({ ...config, files: frontendFiles, }));
+const frontendFiles = ["apps/frontend/**/*.{ts,tsx,js,jsx}"];
+const withFrontendFiles = (configs) =>
+  configs.map((config) => ({ ...config, files: frontendFiles }));
 
 // eslint-disable-next-line unicorn/no-top-level-side-effects
 export default [

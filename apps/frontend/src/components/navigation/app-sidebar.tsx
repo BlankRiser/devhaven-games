@@ -14,12 +14,6 @@ import {
 } from "@phosphor-icons/react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import {
-  Collapsible,
-  CollapsibleContent,
-  CollapsibleTrigger,
-} from "../ui/collapsible";
-import type { GameCategoryId } from "@/features/games-list";
 import { GAME_CATEGORIES, getVisibleGames } from "@/features/games-list";
 import {
   Sidebar,
@@ -36,6 +30,12 @@ import {
   SidebarMenuSubItem,
   SidebarRail,
 } from "@/components/ui/sidebar";
+import {
+  Collapsible,
+  CollapsibleContent,
+  CollapsibleTrigger,
+} from "../ui/collapsible";
+import type { GameCategoryId } from "@/features/games-list";
 
 const categoryIcons: Record<
   GameCategoryId,
@@ -51,73 +51,74 @@ const categoryIcons: Record<
 export const AppSidebar = ({
   ...properties
 }: React.ComponentProps<typeof Sidebar>) => {
-  return(
-  <Sidebar collapsible="icon" {...properties}>
-    <SidebarHeader className="border-sidebar-border flex h-14 shrink-0 justify-center border-b px-2 py-0">
-      <SidebarMenu>
-        <SidebarMenuItem>
-          <SidebarMenuButton
-            size="lg"
-            render={<Link href="/" />}
-            className="hover:border-sidebar-border h-10 border border-transparent"
-          >
-            <div className="bg-sidebar-primary text-sidebar-primary-foreground flex aspect-square size-8 shrink-0 items-center justify-center">
-              <GameControllerIcon className="size-4" weight="fill" />
-            </div>
-            <div className="flex flex-col justify-center gap-0 leading-none">
-              <span className="text-sidebar-foreground/70 text-[10px] leading-none font-light tracking-widest uppercase">
-                DevHaven
-              </span>
-              <span className="font-heading text-xl leading-none font-semibold tracking-[-0.025em] uppercase">
-                Games
-              </span>
-            </div>
-          </SidebarMenuButton>
-        </SidebarMenuItem>
-      </SidebarMenu>
-    </SidebarHeader>
-    <SidebarContent>
-      <NavMain />
-    </SidebarContent>
-    <SidebarFooter className="border-sidebar-border border-t p-2">
-      <SidebarMenu>
-        <SidebarMenuItem>
-          <SidebarMenuButton
-            render={
-              <a
-                href="https://github.com/BlankRiser"
-                target="_blank"
-                rel="noreferrer"
-              />
-            }
-            tooltip="BlankRiser"
-            className="text-xs tracking-wider uppercase"
-          >
-            <LinkSimpleIcon />
-            <span>BlankRiser</span>
-          </SidebarMenuButton>
-        </SidebarMenuItem>
-        <SidebarMenuItem>
-          <SidebarMenuButton
-            render={
-              <a
-                href="https://github.com/BlankRiser/devhaven-games"
-                target="_blank"
-                rel="noreferrer"
-              />
-            }
-            tooltip="Star on GitHub"
-            className="text-xs tracking-wider uppercase"
-          >
-            <GithubLogoIcon />
-            <span>Star on GitHub</span>
-          </SidebarMenuButton>
-        </SidebarMenuItem>
-      </SidebarMenu>
-    </SidebarFooter>
-    <SidebarRail />
-  </Sidebar>
-)};
+  return (
+    <Sidebar collapsible="icon" {...properties}>
+      <SidebarHeader className="border-sidebar-border flex h-14 shrink-0 justify-center border-b px-2 py-0">
+        <SidebarMenu>
+          <SidebarMenuItem>
+            <SidebarMenuButton
+              size="lg"
+              render={<Link href="/" />}
+              className="hover:border-sidebar-border h-10 border border-transparent"
+            >
+              <div className="bg-sidebar-primary text-sidebar-primary-foreground flex aspect-square size-8 shrink-0 items-center justify-center">
+                <GameControllerIcon className="size-4" weight="fill" />
+              </div>
+              <div className="flex flex-col justify-center gap-0 leading-none">
+                <span className="text-sidebar-foreground/70 text-[10px] leading-none font-light tracking-widest uppercase">
+                  DevHaven
+                </span>
+                <span className="font-heading text-xl leading-none font-semibold tracking-[-0.025em] uppercase">
+                  Games
+                </span>
+              </div>
+            </SidebarMenuButton>
+          </SidebarMenuItem>
+        </SidebarMenu>
+      </SidebarHeader>
+      <SidebarContent>
+        <NavMain />
+      </SidebarContent>
+      <SidebarFooter className="border-sidebar-border border-t p-2">
+        <SidebarMenu>
+          <SidebarMenuItem>
+            <SidebarMenuButton
+              render={
+                <a
+                  href="https://github.com/BlankRiser"
+                  target="_blank"
+                  rel="noreferrer"
+                />
+              }
+              tooltip="BlankRiser"
+              className="text-xs tracking-wider uppercase"
+            >
+              <LinkSimpleIcon />
+              <span>BlankRiser</span>
+            </SidebarMenuButton>
+          </SidebarMenuItem>
+          <SidebarMenuItem>
+            <SidebarMenuButton
+              render={
+                <a
+                  href="https://github.com/BlankRiser/devhaven-games"
+                  target="_blank"
+                  rel="noreferrer"
+                />
+              }
+              tooltip="Star on GitHub"
+              className="text-xs tracking-wider uppercase"
+            >
+              <GithubLogoIcon />
+              <span>Star on GitHub</span>
+            </SidebarMenuButton>
+          </SidebarMenuItem>
+        </SidebarMenu>
+      </SidebarFooter>
+      <SidebarRail />
+    </Sidebar>
+  );
+};
 
 const NavMain = () => {
   const pathname = usePathname();
@@ -129,10 +130,9 @@ const NavMain = () => {
       icon: categoryIcons[category.id],
       items: visibleGames.filter((game) => {
         return category.id === "multiplayer"
-          ? (game.supportsMultiplayer === true || game.category === "multiplayer")
+          ? game.supportsMultiplayer === true || game.category === "multiplayer"
           : game.category === category.id;
-      }
-      ),
+      }),
     };
   });
 
@@ -177,13 +177,15 @@ const NavMain = () => {
                           >
                             <span>{subItem.label}</span>
                             {subItem.supportsMultiplayer === true ? (
-                              <span className="text-emerald-500 ml-auto flex items-center">
+                              <span className="ml-auto flex items-center text-emerald-500">
                                 <UsersThreeIcon
                                   className="size-3.5 shrink-0"
                                   weight="fill"
                                   aria-hidden="true"
                                 />
-                                <span className="sr-only">Multiplayer Supported</span>
+                                <span className="sr-only">
+                                  Multiplayer Supported
+                                </span>
                               </span>
                             ) : null}
                           </SidebarMenuSubButton>

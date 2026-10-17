@@ -39,7 +39,10 @@ export interface EventCallbackMap {
 }
 
 export class MultiplayerClient {
-  private readonly listeners = new Map<string, Set<(payload: unknown) => void>>();
+  private readonly listeners = new Map<
+    string,
+    Set<(payload: unknown) => void>
+  >();
   private pingInterval: ReturnType<typeof setInterval> | null = null;
   private socket: WebSocket | null = null;
 

@@ -79,11 +79,10 @@ export const useMultiplayer = <TGameState = unknown>({
   const [profile, setProfile] = useState<PlayerProfile>(getStoredProfile);
   const [connectionStatus, setConnectionStatus] =
     useState<ConnectionStatus>("disconnected");
-  const [roomState, setRoomState] =
-    useState<RoomState<TGameState> | null>(null);
-  const [hostLeftNotice, setHostLeftNotice] = useState<string | null>(
+  const [roomState, setRoomState] = useState<RoomState<TGameState> | null>(
     null
   );
+  const [hostLeftNotice, setHostLeftNotice] = useState<string | null>(null);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
   const initialRoomId = useMemo(() => {
@@ -254,21 +253,30 @@ export const useMultiplayer = <TGameState = unknown>({
     return cleanup;
   }, [client]);
 
-  const sendAction = useCallback((action: unknown) => {
-    client.sendAction(action);
-  }, [client]);
+  const sendAction = useCallback(
+    (action: unknown) => {
+      client.sendAction(action);
+    },
+    [client]
+  );
 
   const resetGame = useCallback(() => {
     client.resetGame();
   }, [client]);
 
-  const sendChat = useCallback((message: string) => {
-    client.sendChat(message);
-  }, [client]);
+  const sendChat = useCallback(
+    (message: string) => {
+      client.sendChat(message);
+    },
+    [client]
+  );
 
-  const setReady = useCallback((isReady: boolean) => {
-    client.setReady(isReady);
-  }, [client]);
+  const setReady = useCallback(
+    (isReady: boolean) => {
+      client.setReady(isReady);
+    },
+    [client]
+  );
 
   const isHost = roomState?.hostId === profile.id;
 

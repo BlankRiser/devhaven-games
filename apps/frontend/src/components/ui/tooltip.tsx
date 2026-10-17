@@ -16,13 +16,15 @@ const TooltipProvider = ({
   );
 };
 
-const Tooltip = ({ ...properties }: TooltipPrimitive.Root.Props) => (
-  <TooltipPrimitive.Root data-slot="tooltip" {...properties} />
-);
+const Tooltip = ({ ...properties }: TooltipPrimitive.Root.Props) => {
+  return <TooltipPrimitive.Root data-slot="tooltip" {...properties} />;
+};
 
-const TooltipTrigger = ({ ...properties }: TooltipPrimitive.Trigger.Props) => (
-  <TooltipPrimitive.Trigger data-slot="tooltip-trigger" {...properties} />
-);
+const TooltipTrigger = ({ ...properties }: TooltipPrimitive.Trigger.Props) => {
+  return (
+    <TooltipPrimitive.Trigger data-slot="tooltip-trigger" {...properties} />
+  );
+};
 
 const TooltipContent = ({
   className,

@@ -2,9 +2,9 @@
 
 import { Collapsible as CollapsiblePrimitive } from "@base-ui/react/collapsible";
 
-const Collapsible = ({ ...properties }: CollapsiblePrimitive.Root.Props) => (
-  <CollapsiblePrimitive.Root data-slot="collapsible" {...properties} />
-);
+const Collapsible = ({ ...properties }: CollapsiblePrimitive.Root.Props) => {
+  return <CollapsiblePrimitive.Root data-slot="collapsible" {...properties} />;
+};
 
 const CollapsibleTrigger = ({
   ...properties

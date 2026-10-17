@@ -201,80 +201,82 @@ export const cloneMazeTemplate = (): {
   totalPellets: number;
 } => {
   let totalPellets = 0;
-  const maze = PACMAN_MAZE_TEMPLATE.map((row) =>
-    row.map((tile) => {
+  const maze = PACMAN_MAZE_TEMPLATE.map((row) => {
+    return row.map((tile) => {
       if (tile === 2 || tile === 3) {
         totalPellets += 1;
       }
       return tile;
-    })
-  );
+    });
+  });
   return { maze, totalPellets };
 };
 
 export const createInitialActors = (): {
   pacman: PacmanActor;
   ghosts: GhostActor[];
-} => ({
-  pacman: {
-    row: PACMAN_START_ROW,
-    col: GHOST_CENTER_COL,
-    dir: "left",
-    nextDir: "left",
-    mouthAngle: 0.2,
-    mouthOpening: true,
-  },
-  ghosts: [
-    {
-      id: "blinky",
-      name: "Blinky",
-      color: GHOST_COLORS.blinky,
-      row: GHOST_EXIT_ROW,
+} => {
+  return {
+    pacman: {
+      row: PACMAN_START_ROW,
       col: GHOST_CENTER_COL,
       dir: "left",
-      mode: "scatter",
-      releaseDelay: 0,
-      inHouse: false,
-      lastDecisionKey: "",
+      nextDir: "left",
+      mouthAngle: 0.2,
+      mouthOpening: true,
     },
-    {
-      id: "pinky",
-      name: "Pinky",
-      color: GHOST_COLORS.pinky,
-      row: GHOST_HOUSE_ROW,
-      col: GHOST_CENTER_COL,
-      dir: "up",
-      mode: "scatter",
-      releaseDelay: 1.5,
-      inHouse: true,
-      lastDecisionKey: "",
-    },
-    {
-      id: "inky",
-      name: "Inky",
-      color: GHOST_COLORS.inky,
-      row: GHOST_HOUSE_ROW,
-      col: GHOST_CENTER_COL - 1,
-      dir: "up",
-      mode: "scatter",
-      releaseDelay: 4.0,
-      inHouse: true,
-      lastDecisionKey: "",
-    },
-    {
-      id: "clyde",
-      name: "Clyde",
-      color: GHOST_COLORS.clyde,
-      row: GHOST_HOUSE_ROW,
-      col: GHOST_CENTER_COL + 1,
-      dir: "up",
-      mode: "scatter",
-      releaseDelay: 6.5,
-      inHouse: true,
-      lastDecisionKey: "",
-    },
-  ],
-});
+    ghosts: [
+      {
+        id: "blinky",
+        name: "Blinky",
+        color: GHOST_COLORS.blinky,
+        row: GHOST_EXIT_ROW,
+        col: GHOST_CENTER_COL,
+        dir: "left",
+        mode: "scatter",
+        releaseDelay: 0,
+        inHouse: false,
+        lastDecisionKey: "",
+      },
+      {
+        id: "pinky",
+        name: "Pinky",
+        color: GHOST_COLORS.pinky,
+        row: GHOST_HOUSE_ROW,
+        col: GHOST_CENTER_COL,
+        dir: "up",
+        mode: "scatter",
+        releaseDelay: 1.5,
+        inHouse: true,
+        lastDecisionKey: "",
+      },
+      {
+        id: "inky",
+        name: "Inky",
+        color: GHOST_COLORS.inky,
+        row: GHOST_HOUSE_ROW,
+        col: GHOST_CENTER_COL - 1,
+        dir: "up",
+        mode: "scatter",
+        releaseDelay: 4,
+        inHouse: true,
+        lastDecisionKey: "",
+      },
+      {
+        id: "clyde",
+        name: "Clyde",
+        color: GHOST_COLORS.clyde,
+        row: GHOST_HOUSE_ROW,
+        col: GHOST_CENTER_COL + 1,
+        dir: "up",
+        mode: "scatter",
+        releaseDelay: 6.5,
+        inHouse: true,
+        lastDecisionKey: "",
+      },
+    ],
+  };
+};
 
 export const createInitialWorld = (
   highScore = 0,

@@ -87,7 +87,7 @@ export interface GameItem {
 
 export const GAMES_LIST: GameItem[] = [
   {
-    category: "board-games" as GameCategoryId,
+    category: "board-games",
     categoryLabel: "Board Games",
     color: "green",
     component: TicTacToe,
@@ -116,7 +116,7 @@ export const GAMES_LIST: GameItem[] = [
     status: "completed" as const,
     label: "Hangman",
     description: "Guess the secret word before the stick figure is hung.",
-    category: "word-puzzle" as GameCategoryId,
+    category: "word-puzzle",
     categoryLabel: "Word & Puzzle",
     players: "1 Player",
     tags: ["word", "puzzle", "letters", "guessing", "vocabulary"],
@@ -130,7 +130,7 @@ export const GAMES_LIST: GameItem[] = [
     status: "completed" as const,
     label: "Minesweeper",
     description: "Clear the minefield without detonating any mines.",
-    category: "board-games" as GameCategoryId,
+    category: "board-games",
     categoryLabel: "Board Games",
     players: "1 Player",
     tags: ["board", "grid", "mines", "logic", "puzzle"],
@@ -145,7 +145,7 @@ export const GAMES_LIST: GameItem[] = [
     label: "Spider Solitaire",
     description:
       "Build descending King-to-Ace runs of the same suit across 10 columns.",
-    category: "card-games" as GameCategoryId,
+    category: "card-games",
     categoryLabel: "Card Games",
     players: "1 Player",
     tags: ["card", "solitaire", "spider", "deck", "patience", "strategy"],
@@ -160,7 +160,7 @@ export const GAMES_LIST: GameItem[] = [
     label: "Pac-Man",
     description:
       "Navigate the neon maze, gobble power pellets, and outsmart the four ghosts.",
-    category: "2d-platformer" as GameCategoryId,
+    category: "2d-platformer",
     categoryLabel: "2D Platformer",
     players: "1 Player",
     tags: ["arcade", "maze", "pacman", "ghosts", "retro", "2d", "pixi"],
@@ -174,7 +174,7 @@ export const GAMES_LIST: GameItem[] = [
     status: "wip" as const,
     label: "Flappy Bird",
     description: "Tap or press space to flap through the pipes.",
-    category: "2d-platformer" as GameCategoryId,
+    category: "2d-platformer",
     categoryLabel: "2D Platformer",
     players: "1 Player",
     tags: ["2d", "platformer", "arcade", "reflex", "endless", "action"],

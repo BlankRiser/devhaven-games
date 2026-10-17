@@ -3,29 +3,25 @@
   "name": "games-backend",
   "main": "src/index.ts",
   "compatibility_date": "2025-02-14",
-  "compatibility_flags": [
-    "nodejs_compat"
-  ],
+  "compatibility_flags": ["nodejs_compat"],
   "durable_objects": {
     "bindings": [
       {
         "name": "GAME_ROOM",
-        "class_name": "GameRoom"
-      }
-    ]
+        "class_name": "GameRoom",
+      },
+    ],
   },
   "migrations": [
     {
       "tag": "v1",
-      "new_sqlite_classes": [
-        "GameRoom"
-      ]
-    }
+      "new_sqlite_classes": ["GameRoom"],
+    },
   ],
   "observability": {
-    "enabled": true
+    "enabled": true,
   },
   "dev": {
-    "port": 8787
-  }
+    "port": 8787,
+  },
 }

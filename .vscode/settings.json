@@ -75,20 +75,10 @@
   ],
   // Tailwind CSS
   "tailwindCSS.experimental.classRegex": [
-    [
-      "cva\\(((?:[^()]|\\([^()]*\\))*)\\)",
-      "[\"'`]([^\"'`]*).*?[\"'`]"
-    ],
-    [
-      "cx\\(((?:[^()]|\\([^()]*\\))*)\\)",
-      "(?:'|\"|`)([^']*)(?:'|\"|`)"
-    ]
+    ["cva\\(((?:[^()]|\\([^()]*\\))*)\\)", "[\"'`]([^\"'`]*).*?[\"'`]"],
+    ["cx\\(((?:[^()]|\\([^()]*\\))*)\\)", "(?:'|\"|`)([^']*)(?:'|\"|`)"]
   ],
-  "tailwindCSS.classFunctions": [
-    "cn",
-    "cx",
-    "cva"
-  ],
+  "tailwindCSS.classFunctions": ["cn", "cx", "cva"],
   // Editor settings
   "editor.codeActionsOnSave": {
     "source.fixAll.eslint": "explicit",
@@ -103,10 +93,7 @@
   "emmet.showExpandedAbbreviation": "never",
   "js/ts.tsdk.path": "node_modules/typescript/lib",
   "js/ts.tsdk.promptToUseWorkspaceVersion": true,
-  "cSpell.words": [
-    "pacman",
-    "ultracite"
-  ],
+  "cSpell.words": ["pacman", "ultracite"],
   "[jsonc]": {
     "editor.defaultFormatter": "vscode.json-language-features"
   },

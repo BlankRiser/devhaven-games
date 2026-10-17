@@ -17,7 +17,7 @@ export default function NotFound() {
           Could not locate the requested module in the shipping manifest.
         </p>
         <div className="mt-2 pt-2">
-          <Link href="/" className={buttonVariants({variant: 'default'})} >
+          <Link href="/" className={buttonVariants({ variant: "default" })}>
             <ArrowLeftIcon data-icon="inline-start" />
             <span>Return to Manifest</span>
           </Link>

@@ -73,11 +73,13 @@ export const getGameMetrics = (size: GameSize): GameMetrics => {
   };
 };
 
-export const createInitialBird = (metrics: GameMetrics): Bird => ({
-  y: metrics.height / 2 - metrics.birdHeight / 2,
-  velocity: 0,
-  rotation: 0,
-});
+export const createInitialBird = (metrics: GameMetrics): Bird => {
+  return {
+    y: metrics.height / 2 - metrics.birdHeight / 2,
+    velocity: 0,
+    rotation: 0,
+  };
+};
 
 export const createPipe = (x: number, metrics: GameMetrics): Pipe => {
   const minGapY = 100 * metrics.scale;

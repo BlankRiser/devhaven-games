@@ -183,7 +183,9 @@ const runTest = async (): Promise<void> => {
 
     client1.sendChat("Good game!");
     await chatPromise;
-    process.stdout.write("   ✅ Player 2 received chat message: 'Good game!'\n");
+    process.stdout.write(
+      "   ✅ Player 2 received chat message: 'Good game!'\n"
+    );
 
     // 6. Disconnect Player 1 and test host handover (keep_going)
     process.stdout.write(

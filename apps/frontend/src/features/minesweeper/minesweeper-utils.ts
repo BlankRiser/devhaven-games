@@ -70,14 +70,16 @@ export const createEmptyBoard = ({
   rows,
   cols,
 }: Pick<MinesweeperConfig, "rows" | "cols">): Cell[][] => {
-  return Array.from({ length: rows }, () =>
-    Array.from({ length: cols }, () => ({
-      value: 0 as CellValue,
-      revealed: false,
-      flagged: false,
-      exploded: false,
-    }))
-  );
+  return Array.from({ length: rows }, () => {
+    return Array.from({ length: cols }, () => {
+      return {
+        value: 0,
+        revealed: false,
+        flagged: false,
+        exploded: false,
+      };
+    });
+  });
 };
 
 export const getNeighborCoords = (
@@ -180,17 +182,18 @@ export const hasMines = (board: Cell[][]): boolean =>
   board.some((row) => row.some((cell) => cell.value === "mine"));
 
 export const isWon = (board: Cell[][]): boolean => {
-  return board.every((row) =>
-    row.every((cell) =>
+  return board.every((row) => {
+    return row.every((cell) =>
       cell.value === "mine" ? !cell.revealed : cell.revealed
-    )
-  );
+    );
+  });
 };
 
-export const isLost = (board: Cell[][]): boolean =>
-  board.some((row) =>
+export const isLost = (board: Cell[][]): boolean => {
+  return board.some((row) =>
     row.some((cell) => cell.value === "mine" && cell.revealed)
   );
+};
 
 const autoFlagMinesIfWon = (board: Cell[][]): void => {
   if (!hasMines(board) || isLost(board) || !isWon(board)) {

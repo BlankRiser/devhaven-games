@@ -76,11 +76,15 @@ const GameName = () => {
         {activeGame.label}
       </h1>
       {activeGame.supportsMultiplayer === true ? (
-        <span className="border-emerald-500/40 bg-emerald-500/10 text-emerald-400 inline-flex items-center justify-center border p-1">
-          <UsersThreeIcon className="size-3.5" weight="fill" aria-hidden="true" />
+        <span className="inline-flex items-center justify-center border border-emerald-500/40 bg-emerald-500/10 p-1 text-emerald-400">
+          <UsersThreeIcon
+            className="size-3.5"
+            weight="fill"
+            aria-hidden="true"
+          />
           <span className="sr-only">Multiplayer Supported</span>
         </span>
       ) : null}
     </div>
   );
-}
+};

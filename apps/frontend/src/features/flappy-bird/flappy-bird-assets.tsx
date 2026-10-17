@@ -192,78 +192,80 @@ export const FlappyBirdCanvas = () => {
   const lastSpriteUpdateReference = React.useRef(0);
   const metricsReference = React.useRef<GameMetrics>(defaultMetrics);
 
-  const gameStatusRef = React.useRef<GameStatus>("idle");
-  const birdRef = React.useRef<Bird>(createInitialBird(defaultMetrics));
-  const pipesRef = React.useRef<Pipe[]>([]);
-  const scoreRef = React.useRef(0);
+  const gameStatusReference = React.useRef<GameStatus>("idle");
+  const birdReference = React.useRef<Bird>(createInitialBird(defaultMetrics));
+  const pipesReference = React.useRef<Pipe[]>([]);
+  const scoreReference = React.useRef(0);
 
   const [gameStatus, setGameStatus] = React.useState<GameStatus>("idle");
   const [score, setScore] = React.useState(0);
   const [bestScore, setBestScoreState] = React.useState(0);
 
   const resetGame = React.useCallback(() => {
-    birdRef.current = createInitialBird(metricsReference.current);
-    pipesRef.current = [];
+    birdReference.current = createInitialBird(metricsReference.current);
+    pipesReference.current = [];
     groundOffsetReference.current = 0;
     spriteFrameReference.current = 0;
     lastPipeSpawnReference.current = 0;
-    gameStatusRef.current = "idle";
+    gameStatusReference.current = "idle";
     setGameStatus("idle");
-    scoreRef.current = 0;
+    scoreReference.current = 0;
     setScore(0);
   }, []);
 
   const startGame = React.useCallback(() => {
     const metrics = metricsReference.current;
-    birdRef.current = createInitialBird(metrics);
-    pipesRef.current = [
+    birdReference.current = createInitialBird(metrics);
+    pipesReference.current = [
       createPipe(metrics.width + 80 * metrics.scale, metrics),
     ];
     groundOffsetReference.current = 0;
     spriteFrameReference.current = 0;
     lastPipeSpawnReference.current = performance.now();
-    gameStatusRef.current = "playing";
+    gameStatusReference.current = "playing";
     setGameStatus("playing");
-    scoreRef.current = 0;
+    scoreReference.current = 0;
     setScore(0);
   }, []);
 
   const activateOverlayButton = React.useCallback(() => {
-    if (gameStatusRef.current === "gameover") {
+    if (gameStatusReference.current === "gameover") {
       startGame();
       return;
     }
 
-    if (gameStatusRef.current === "idle") {
+    if (gameStatusReference.current === "idle") {
       startGame();
     }
   }, [startGame]);
 
   const flap = React.useCallback(() => {
-    if (gameStatusRef.current === "playing") {
-      birdRef.current.velocity = metricsReference.current.flapVelocity;
+    if (gameStatusReference.current === "playing") {
+      birdReference.current.velocity = metricsReference.current.flapVelocity;
     }
   }, []);
 
   const endGame = React.useCallback((finalScore: number) => {
-    gameStatusRef.current = "gameover";
+    gameStatusReference.current = "gameover";
     setGameStatus("gameover");
 
     const currentBest = getBestScore();
-    if (finalScore > currentBest) {
-      setBestScore(finalScore);
-      setBestScoreState(finalScore);
+    if (!(finalScore > currentBest)) {
+      return;
     }
+
+    setBestScore(finalScore);
+    setBestScoreState(finalScore);
   }, []);
 
   const updateGame = React.useCallback(
     (timestamp: number) => {
-      if (gameStatusRef.current !== "playing") {
+      if (gameStatusReference.current !== "playing") {
         return;
       }
 
       const metrics = metricsReference.current;
-      const bird = birdRef.current;
+      const bird = birdReference.current;
       bird.velocity = Math.min(
         bird.velocity + metrics.gravity,
         metrics.maxFallSpeed
@@ -274,7 +276,7 @@ export const FlappyBirdCanvas = () => {
         70
       );
 
-      pipesRef.current = pipesRef.current
+      pipesReference.current = pipesReference.current
         .map((pipe) => ({ ...pipe, x: pipe.x - metrics.pipeSpeed }))
         .filter((pipe) => pipe.x + metrics.pipeWidth > -20 * metrics.scale);
 
@@ -282,22 +284,22 @@ export const FlappyBirdCanvas = () => {
         timestamp - lastPipeSpawnReference.current >=
         GAME_CONFIG.pipeSpawnInterval
       ) {
-        pipesRef.current.push(
+        pipesReference.current.push(
           createPipe(metrics.width + 40 * metrics.scale, metrics)
         );
         lastPipeSpawnReference.current = timestamp;
       }
 
       const scoreUpdate = updateScore(
-        pipesRef.current,
+        pipesReference.current,
         metrics.birdX,
         metrics.pipeWidth
       );
-      pipesRef.current = scoreUpdate.pipes;
+      pipesReference.current = scoreUpdate.pipes;
 
       if (scoreUpdate.scoreDelta > 0) {
-        scoreRef.current += scoreUpdate.scoreDelta;
-        setScore(scoreRef.current);
+        scoreReference.current += scoreUpdate.scoreDelta;
+        setScore(scoreReference.current);
       }
 
       groundOffsetReference.current += metrics.pipeSpeed;
@@ -311,8 +313,8 @@ export const FlappyBirdCanvas = () => {
         lastSpriteUpdateReference.current = timestamp;
       }
 
-      if (checkCollision(bird, pipesRef.current, metrics)) {
-        endGame(scoreRef.current);
+      if (checkCollision(bird, pipesReference.current, metrics)) {
+        endGame(scoreReference.current);
       }
     },
     [endGame]
@@ -335,7 +337,7 @@ export const FlappyBirdCanvas = () => {
       const dpr = window.devicePixelRatio || 1;
       context.setTransform(dpr, 0, 0, dpr, 0, 0);
 
-      if (gameStatusRef.current === "playing") {
+      if (gameStatusReference.current === "playing") {
         updateGame(timestamp);
       }
 
@@ -343,7 +345,7 @@ export const FlappyBirdCanvas = () => {
 
       drawBackground(context, metrics);
       drawClouds(context, groundOffsetReference.current * 0.4, metrics);
-      for (const pipe of pipesRef.current) {
+      for (const pipe of pipesReference.current) {
         drawPipe(context, pipe, metrics);
       }
       drawGround(context, groundOffsetReference.current, metrics);
@@ -351,7 +353,7 @@ export const FlappyBirdCanvas = () => {
       if (sprite?.complete) {
         drawBird(
           context,
-          birdRef.current,
+          birdReference.current,
           sprite,
           spriteFrameReference.current,
           metrics
@@ -361,7 +363,7 @@ export const FlappyBirdCanvas = () => {
         context.beginPath();
         context.ellipse(
           metrics.birdX + metrics.birdWidth / 2,
-          birdRef.current.y + metrics.birdHeight / 2,
+          birdReference.current.y + metrics.birdHeight / 2,
           metrics.birdWidth / 2,
           metrics.birdHeight / 2,
           0,
@@ -410,7 +412,7 @@ export const FlappyBirdCanvas = () => {
           context.setTransform(dpr, 0, 0, dpr, 0, 0);
         }
 
-        clampBirdY(birdRef.current, metrics);
+        clampBirdY(birdReference.current, metrics);
       });
     };
 
@@ -469,7 +471,7 @@ export const FlappyBirdCanvas = () => {
         return;
       }
 
-      if (gameStatusRef.current === "playing") {
+      if (gameStatusReference.current === "playing") {
         flap();
         return;
       }

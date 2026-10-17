@@ -9,19 +9,21 @@ import type { SVGMotionProps, Variants } from "motion/react";
 
 const gallowsVariants: Variants = {
   hidden: { pathLength: 0, opacity: 0 },
-  visible: (delayIndex = 0) => ({
-    pathLength: 1,
-    opacity: 1,
-    transition: {
-      pathLength: {
-        delay: delayIndex * 0.12,
-        type: "spring",
-        duration: 0.45,
-        bounce: 0,
+  visible: (delayIndex = 0) => {
+    return {
+      pathLength: 1,
+      opacity: 1,
+      transition: {
+        pathLength: {
+          delay: delayIndex * 0.12,
+          type: "spring",
+          duration: 0.45,
+          bounce: 0,
+        },
+        opacity: { delay: delayIndex * 0.12, duration: 0.05 },
       },
-      opacity: { delay: delayIndex * 0.12, duration: 0.05 },
-    },
-  }),
+    };
+  },
 };
 
 const bodyPartVariants: Variants = {

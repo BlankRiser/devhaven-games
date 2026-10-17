@@ -365,19 +365,21 @@ export default function Minesweeper() {
           >
             {board.map((row, rowIndex) => (
               <div key={rowIndex} className="flex gap-0.5" role="row">
-                {row.map((cell, colIndex) => (
-                  <MinesweeperCell
-                    key={`${rowIndex}-${colIndex}`}
-                    row={rowIndex}
-                    col={colIndex}
-                    cell={cell}
-                    difficulty={difficulty}
-                    cellSize={cellSize}
-                    inputMode={inputMode}
-                    hasLost={stats.hasLost}
-                    isLocked={isGameOver}
-                  />
-                ))}
+                {row.map((cell, colIndex) => {
+                  return (
+                    <MinesweeperCell
+                      key={`${rowIndex}-${colIndex}`}
+                      row={rowIndex}
+                      col={colIndex}
+                      cell={cell}
+                      difficulty={difficulty}
+                      cellSize={cellSize}
+                      inputMode={inputMode}
+                      hasLost={stats.hasLost}
+                      isLocked={isGameOver}
+                    />
+                  );
+                })}
               </div>
             ))}
           </div>

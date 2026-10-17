@@ -45,6 +45,7 @@ Real-time authoritative multiplayer game engine powered by **Cloudflare Workers*
 ## 1. Local Development & Testing
 
 ### Prerequisites
+
 - [Bun](https://bun.sh/) (v1.x or higher)
 
 ### Start the Servers
@@ -69,6 +70,7 @@ cd apps/backend && bun dev
 ### Testing Multiplayer Locally
 
 #### Method A: Browser Interactive Testing (Two Players)
+
 1. Ensure both frontend (`http://localhost:3000`) and backend (`http://localhost:8787`) are running.
 2. Open **Window 1**: Navigate to `http://localhost:3000/games/tic-tac-toe`.
 3. Switch mode to **"Online Multiplayer"** and click **"Create Game Room"**.
@@ -80,6 +82,7 @@ cd apps/backend && bun dev
 9. Close Window 1 to observe host migration or session termination depending on your policy.
 
 #### Method B: Automated CLI Integration Test Suite
+
 The repository includes an automated integration test script simulating two concurrent WebSocket clients connecting to the backend, exchanging moves, broadcasting chat, testing host migration, and verifying room teardown:
 
 ```bash
@@ -91,6 +94,7 @@ bun run test:multiplayer
 ```
 
 The script output verifies:
+
 ```text
 🚀 Testing Multiplayer Room: test-a82k1
 📡 Target backend: http://localhost:8787
@@ -114,10 +118,13 @@ The script output verifies:
 ```
 
 #### Method C: Health Check via cURL
+
 ```bash
 curl http://localhost:8787/health
 ```
+
 Response:
+
 ```json
 {
   "env": "development",
@@ -140,20 +147,23 @@ Response:
 ### Option 1: Manual CLI Deployment
 
 1. **Authenticate Wrangler**:
+
    ```bash
    bunx wrangler login
    ```
-   *(Or set the `CLOUDFLARE_API_TOKEN` environment variable in your terminal).*
+
+   _(Or set the `CLOUDFLARE_API_TOKEN` environment variable in your terminal)._
 
 2. **Deploy from the Monorepo Root**:
+
    ```bash
    bun run build:backend
    bun --filter backend deploy
    ```
-   *(Or from within `apps/backend`: `bun run deploy`)*.
 
-3. **Verify Deployment**:
-   Wrangler will output your live URL:
+   _(Or from within `apps/backend`: `bun run deploy`)_.
+
+3. **Verify Deployment**: Wrangler will output your live URL:
    ```text
    Uploaded backend (2.10 sec)
    Deployed backend triggers (0.50 sec)
@@ -196,8 +206,7 @@ Once your backend is deployed (e.g. at `https://backend.<subdomain>.workers.dev`
    ```env
    NEXT_PUBLIC_BACKEND_URL=https://backend.<subdomain>.workers.dev
    ```
-2. For local frontend testing against the production backend:
-   Create `apps/frontend/.env.local`:
+2. For local frontend testing against the production backend: Create `apps/frontend/.env.local`:
    ```env
    NEXT_PUBLIC_BACKEND_URL=https://backend.<subdomain>.workers.dev
    ```

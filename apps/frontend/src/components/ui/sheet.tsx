@@ -7,21 +7,21 @@ import * as React from "react";
 
 import { Button } from "@/components/ui/button";
 
-const Sheet = ({ ...properties }: SheetPrimitive.Root.Props) => (
-  <SheetPrimitive.Root data-slot="sheet" {...properties} />
-);
+const Sheet = ({ ...properties }: SheetPrimitive.Root.Props) => {
+  return <SheetPrimitive.Root data-slot="sheet" {...properties} />;
+};
 
-const SheetTrigger = ({ ...properties }: SheetPrimitive.Trigger.Props) => (
-  <SheetPrimitive.Trigger data-slot="sheet-trigger" {...properties} />
-);
+const SheetTrigger = ({ ...properties }: SheetPrimitive.Trigger.Props) => {
+  return <SheetPrimitive.Trigger data-slot="sheet-trigger" {...properties} />;
+};
 
-const SheetClose = ({ ...properties }: SheetPrimitive.Close.Props) => (
-  <SheetPrimitive.Close data-slot="sheet-close" {...properties} />
-);
+const SheetClose = ({ ...properties }: SheetPrimitive.Close.Props) => {
+  return <SheetPrimitive.Close data-slot="sheet-close" {...properties} />;
+};
 
-const SheetPortal = ({ ...properties }: SheetPrimitive.Portal.Props) => (
-  <SheetPrimitive.Portal data-slot="sheet-portal" {...properties} />
-);
+const SheetPortal = ({ ...properties }: SheetPrimitive.Portal.Props) => {
+  return <SheetPrimitive.Portal data-slot="sheet-portal" {...properties} />;
+};
 
 const SheetOverlay = ({
   className,

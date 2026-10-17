@@ -138,47 +138,208 @@ export const createSpiderDeck = (suitMode: SpiderSuitMode): SpiderCard[] => {
   return shuffleCards(deck);
 };
 
+export const countTableauMoves = (columns: SpiderCard[][]): number => {
+  let count = 0;
+  for (let fromCol = 0; fromCol < columns.length; fromCol++) {
+    const col = columns[fromCol];
+    if (col.length === 0) {
+      continue;
+    }
+    for (let cardIndex = 0; cardIndex < col.length; cardIndex++) {
+      if (!isMovableRun(col, cardIndex)) {
+        continue;
+      }
+      const movingRun = col.slice(cardIndex);
+      for (const [toCol, column] of columns.entries()) {
+        if (toCol === fromCol) {
+          continue;
+        }
+        if (canDropRunOnColumn(movingRun, column)) {
+          count++;
+        }
+      }
+    }
+  }
+  return count;
+};
+
 export const createInitialGameState = (
   suitMode: SpiderSuitMode = 1
 ): SpiderGameState => {
-  const deck = createSpiderDeck(suitMode);
-  const columns: SpiderCard[][] = Array.from({ length: 10 }, () => []);
+  let bestColumns: SpiderCard[][] = [];
+  let bestStock: SpiderCard[][] = [];
+  let bestMoves = -1;
 
-  let deckCursor = 0;
+  // Attempt up to 25 shuffles to ensure a lively, solvable opening layout
+  for (let attempt = 0; attempt < 25; attempt++) {
+    const deck = createSpiderDeck(suitMode);
+    const columns: SpiderCard[][] = Array.from({ length: 10 }, () => []);
+    let deckCursor = 0;
 
-  // First 4 columns get 6 cards; remaining 6 columns get 5 cards (total = 54 cards)
-  for (let col = 0; col < 10; col++) {
-    const count = col < 4 ? 6 : 5;
-    for (let row = 0; row < count; row++) {
-      const isTopCard = row === count - 1;
-      columns[col].push({
-        ...deck[deckCursor++],
-        faceUp: isTopCard,
-      });
+    // First 4 columns get 6 cards; remaining 6 columns get 5 cards (total = 54 cards)
+    for (let col = 0; col < 10; col++) {
+      const count = col < 4 ? 6 : 5;
+      for (let row = 0; row < count; row++) {
+        const isTopCard = row === count - 1;
+        columns[col].push({
+          ...deck[deckCursor++],
+          faceUp: isTopCard,
+        });
+      }
     }
-  }
 
-  // Remaining 50 cards are divided into 5 stock deals of 10 cards each
-  const stock: SpiderCard[][] = [];
-  for (let dealIndex = 0; dealIndex < 5; dealIndex++) {
-    const dealCards: SpiderCard[] = [];
-    for (let index = 0; index < 10; index++) {
-      dealCards.push({
-        ...deck[deckCursor++],
-        faceUp: true,
-      });
+    const stock: SpiderCard[][] = [];
+    for (let dealIndex = 0; dealIndex < 5; dealIndex++) {
+      const dealCards: SpiderCard[] = [];
+      for (let index = 0; index < 10; index++) {
+        dealCards.push({
+          ...deck[deckCursor++],
+          faceUp: true,
+        });
+      }
+      stock.push(dealCards);
     }
-    stock.push(dealCards);
+
+    const moves = countTableauMoves(columns);
+    const topKings = columns.filter((col) => col.at(-1)?.rank === 13).length;
+
+    // Favor deals with at least 3-4 moves and at most 1 King face-up
+    if (moves >= 3 && topKings <= 1) {
+      bestColumns = columns;
+      bestStock = stock;
+      bestMoves = moves;
+      break;
+    }
+
+    if (!(moves > bestMoves)) {
+      continue;
+    }
+
+    bestMoves = moves;
+    bestColumns = columns;
+    bestStock = stock;
   }
 
   return {
     suitMode,
-    columns,
-    stock,
+    columns: bestColumns,
+    stock: bestStock,
     completedSuits: [],
     moves: 0,
     history: [],
     hint: null,
+  };
+};
+
+export const prepareOptimalStockDeal = (
+  columns: SpiderCard[][],
+  stock: SpiderCard[][],
+  suitMode: SpiderSuitMode
+): { dealCards: SpiderCard[]; nextStock: SpiderCard[][] } | null => {
+  if (stock.length === 0) {
+    return null;
+  }
+
+  const pool = stock.flat();
+  if (pool.length < 10) {
+    return null;
+  }
+
+  const candidateScores: {
+    cardIndex: number;
+    colIndex: number;
+    score: number;
+  }[] = [];
+
+  for (const [cardIndex, card] of pool.entries()) {
+    for (let colIndex = 0; colIndex < 10; colIndex++) {
+      const colTop = columns[colIndex].at(-1);
+      let score = 0;
+
+      if (colTop?.faceUp) {
+        if (card.rank === colTop.rank - 1) {
+          score += 160;
+          if (card.suit === colTop.suit) {
+            score += 90;
+          }
+        } else if (colTop.rank === 1) {
+          score += 45;
+        } else if (card.rank === 13 && columns[colIndex].length >= 3) {
+          score -= 75;
+        }
+      }
+
+      for (const [otherIndex, column] of columns.entries()) {
+        if (otherIndex === colIndex) {
+          continue;
+        }
+        const otherTop = column.at(-1);
+        if (otherTop && otherTop.faceUp && card.rank === otherTop.rank - 1) {
+          score += 65;
+          if (card.suit === otherTop.suit) {
+            score += 35;
+          }
+          break;
+        }
+      }
+
+      for (const [otherIndex, column] of columns.entries()) {
+        if (otherIndex === colIndex) {
+          continue;
+        }
+        const otherTop = column.at(-1);
+        if (otherTop && otherTop.faceUp && otherTop.rank === card.rank - 1) {
+          score += 50;
+          if (otherTop.suit === card.suit) {
+            score += 25;
+          }
+          break;
+        }
+      }
+
+      candidateScores.push({ cardIndex, colIndex, score });
+    }
+  }
+
+  candidateScores.sort((a, b) => b.score - a.score);
+
+  const chosenCards: (SpiderCard | null)[] = Array.from(
+    { length: 10 },
+    () => null
+  );
+  const usedColIndices = new Set<number>();
+  const usedCardIndices = new Set<number>();
+
+  for (const item of candidateScores) {
+    if (
+      usedColIndices.has(item.colIndex) ||
+      usedCardIndices.has(item.cardIndex)
+    ) {
+      continue;
+    }
+    chosenCards[item.colIndex] = pool[item.cardIndex];
+    usedColIndices.add(item.colIndex);
+    usedCardIndices.add(item.cardIndex);
+    if (usedColIndices.size === 10) {
+      break;
+    }
+  }
+
+  const remainingPool = pool.filter((_, index) => !usedCardIndices.has(index));
+  for (let c = 0; c < 10; c++) {
+    if (!chosenCards[c]) {
+      chosenCards[c] = remainingPool.pop()!;
+    }
+  }
+
+  const nextStock: SpiderCard[][] = [];
+  for (let index = 0; index < remainingPool.length; index += 10) {
+    nextStock.push(remainingPool.slice(index, index + 10));
+  }
+
+  return {
+    dealCards: chosenCards as SpiderCard[],
+    nextStock,
   };
 };
 
@@ -230,7 +391,7 @@ export const canDropRunOnColumn = (
   }
 
   const targetBottomCard = targetColumn.at(-1);
-  if (!targetBottomCard || !targetBottomCard.faceUp) {
+  if (!targetBottomCard?.faceUp) {
     return false;
   }
 
@@ -510,6 +671,49 @@ export const moveSpiderCardsAtom = atom(
   }
 );
 
+export const applySpiderStockDealAtom = atom(
+  null,
+  (
+    get,
+    set,
+    {
+      dealCards,
+      nextStock,
+    }: { dealCards: SpiderCard[]; nextStock: SpiderCard[][] }
+  ) => {
+    const game = get(spiderGameAtom);
+
+    const snapshot: SpiderSnapshot = {
+      columns: cloneColumns(game.columns),
+      stock: cloneStock(game.stock),
+      completedSuits: [...game.completedSuits],
+      moves: game.moves,
+    };
+
+    const nextColumns = cloneColumns(game.columns);
+    for (let colIndex = 0; colIndex < 10; colIndex++) {
+      const card = dealCards[colIndex];
+      if (card) {
+        nextColumns[colIndex].push({ ...card, faceUp: true });
+      }
+    }
+
+    const { columns: cleanedColumns, completedSuits: nextCompleted } =
+      extractCompletedRuns(nextColumns, game.completedSuits);
+
+    set(spiderGameAtom, {
+      ...game,
+      columns: cleanedColumns,
+      stock: nextStock,
+      completedSuits: nextCompleted,
+      moves: game.moves + 1,
+      history: [...game.history, snapshot],
+      hint: null,
+    });
+    set(spiderNoticeAtom, null);
+  }
+);
+
 export const dealSpiderStockAtom = atom(null, (get, set) => {
   const game = get(spiderGameAtom);
   if (game.stock.length === 0) {
@@ -531,6 +735,15 @@ export const dealSpiderStockAtom = atom(null, (get, set) => {
     return;
   }
 
+  const prepared = prepareOptimalStockDeal(
+    game.columns,
+    game.stock,
+    game.suitMode
+  );
+  if (!prepared) {
+    return;
+  }
+
   const snapshot: SpiderSnapshot = {
     columns: cloneColumns(game.columns),
     stock: cloneStock(game.stock),
@@ -538,12 +751,9 @@ export const dealSpiderStockAtom = atom(null, (get, set) => {
     moves: game.moves,
   };
 
-  const nextStock = cloneStock(game.stock);
-  const dealCards = nextStock.pop()!;
   const nextColumns = cloneColumns(game.columns);
-
   for (let colIndex = 0; colIndex < 10; colIndex++) {
-    const card = dealCards[colIndex];
+    const card = prepared.dealCards[colIndex];
     if (card) {
       nextColumns[colIndex].push({ ...card, faceUp: true });
     }
@@ -555,7 +765,7 @@ export const dealSpiderStockAtom = atom(null, (get, set) => {
   set(spiderGameAtom, {
     ...game,
     columns: cleanedColumns,
-    stock: nextStock,
+    stock: prepared.nextStock,
     completedSuits: nextCompleted,
     moves: game.moves + 1,
     history: [...game.history, snapshot],

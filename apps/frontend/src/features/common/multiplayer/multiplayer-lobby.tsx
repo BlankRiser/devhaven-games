@@ -151,11 +151,13 @@ export const MultiplayerLobby = ({
         </div>
 
         {typeof initialRoomId === "string" && initialRoomId.length > 0 ? (
-          <div className="border-emerald-500/40 bg-emerald-500/10 text-emerald-400 mx-auto flex max-w-md items-center gap-2.5 border p-3 font-mono text-xs">
+          <div className="mx-auto flex max-w-md items-center gap-2.5 border border-emerald-500/40 bg-emerald-500/10 p-3 font-mono text-xs text-emerald-400">
             <LinkSimpleIcon className="size-4 shrink-0 text-emerald-400" />
             <div className="flex-1">
-              <span className="font-bold">Room Invite Detected:</span>{" "}
-              Room code <span className="font-bold underline">{initialRoomId}</span> has been pre-filled below. Confirm your nickname and click &quot;Join Game Room&quot;!
+              <span className="font-bold">Room Invite Detected:</span> Room code{" "}
+              <span className="font-bold underline">{initialRoomId}</span> has
+              been pre-filled below. Confirm your nickname and click &quot;Join
+              Game Room&quot;!
             </div>
           </div>
         ) : null}

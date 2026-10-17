@@ -112,15 +112,15 @@ export const TicTacToeOnline = ({
   };
 
   const playerX = roomState
-    ? Object.values(roomState.players).find(
+    ? (Object.values(roomState.players).find(
         (p) => roomState.gameState.playerSymbols[p.id] === "X"
-      ) ?? null
+      ) ?? null)
     : null;
 
   const playerO = roomState
-    ? Object.values(roomState.players).find(
+    ? (Object.values(roomState.players).find(
         (p) => roomState.gameState.playerSymbols[p.id] === "O"
-      ) ?? null
+      ) ?? null)
     : null;
 
   if (!roomState) {

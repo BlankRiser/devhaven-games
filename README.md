@@ -22,11 +22,13 @@ bun install
 ### Development
 
 Run all apps concurrently:
+
 ```bash
 bun dev
 ```
 
 Or run individual apps:
+
 ```bash
 # Frontend (Next.js)
 bun dev:frontend

@@ -102,7 +102,8 @@ export const handleTicTacToeAction = (
     !("cellIndex" in rawAction)
   ) {
     return {
-      error: "Invalid action format. Expected { type: 'move', cellIndex: number }",
+      error:
+        "Invalid action format. Expected { type: 'move', cellIndex: number }",
       newState: state,
       status: "in_progress",
     };

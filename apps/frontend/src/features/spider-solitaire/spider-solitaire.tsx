@@ -30,15 +30,17 @@ import {
 import { cn } from "@/lib/utils";
 import {
   CompletedFoundationsBar,
+  FloatingStockDeck,
   SpiderPlayingCardView,
   StockPileButton,
 } from "./spider-solitaire-assets";
 import {
+  applySpiderStockDealAtom,
   canDropRunOnColumn,
-  dealSpiderStockAtom,
   findBestDestinationColumn,
   isMovableRun,
   moveSpiderCardsAtom,
+  prepareOptimalStockDeal,
   spiderElapsedSecondsAtom,
   spiderGameAtom,
   spiderNoticeAtom,
@@ -67,7 +69,7 @@ export default function SpiderSolitaire() {
 
   const startNewGame = useSetAtom(startNewSpiderGameAtom);
   const moveCards = useSetAtom(moveSpiderCardsAtom);
-  const dealStock = useSetAtom(dealSpiderStockAtom);
+  const applyStockDeal = useSetAtom(applySpiderStockDealAtom);
   const undoMove = useSetAtom(undoSpiderMoveAtom);
   const triggerHint = useSetAtom(triggerSpiderHintAtom);
 
@@ -116,6 +118,139 @@ export default function SpiderSolitaire() {
     };
   }, [stats.moves, stats.hasWon, setElapsedSeconds]);
 
+  const [isDealing, setIsDealing] = React.useState(false);
+  const [flyingCards, setFlyingCards] = React.useState<{
+    cards: SpiderCard[];
+    origin: { x: number; y: number };
+    destinations: { x: number; y: number; width: number; height: number }[];
+  } | null>(null);
+
+  const stockDeckReference = React.useRef<HTMLButtonElement | null>(null);
+  const columnReferences = React.useRef<(HTMLDivElement | null)[]>([]);
+  const dealTimeoutReference = React.useRef<number | null>(null);
+
+  React.useEffect(() => {
+    return () => {
+      if (dealTimeoutReference.current !== null) {
+        window.clearTimeout(dealTimeoutReference.current);
+      }
+    };
+  }, []);
+
+  const handleDealStock = React.useCallback(() => {
+    if (isDealing) {
+      return;
+    }
+
+    if (stats.dealsRemaining === 0) {
+      setNotice({
+        title: "No Cards Remaining",
+        message:
+          "The stock pile is empty. Continue playing with the cards on the board.",
+      });
+      return;
+    }
+
+    if (!stats.canDealStock) {
+      setNotice({
+        title: "Empty Column Blocked",
+        message:
+          "Every tableau column must contain at least one card before dealing from the stock.",
+      });
+      return;
+    }
+
+    const prepared = prepareOptimalStockDeal(
+      game.columns,
+      game.stock,
+      game.suitMode
+    );
+
+    if (!prepared) {
+      return;
+    }
+
+    // Measure origin (bottom right floating deck or viewport fallback)
+    const deckRect = stockDeckReference.current?.getBoundingClientRect();
+    const origin = deckRect
+      ? { x: deckRect.left, y: deckRect.top }
+      : { x: window.innerWidth - 100, y: window.innerHeight - 130 };
+
+    // Measure destinations for each column
+    const destinations: {
+      x: number;
+      y: number;
+      width: number;
+      height: number;
+    }[] = [];
+
+    for (let index = 0; index < 10; index += 1) {
+      const colElement = columnReferences.current[index];
+      const colCards = game.columns[index] ?? [];
+      const faceUpStep = colCards.length > 13 ? 22 : 28;
+      const faceDownStep = 12;
+      let topOffset = 0;
+      for (const card of colCards) {
+        topOffset += card.faceUp ? faceUpStep : faceDownStep;
+      }
+
+      if (colElement) {
+        const colRect = colElement.getBoundingClientRect();
+        const cardWidth = Math.max(60, colRect.width - 4);
+        let cardHeight = 88;
+        if (colRect.width > 100) {
+          cardHeight = 128;
+        } else if (colRect.width > 80) {
+          cardHeight = 112;
+        }
+        const targetY = Math.min(
+          colRect.top + topOffset,
+          window.innerHeight - 120
+        );
+        destinations.push({
+          x: colRect.left + 2,
+          y: targetY,
+          width: cardWidth,
+          height: cardHeight,
+        });
+      } else {
+        destinations.push({
+          x: (window.innerWidth / 10) * index + 8,
+          y: Math.min(220 + topOffset, window.innerHeight - 120),
+          width: 80,
+          height: 112,
+        });
+      }
+    }
+
+    setIsDealing(true);
+    setSelectedRun(null);
+    setNotice(null);
+    setFlyingCards({
+      cards: prepared.dealCards,
+      origin,
+      destinations,
+    });
+
+    dealTimeoutReference.current = window.setTimeout(() => {
+      applyStockDeal({
+        dealCards: prepared.dealCards,
+        nextStock: prepared.nextStock,
+      });
+      setFlyingCards(null);
+      setIsDealing(false);
+    }, 780);
+  }, [
+    applyStockDeal,
+    game.columns,
+    game.stock,
+    game.suitMode,
+    isDealing,
+    setNotice,
+    stats.canDealStock,
+    stats.dealsRemaining,
+  ]);
+
   // Keyboard shortcuts: Z to undo, H for hint, D to deal stock
   React.useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
@@ -152,7 +287,7 @@ export default function SpiderSolitaire() {
         }
         case "d": {
           event.preventDefault();
-          dealStock();
+          handleDealStock();
 
           break;
         }
@@ -169,7 +304,7 @@ export default function SpiderSolitaire() {
     return () => {
       window.removeEventListener("keydown", handleKeyDown);
     };
-  }, [dealStock, triggerHint, undoMove]);
+  }, [handleDealStock, triggerHint, undoMove]);
 
   const activeSource = activeDrag ?? selectedRun;
   const activeMovingCards = React.useMemo(() => {
@@ -377,9 +512,7 @@ export default function SpiderSolitaire() {
               dealsRemaining={stats.dealsRemaining}
               canDeal={stats.canDealStock}
               isHintTarget={game.hint?.toCol === "stock"}
-              onDeal={() => {
-                dealStock();
-              }}
+              onDeal={handleDealStock}
             />
 
             <Button
@@ -497,7 +630,7 @@ export default function SpiderSolitaire() {
           setActiveDrag(null);
         }}
       >
-        <div className="bg-card/30 min-h-0 w-full flex-1 overflow-auto p-2 sm:p-4">
+        <div className="bg-card/30 min-h-0 w-full flex-1 overflow-auto p-2 pb-32 sm:p-4 sm:pb-36">
           <div className="grid h-full min-w-[720px] grid-cols-10 gap-1.5 sm:gap-2.5 lg:gap-3">
             {game.columns.map((column, colIndex) => {
               const isValidTarget =
@@ -514,6 +647,9 @@ export default function SpiderSolitaire() {
                   selectedRun={selectedRun}
                   hint={game.hint}
                   isValidTarget={isValidTarget}
+                  onMountColumnRef={(element) => {
+                    columnReferences.current[colIndex] = element;
+                  }}
                   onCardClick={handleCardClick}
                   onCardDoubleClick={handleCardDoubleClick}
                   onEmptyColumnClick={handleEmptyColumnClick}
@@ -544,6 +680,71 @@ export default function SpiderSolitaire() {
           ) : null}
         </DragOverlay>
       </DndContext>
+
+      {/* Floating 3D Stock Deck (Bottom-Right Corner) */}
+      <FloatingStockDeck
+        deckRef={stockDeckReference}
+        dealsRemaining={stats.dealsRemaining}
+        canDeal={stats.canDealStock}
+        isDealing={isDealing}
+        isHintTarget={game.hint?.toCol === "stock"}
+        onDeal={handleDealStock}
+      />
+
+      {/* Animated Stock Deal Flying Cards Overlay */}
+      {flyingCards ? (
+        <div
+          className="pointer-events-none fixed inset-0 z-50 overflow-hidden"
+          aria-hidden="true"
+        >
+          {flyingCards.cards.map((card, index) => {
+            const destination = flyingCards.destinations[index];
+            if (!destination) {
+              return null;
+            }
+
+            return (
+              <motion.div
+                key={`deal-fly-${card.id}`}
+                initial={{
+                  x: flyingCards.origin.x,
+                  y: flyingCards.origin.y,
+                  scale: 0.75,
+                  rotate: 15,
+                  opacity: 0.85,
+                }}
+                animate={{
+                  x: [flyingCards.origin.x, destination.x],
+                  y: [
+                    flyingCards.origin.y,
+                    Math.min(flyingCards.origin.y, destination.y) - 60,
+                    destination.y,
+                  ],
+                  scale: [0.75, 1.05, 1],
+                  rotate: [15, -4, 0],
+                  opacity: [0.85, 1, 1],
+                }}
+                transition={{
+                  delay: index * 0.04,
+                  duration: 0.4,
+                  ease: [0.22, 1, 0.36, 1],
+                }}
+                style={{
+                  width: destination.width,
+                  height: destination.height,
+                }}
+                className="fixed top-0 left-0 shadow-2xl"
+              >
+                <SpiderPlayingCardView
+                  card={card}
+                  isMovable={false}
+                  isOverlay
+                />
+              </motion.div>
+            );
+          })}
+        </div>
+      ) : null}
     </section>
   );
 }
@@ -555,6 +756,7 @@ const TableauColumn = ({
   selectedRun,
   hint,
   isValidTarget,
+  onMountColumnRef,
   onCardClick,
   onCardDoubleClick,
   onEmptyColumnClick,
@@ -565,6 +767,7 @@ const TableauColumn = ({
   readonly selectedRun: ActiveSelection | null;
   readonly hint: SpiderMoveHint | null;
   readonly isValidTarget: boolean;
+  readonly onMountColumnRef?: (element: HTMLDivElement | null) => void;
   readonly onCardClick: (colIndex: number, cardIndex: number) => void;
   readonly onCardDoubleClick: (colIndex: number, cardIndex: number) => void;
   readonly onEmptyColumnClick: (colIndex: number) => void;
@@ -591,7 +794,10 @@ const TableauColumn = ({
 
   return (
     <div
-      ref={setNodeRef}
+      ref={(element) => {
+        setNodeRef(element);
+        onMountColumnRef?.(element);
+      }}
       onClick={() => {
         if (cards.length === 0) {
           onEmptyColumnClick(colIndex);

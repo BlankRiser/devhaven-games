@@ -107,7 +107,10 @@ export const TicTacToeLocal = ({
     }
 
     setWinner(outcome);
-    setScores((previous) => ({ ...previous, [outcome]: previous[outcome] + 1 }));
+    setScores((previous) => ({
+      ...previous,
+      [outcome]: previous[outcome] + 1,
+    }));
   };
 
   const hasAnyScore = scores.x > 0 || scores.o > 0 || scores.draw > 0;

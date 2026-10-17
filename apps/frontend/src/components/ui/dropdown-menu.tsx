@@ -5,19 +5,23 @@ import { CaretRightIcon, CheckIcon } from "@phosphor-icons/react";
 import { cn } from "cn";
 import * as React from "react";
 
-const DropdownMenu = ({ ...properties }: MenuPrimitive.Root.Props) => (
-  <MenuPrimitive.Root data-slot="dropdown-menu" {...properties} />
-);
+const DropdownMenu = ({ ...properties }: MenuPrimitive.Root.Props) => {
+  return <MenuPrimitive.Root data-slot="dropdown-menu" {...properties} />;
+};
 
-const DropdownMenuPortal = ({ ...properties }: MenuPrimitive.Portal.Props) => (
-  <MenuPrimitive.Portal data-slot="dropdown-menu-portal" {...properties} />
-);
+const DropdownMenuPortal = ({ ...properties }: MenuPrimitive.Portal.Props) => {
+  return (
+    <MenuPrimitive.Portal data-slot="dropdown-menu-portal" {...properties} />
+  );
+};
 
 const DropdownMenuTrigger = ({
   ...properties
-}: MenuPrimitive.Trigger.Props) => (
-  <MenuPrimitive.Trigger data-slot="dropdown-menu-trigger" {...properties} />
-);
+}: MenuPrimitive.Trigger.Props) => {
+  return (
+    <MenuPrimitive.Trigger data-slot="dropdown-menu-trigger" {...properties} />
+  );
+};
 
 const DropdownMenuContent = ({
   align = "start",
@@ -51,9 +55,11 @@ const DropdownMenuContent = ({
   </MenuPrimitive.Portal>
 );
 
-const DropdownMenuGroup = ({ ...properties }: MenuPrimitive.Group.Props) => (
-  <MenuPrimitive.Group data-slot="dropdown-menu-group" {...properties} />
-);
+const DropdownMenuGroup = ({ ...properties }: MenuPrimitive.Group.Props) => {
+  return (
+    <MenuPrimitive.Group data-slot="dropdown-menu-group" {...properties} />
+  );
+};
 
 const DropdownMenuLabel = ({
   className,
@@ -100,9 +106,11 @@ const DropdownMenuItem = ({
 
 const DropdownMenuSub = ({
   ...properties
-}: MenuPrimitive.SubmenuRoot.Props) => (
-  <MenuPrimitive.SubmenuRoot data-slot="dropdown-menu-sub" {...properties} />
-);
+}: MenuPrimitive.SubmenuRoot.Props) => {
+  return (
+    <MenuPrimitive.SubmenuRoot data-slot="dropdown-menu-sub" {...properties} />
+  );
+};
 
 const DropdownMenuSubTrigger = ({
   className,

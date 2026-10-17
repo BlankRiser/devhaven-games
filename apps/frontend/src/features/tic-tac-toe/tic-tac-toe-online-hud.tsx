@@ -84,7 +84,7 @@ const OnlineStatusBadge = ({
 
   if (isOnlineTurn) {
     return (
-      <span className="border-emerald-500 bg-emerald-500/15 text-emerald-400 flex items-center gap-1.5 border px-2.5 py-1 font-mono text-xs font-bold tracking-wider">
+      <span className="flex items-center gap-1.5 border border-emerald-500 bg-emerald-500/15 px-2.5 py-1 font-mono text-xs font-bold tracking-wider text-emerald-400">
         Your Turn (Player {mySymbol})
       </span>
     );
@@ -157,14 +157,14 @@ export const TicTacToeOnlineHud = ({
           >
             <UsersIcon className="size-3.5" />
             <span>Multiplayer</span>
-            <span className="size-1.5 rounded-full bg-emerald-500 animate-pulse" />
+            <span className="size-1.5 animate-pulse rounded-full bg-emerald-500" />
           </button>
         </div>
 
         <div className="flex flex-wrap items-center gap-3 sm:gap-5">
           <div className="border-border bg-secondary/40 flex items-center gap-1 border px-2 py-0.5 font-mono text-xs">
             <span className="text-muted-foreground">Room:</span>
-            <span className="text-foreground font-bold font-mono">
+            <span className="text-foreground font-mono font-bold">
               #{roomId}
             </span>
             <Button
@@ -184,13 +184,13 @@ export const TicTacToeOnlineHud = ({
 
           <div className="hidden items-center gap-1.5 sm:flex">
             {isHost ? (
-              <span className="border-border bg-amber-500/10 text-amber-500 inline-flex items-center gap-1 border px-2 py-0.5 text-xs font-mono font-bold">
+              <span className="border-border inline-flex items-center gap-1 border bg-amber-500/10 px-2 py-0.5 font-mono text-xs font-bold text-amber-500">
                 <CrownIcon className="size-3" weight="fill" />
                 Host
               </span>
             ) : null}
 
-            <span className="border-border bg-secondary/30 text-muted-foreground inline-flex items-center border px-1.5 py-0.5 text-xs font-mono">
+            <span className="border-border bg-secondary/30 text-muted-foreground inline-flex items-center border px-1.5 py-0.5 font-mono text-xs">
               {hostLabel}
             </span>
           </div>

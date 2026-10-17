@@ -198,10 +198,7 @@ export class GameRoom extends DurableObject<Environment> {
     const engine = getGameEngine(room.gameType);
     room.gameState = engine.onPlayersChanged(room.gameState, room.players);
 
-    if (
-      Object.keys(room.players).length < 2 &&
-      room.status === "in_progress"
-    ) {
+    if (Object.keys(room.players).length < 2 && room.status === "in_progress") {
       room.status = "waiting";
     }
 

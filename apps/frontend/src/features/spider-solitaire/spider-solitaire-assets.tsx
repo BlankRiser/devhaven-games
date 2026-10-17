@@ -205,3 +205,115 @@ export const StockPileButton = ({
     <span className="font-mono font-bold">Deal ({dealsRemaining})</span>
   </button>
 );
+
+export const FloatingStockDeck = ({
+  dealsRemaining,
+  canDeal,
+  isDealing,
+  isHintTarget = false,
+  onDeal,
+  deckRef,
+}: {
+  readonly dealsRemaining: number;
+  readonly canDeal: boolean;
+  readonly isDealing: boolean;
+  readonly isHintTarget?: boolean;
+  readonly onDeal: () => void;
+  readonly deckRef?: React.Ref<HTMLButtonElement>;
+}) => {
+  const isDisabled = dealsRemaining === 0 || isDealing;
+
+  let deckTitle = `Deal 10 cards (${dealsRemaining} remaining) — Press 'D'`;
+  if (dealsRemaining === 0) {
+    deckTitle = "No stock deals remaining";
+  } else if (!canDeal) {
+    deckTitle = "Fill all empty columns before dealing from stock";
+  }
+
+  let buttonStateClass =
+    "border-border bg-card text-foreground hover:border-foreground cursor-pointer hover:-translate-y-1 hover:shadow-xl active:translate-y-0";
+  if (isDisabled) {
+    buttonStateClass =
+      "border-border/60 bg-secondary/20 text-muted-foreground/40 cursor-not-allowed border-dashed";
+  } else if (isHintTarget) {
+    buttonStateClass =
+      "border-chart-3 bg-card text-foreground ring-chart-3/50 cursor-pointer shadow-xl ring-2 hover:-translate-y-1";
+  } else if (!canDeal) {
+    buttonStateClass =
+      "border-border/80 bg-secondary/40 text-muted-foreground cursor-not-allowed";
+  }
+
+  return (
+    <div className="fixed right-4 bottom-4 z-30 select-none sm:right-6 sm:bottom-6">
+      <button
+        ref={deckRef}
+        type="button"
+        disabled={isDisabled}
+        onClick={onDeal}
+        aria-label={
+          dealsRemaining === 0
+            ? "Stock deck is empty"
+            : `Deal 10 cards from stock (${dealsRemaining} deals remaining, keyboard shortcut D)`
+        }
+        title={deckTitle}
+        className={cn(
+          "group relative flex h-24 w-18 flex-col items-center justify-between border p-2 shadow-lg transition-all sm:h-28 sm:w-20",
+          buttonStateClass
+        )}
+      >
+        {/* Layered Deck Effect under the top card */}
+        {dealsRemaining > 1 ? (
+          <>
+            <span
+              aria-hidden="true"
+              className="border-border bg-secondary/80 pointer-events-none absolute inset-0 -translate-x-1 -translate-y-1 -rotate-3 border shadow-xs"
+            />
+            {dealsRemaining > 2 ? (
+              <span
+                aria-hidden="true"
+                className="border-border bg-secondary/70 pointer-events-none absolute inset-0 -translate-x-2 -translate-y-2 -rotate-6 border shadow-xs"
+              />
+            ) : null}
+          </>
+        ) : null}
+
+        {/* Card Front / Pattern Face */}
+        {dealsRemaining > 0 ? (
+          <div className="relative z-10 flex h-full w-full flex-col items-center justify-between">
+            <div className="flex w-full items-center justify-between">
+              <StackIcon
+                className={cn(
+                  "size-3.5",
+                  canDeal ? "text-chart-3" : "text-muted-foreground/50"
+                )}
+                weight="duotone"
+              />
+              <span className="bg-foreground text-background px-1 py-0.5 font-mono text-[10px] leading-none font-bold">
+                {dealsRemaining}
+              </span>
+            </div>
+
+            <div className="flex flex-col items-center text-center">
+              <span className="font-heading text-xs font-bold tracking-wider uppercase">
+                {isDealing ? "Dealing…" : "Stock"}
+              </span>
+              <span className="text-muted-foreground font-mono text-[9px] tracking-tight">
+                [Key: D]
+              </span>
+            </div>
+
+            <div className="border-border/60 bg-secondary/50 flex w-full items-center justify-center border py-0.5 text-[9px] font-medium uppercase">
+              {canDeal ? "+10 Cards" : "Fill Holes"}
+            </div>
+          </div>
+        ) : (
+          <div className="relative z-10 grid h-full w-full place-items-center text-center">
+            <span className="text-muted-foreground/50 font-mono text-[10px] uppercase">
+              Deck Empty
+            </span>
+          </div>
+        )}
+      </button>
+    </div>
+  );
+};

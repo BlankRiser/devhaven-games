@@ -362,25 +362,27 @@ export default function Pacman() {
 
   const syncHudFromWorld = React.useCallback(() => {
     const w = worldReference.current;
-    setHud((previous) => ({
-      ...previous,
-      score: w.score,
-      highScore: w.highScore,
-      lives: w.lives,
-      level: w.level,
-      pelletsRemaining: w.pelletsRemaining,
-      status: w.status,
-      frightenedSeconds: Math.ceil(w.frightenedTimer),
-    }));
+    setHud((previous) => {
+      return {
+        ...previous,
+        score: w.score,
+        highScore: w.highScore,
+        lives: w.lives,
+        level: w.level,
+        pelletsRemaining: w.pelletsRemaining,
+        status: w.status,
+        frightenedSeconds: Math.ceil(w.frightenedTimer),
+      };
+    });
   }, [setHud]);
 
   const handleFpsUpdate = React.useCallback(
     (measuredFps: number) => {
-      setHud((previous) =>
-        previous.fps === measuredFps
+      setHud((previous) => {
+        return previous.fps === measuredFps
           ? previous
-          : { ...previous, fps: measuredFps }
-      );
+          : { ...previous, fps: measuredFps };
+      });
     },
     [setHud]
   );
