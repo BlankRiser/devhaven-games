@@ -20,6 +20,9 @@ const SpiderSolitaire = dynamic(
   async () => await import("./spider-solitaire/spider-solitaire"),
   { ssr: false }
 );
+const Sudoku = dynamic(async () => await import("./sudoku/sudoku"), {
+  ssr: false,
+});
 const TicTacToe = dynamic(
   async () => await import("./tic-tac-toe/tic-tac-toe"),
   { ssr: false }
@@ -124,6 +127,21 @@ export const GAMES_LIST: GameItem[] = [
     color: "green",
     url: "/games/hangman",
     component: Hangman,
+  },
+  {
+    slug: "sudoku",
+    status: "completed" as const,
+    label: "Sudoku",
+    description:
+      "Fill the 9x9 grid with numbers 1 to 9 following classic tier-based logic rules.",
+    category: "word-puzzle",
+    categoryLabel: "Word & Puzzle",
+    players: "1 Player",
+    tags: ["sudoku", "grid", "logic", "numbers", "puzzle", "brain-teaser"],
+    icon: "gamepad",
+    color: "green",
+    url: "/games/sudoku",
+    component: Sudoku,
   },
   {
     slug: "minesweeper",

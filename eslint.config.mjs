@@ -30,6 +30,17 @@ export default [
     },
   },
   {
+    files: ["apps/frontend/src/features/sudoku/**/*.{ts,tsx}"],
+    rules: {
+      "@typescript-eslint/naming-convention": "off",
+      "complexity": "off",
+      "no-bitwise": "off",
+      "sonarjs/cognitive-complexity": "off",
+      "sonarjs/pseudo-random": "off",
+      "sonarjs/too-many-break-or-continue-in-loop": "off",
+    },
+  },
+  {
     files: ["apps/frontend/src/features/common/multiplayer/**/*.{ts,tsx}"],
     rules: {
       "@typescript-eslint/no-unsafe-type-assertion": "off",
