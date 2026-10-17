@@ -34,7 +34,7 @@ export const siteMetadata = {
   category: "games",
   classification: "Game, Puzzle, Arcade, Web Application",
   description:
-    "Play free online browser games with zero ads or installations. Enjoy daily Sudoku puzzles, real-time multiplayer Tic-Tac-Toe, Spider Solitaire, Minesweeper, and Pac-Man.",
+    "Play free online games instantly in your browser—no downloads, installations, or ads. Challenge friends in multiplayer Tic-Tac-Toe, solve Sudoku puzzles, play classic Spider Solitaire and Minesweeper, explore the Pac-Man maze, and test your vocabulary with Hangman. Jump into quick arcade games and brain teasers on any device.",
   githubUrl: "https://github.com/BlankRiser/devhaven-games",
   keywords: [
     "free online games",
@@ -53,7 +53,7 @@ export const siteMetadata = {
   ],
   locale: "en_US",
   name: "DevHaven Games",
-  tagline: "Zero-Latency Web Games & Real-Time Multiplayer",
+  tagline: "Free Online Games, Brain Teasers & Multiplayer Fun",
   themeColor: "#121212",
   title: "DevHaven Games | Free Web Games, Word Puzzles & Multiplayer Arcade",
   twitterHandle: "@BlankRiser",
@@ -66,7 +66,7 @@ export const gameMetadataCatalog: Record<SiteGameSlug, GameSeoMetadata> = {
     category: "board-games",
     categoryLabel: "Board Games",
     description:
-      "Play Tic-Tac-Toe online in real-time. Challenge friends across devices via room codes or play local 2-player grid battles with zero latency.",
+      "Play Tic-Tac-Toe online for free and challenge a friend to a quick game of Xs and Os. Create a room and share a link to play together in real time, or enjoy a classic two-player game on the same device. Outsmart your opponent, line up three symbols, and see who wins!",
     features: [
       "Real-time WebSocket multiplayer",
       "Room code & instant invite link sharing",
@@ -76,13 +76,14 @@ export const gameMetadataCatalog: Record<SiteGameSlug, GameSeoMetadata> = {
     genre: "Strategy, Board Game",
     keywords: [
       "tic tac toe online",
+      "tic tac toe",
       "multiplayer tic tac toe",
       "2 player tic tac toe",
       "play tic tac toe with friends",
       "noughts and crosses online",
       "real time tic tac toe",
     ],
-    metaTitle: "Tic-Tac-Toe Online - Free Real-Time Multiplayer & 2-Player Game",
+    metaTitle: "Tic Tac Toe",
     numberOfPlayersMax: 2,
     numberOfPlayersMin: 1,
     operatingSystem: "Any",
@@ -98,7 +99,7 @@ export const gameMetadataCatalog: Record<SiteGameSlug, GameSeoMetadata> = {
     category: "word-puzzle",
     categoryLabel: "Word & Puzzle",
     description:
-      "Play free Sudoku online with 9x9 logic grids, tier-based difficulty ratings, keyboard navigation (Tab & Enter), pencil notes, and live completion timer.",
+      "Enjoy free Sudoku online with number puzzles for every skill level. Fill the 9x9 grid so every row, column, and 3x3 box contains the numbers 1 through 9 without repeats. Use pencil notes to track possibilities, challenge yourself with different difficulty levels, and sharpen your logical thinking—all in your browser, with no download required.",
     features: [
       "Tier-based puzzle generator",
       "Full keyboard navigation with Tab and Enter",
@@ -116,7 +117,7 @@ export const gameMetadataCatalog: Record<SiteGameSlug, GameSeoMetadata> = {
       "sudoku with notes",
       "free brain puzzles",
     ],
-    metaTitle: "Sudoku Online - Free Daily Logic Puzzles & Tier-Based Grids",
+    metaTitle: "Sudoku",
     numberOfPlayersMax: 1,
     numberOfPlayersMin: 1,
     operatingSystem: "Any",
@@ -132,7 +133,7 @@ export const gameMetadataCatalog: Record<SiteGameSlug, GameSeoMetadata> = {
     category: "card-games",
     categoryLabel: "Card Games",
     description:
-      "Play classic Spider Solitaire online with animated bottom-right card deals, intelligent deck validation, full undo support, and 10 tableau columns.",
+      "Play Spider Solitaire online for free and put your card-playing strategy to the test. Arrange cards in descending order from King to Ace, build complete sequences of the same suit, and clear all ten columns to win. Undo moves, rethink your strategy, and enjoy a classic solitaire card game whenever you need a relaxing break.",
     features: [
       "Smooth dealing animations from bottom-right deck",
       "Solvable deal validation and complete card decks",
@@ -149,7 +150,7 @@ export const gameMetadataCatalog: Record<SiteGameSlug, GameSeoMetadata> = {
       "classic card patience",
       "solitaire with undo",
     ],
-    metaTitle: "Spider Solitaire Online - Free Classic Card Patience Game",
+    metaTitle: "Spider Solitaire",
     numberOfPlayersMax: 1,
     numberOfPlayersMin: 1,
     operatingSystem: "Any",
@@ -165,7 +166,7 @@ export const gameMetadataCatalog: Record<SiteGameSlug, GameSeoMetadata> = {
     category: "board-games",
     categoryLabel: "Board Games",
     description:
-      "Sweep the minefield without detonating hidden explosives. Classic retro Minesweeper featuring first-click safety, flag placement, and time tracking.",
+      "Play Minesweeper online for free in this classic minefield logic puzzle. Reveal squares, use the numbers to figure out where hidden mines are buried, and flag dangerous tiles without triggering an explosion. Every move is a test of logic and careful planning. Can you clear the entire board and beat your best time?",
     features: [
       "First-click mine safety guarantee",
       "Right-click / toggle flagging mode",
@@ -181,7 +182,7 @@ export const gameMetadataCatalog: Record<SiteGameSlug, GameSeoMetadata> = {
       "retro minesweeper browser",
       "logic grid bomb puzzle",
     ],
-    metaTitle: "Minesweeper Online - Free Classic Logic Grid & Minefield Challenge",
+    metaTitle: "Minesweeper",
     numberOfPlayersMax: 1,
     numberOfPlayersMin: 1,
     operatingSystem: "Any",
@@ -197,7 +198,7 @@ export const gameMetadataCatalog: Record<SiteGameSlug, GameSeoMetadata> = {
     category: "2d-platformer",
     categoryLabel: "2D Platformer",
     description:
-      "Chomp neon pellets, outsmart Blinky, Pinky, Inky, and Clyde, and clear the retro maze. Desktop-optimized Pac-Man with crisp aspect-ratio rendering.",
+      "Relive the fun of classic Pac-Man in this free online arcade maze game. Guide Pac-Man through winding corridors, gobble up every pellet, and avoid Blinky, Pinky, Inky, and Clyde as they chase you through the maze. Grab power pellets to turn the tables on the ghosts, rack up points, and see how long you can survive.",
     features: [
       "Square aspect ratio canvas without asset stretching",
       "Four authentic ghost AI patrol behaviors",
@@ -213,7 +214,7 @@ export const gameMetadataCatalog: Record<SiteGameSlug, GameSeoMetadata> = {
       "play pacman desktop",
       "arcade classic 80s",
     ],
-    metaTitle: "Pac-Man Online - Play Retro Arcade Neon Maze Game Free",
+    metaTitle: "Pac-Man",
     numberOfPlayersMax: 1,
     numberOfPlayersMin: 1,
     operatingSystem: "Any",
@@ -229,7 +230,7 @@ export const gameMetadataCatalog: Record<SiteGameSlug, GameSeoMetadata> = {
     category: "word-puzzle",
     categoryLabel: "Word & Puzzle",
     description:
-      "Test your vocabulary in Hangman. Deduce secret words letter-by-letter across various categories before the vector gallows drawing is completed.",
+      "Play Hangman online for free and see if you can guess the hidden word before you run out of chances. Pick letters one at a time, use category clues to narrow down your choices, and uncover the answer before the drawing is complete. It's a fun way to test your spelling, build your vocabulary, and enjoy a quick word-guessing challenge.",
     features: [
       "Clean vector gallows with tight alignment",
       "Categorized dictionary word banks",
@@ -245,7 +246,7 @@ export const gameMetadataCatalog: Record<SiteGameSlug, GameSeoMetadata> = {
       "vocabulary deduction game",
       "hangman word categories",
     ],
-    metaTitle: "Hangman Online - Free Word Guessing & Vocabulary Puzzle",
+    metaTitle: "Hangman",
     numberOfPlayersMax: 1,
     numberOfPlayersMin: 1,
     operatingSystem: "Any",
@@ -261,7 +262,7 @@ export const gameMetadataCatalog: Record<SiteGameSlug, GameSeoMetadata> = {
     category: "2d-platformer",
     categoryLabel: "2D Platformer",
     description:
-      "Tap or press space to flap through pipe obstacles. Test your reflexes in this endless retro arcade side-scrolling physics challenge.",
+      "Test your timing and reflexes in this Flappy Bird-inspired browser arcade game. Tap, click, or press the spacebar to keep your bird flying through narrow gaps between pipes without crashing. Each obstacle is another chance to beat your high score, but one mistimed flap can end your run. How far can you fly?",
     features: [
       "One-touch reflex physics engine",
       "Procedurally generated obstacle pipes",
@@ -276,7 +277,7 @@ export const gameMetadataCatalog: Record<SiteGameSlug, GameSeoMetadata> = {
       "endless reflex game",
       "flappy bird high score",
     ],
-    metaTitle: "Flappy Bird Online - Play Retro Tap Reflex Challenge",
+    metaTitle: "Flappy Bird",
     numberOfPlayersMax: 1,
     numberOfPlayersMin: 1,
     operatingSystem: "Any",

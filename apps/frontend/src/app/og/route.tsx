@@ -17,7 +17,7 @@ const fullDimension = "100%";
 const spaceBetweenLayout = "space-between";
 const columnLayout = "column";
 
-const engineLabel = "[ ZERO-INSTALL BROWSER ENGINE ]";
+const engineLabel = "[ ZERO-INSTALL BROWSER GAME ]";
 const multiplayerLabel = "● REAL-TIME WEBSOCKET MULTIPLAYER";
 const localSessionLabel = "⚡ INSTANT LOCAL SESSION";
 const noAdsLabel = "0 ADS // NO TRACKING";
