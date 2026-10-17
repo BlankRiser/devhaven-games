@@ -198,9 +198,9 @@ export default function SpiderSolitaire() {
         const colRect = colElement.getBoundingClientRect();
         const cardWidth = Math.max(60, colRect.width - 4);
         let cardHeight = 88;
-        if (colRect.width > 100) {
+        if (colRect.width > 85) {
           cardHeight = 128;
-        } else if (colRect.width > 80) {
+        } else if (colRect.width > 70) {
           cardHeight = 112;
         }
         const targetY = Math.min(
@@ -631,7 +631,7 @@ export default function SpiderSolitaire() {
         }}
       >
         <div className="bg-card/30 min-h-0 w-full flex-1 overflow-auto p-2 pb-32 sm:p-4 sm:pb-36">
-          <div className="grid h-full min-w-[720px] grid-cols-10 gap-1.5 sm:gap-2.5 lg:gap-3">
+          <div className="mx-auto grid h-full w-full max-w-5xl min-w-[680px] grid-cols-10 gap-1.5 sm:gap-2 lg:gap-2.5">
             {game.columns.map((column, colIndex) => {
               const isValidTarget =
                 activeSource !== null &&
@@ -661,7 +661,7 @@ export default function SpiderSolitaire() {
 
         <DragOverlay dropAnimation={null}>
           {activeDrag && activeMovingCards.length > 0 ? (
-            <div className="relative w-20 sm:w-28 lg:w-32">
+            <div className="relative w-18 sm:w-20 lg:w-24">
               {activeMovingCards.map((card, index) => (
                 <div
                   key={card.id}

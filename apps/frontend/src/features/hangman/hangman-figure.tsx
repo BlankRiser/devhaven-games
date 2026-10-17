@@ -57,7 +57,7 @@ export const HangmanFigure = ({
     <motion.svg
       initial="hidden"
       animate="visible"
-      viewBox="60 25 380 450"
+      viewBox="75 25 345 450"
       fill="none"
       className={cn(
         "h-44 w-44 shrink-0 transition-colors duration-300 sm:h-60 sm:w-60 lg:h-72 lg:w-72",

@@ -7,6 +7,7 @@ import {
   ArrowLeftIcon,
   ArrowRightIcon,
   ArrowUpIcon,
+  DesktopIcon,
   GhostIcon,
   HeartIcon,
   LightningIcon,
@@ -30,6 +31,7 @@ import {
   FullscreenToggleButton,
   useGameFullscreen,
 } from "@/features/common/use-game-fullscreen";
+import { useIsMobile } from "@/hooks/use-mobile";
 import { cn } from "@/lib/utils";
 import { drawDynamicScene, drawStaticMaze } from "./pacman-renderer";
 import {
@@ -353,8 +355,65 @@ const PacmanStatusOverlay = ({
   );
 };
 
+const PacmanMobileNoticeDialog = ({
+  open,
+  onDismiss,
+}: {
+  readonly open: boolean;
+  readonly onDismiss: () => void;
+}) => (
+  <AnimatePresence>
+    {open ? (
+      <motion.div
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        exit={{ opacity: 0 }}
+        className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 p-4 backdrop-blur-xs"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="mobile-notice-title"
+        aria-describedby="mobile-notice-desc"
+      >
+        <motion.div
+          initial={{ scale: 0.95, opacity: 0, y: 10 }}
+          animate={{ scale: 1, opacity: 1, y: 0 }}
+          exit={{ scale: 0.95, opacity: 0, y: 10 }}
+          className="border-border bg-card text-card-foreground flex max-w-sm flex-col items-center gap-4 border p-6 text-center shadow-2xl"
+        >
+          <div className="bg-primary/10 text-primary border-primary/20 flex size-12 items-center justify-center border">
+            <DesktopIcon className="size-6" weight="duotone" />
+          </div>
+          <div className="flex flex-col gap-1.5">
+            <h2
+              id="mobile-notice-title"
+              className="font-heading text-lg font-bold tracking-wider uppercase"
+            >
+              Desktop View Recommended
+            </h2>
+            <p
+              id="mobile-notice-desc"
+              className="text-muted-foreground text-xs leading-relaxed"
+            >
+              Pac-Man is designed for fast keyboard navigation (Arrow Keys or
+              WASD) and is best experienced on a desktop view.
+            </p>
+          </div>
+          <Button
+            className="w-full text-xs font-semibold tracking-wider uppercase"
+            onClick={onDismiss}
+          >
+            Continue Anyway
+          </Button>
+        </motion.div>
+      </motion.div>
+    ) : null}
+  </AnimatePresence>
+);
+
 export default function Pacman() {
   const setHud = useSetAtom(pacmanHudAtom);
+  const isMobile = useIsMobile();
+  const [isMobileDismissed, setIsMobileDismissed] = React.useState(false);
   const worldReference = React.useRef<PacmanWorldState>(
     createInitialWorld(0, 1)
   );
@@ -458,24 +517,34 @@ export default function Pacman() {
         onToggleFullscreen={toggleFullscreen}
       />
 
-      <div className="relative flex min-h-0 w-full flex-1 items-center justify-center overflow-hidden bg-[#0d111a]">
-        <PixiStage
-          width={STAGE_WIDTH}
-          height={STAGE_HEIGHT}
-          fitContainer
-          padding={12}
-          backgroundColor={0x0d_11_1a}
-          onFpsUpdate={handleFpsUpdate}
-        >
-          <PacmanPixiScene
-            worldRef={worldReference}
-            queuedDirectionRef={inputRef}
-            onSyncHud={syncHudFromWorld}
-          />
-        </PixiStage>
+      <div className="relative flex min-h-0 w-full flex-1 items-center justify-center overflow-hidden bg-[#0d111a] p-2 sm:p-4">
+        <div className="border-border/40 relative flex aspect-square h-full max-h-full max-w-full w-auto items-center justify-center overflow-hidden border bg-black/60 shadow-2xl">
+          <PixiStage
+            width={STAGE_WIDTH}
+            height={STAGE_HEIGHT}
+            fitContainer
+            scaleMode="contain"
+            padding={8}
+            backgroundColor={0x0d_11_1a}
+            onFpsUpdate={handleFpsUpdate}
+          >
+            <PacmanPixiScene
+              worldRef={worldReference}
+              queuedDirectionRef={inputRef}
+              onSyncHud={syncHudFromWorld}
+            />
+          </PixiStage>
 
-        <PacmanStatusOverlay onStartOrResume={startOrResumeGame} />
+          <PacmanStatusOverlay onStartOrResume={startOrResumeGame} />
+        </div>
       </div>
+
+      <PacmanMobileNoticeDialog
+        open={Boolean(isMobile) && !isMobileDismissed}
+        onDismiss={() => {
+          setIsMobileDismissed(true);
+        }}
+      />
     </section>
   );
 }

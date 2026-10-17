@@ -27,7 +27,7 @@ export default function Hangman() {
       <HangmanErrorAlert />
 
       <div className="bg-card/30 relative flex min-h-0 w-full flex-1 flex-col justify-between gap-4 overflow-auto p-3 sm:p-6">
-        <div className="border-border bg-secondary/20 flex min-h-0 w-full flex-1 flex-col items-center justify-center gap-6 border px-4 py-6 lg:flex-row lg:gap-12">
+        <div className="border-border bg-secondary/20 mx-auto flex min-h-0 w-full max-w-3xl flex-1 flex-col items-center justify-center gap-4 border px-6 py-6 sm:gap-6 lg:flex-row lg:justify-center lg:gap-8">
           <HangmanFigure />
           <HangmanInput />
         </div>

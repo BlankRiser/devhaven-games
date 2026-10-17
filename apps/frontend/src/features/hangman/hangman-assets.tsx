@@ -281,7 +281,7 @@ export const HangmanInput = () => {
   }, [guessLetter, resetHangman, stats.hasWon, stats.maxAttemptsReached]);
 
   return (
-    <div className="grid w-full place-items-center py-2">
+    <div className="flex w-auto max-w-full flex-col items-center justify-center py-2">
       <AnimatePresence mode="wait">
         <motion.div
           key={stats.word || "empty"}
@@ -289,7 +289,7 @@ export const HangmanInput = () => {
           animate={{ opacity: 1, y: 0 }}
           exit={{ opacity: 0, y: -6 }}
           transition={{ duration: 0.16, ease: "easeOut" }}
-          className="w-full"
+          className="w-auto max-w-full"
         >
           <motion.div
             animate={controls}
